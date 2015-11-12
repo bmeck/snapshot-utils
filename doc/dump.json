@@ -1,0 +1,1924 @@
+[
+  {
+    "__docId__": 0,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/HeapSnapshot.js",
+    "memberof": null,
+    "longname": "lib/HeapSnapshot.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 5,
+    "content": "/**\n * Representation for iterating over a snapshot's Nodes and Edges.\n * The structure of a snapshot's Node and Edge is defined within the contents of the snapshot.\n */\nexport default class HeapSnapshot {\n  /**\n   * @param {SplitSnapshotProvider} provider Snapshot data provider\n   */\n  constructor(provider) {\n    /**\n     * @private\n     */\n    this.meta = provider.getMeta();\n    /**\n     * @private\n     */\n    this.Node = createNodeClass(this, provider);\n    /**\n     * @private\n     */\n    this.Edge = createEdgeClass(this, provider);\n    /**\n     * @private\n     */\n    this.provider = provider;\n  }\n\n  /**\n  * @typedef {Object} NodeResult\n  * @property {Node} node\n  * @property {number} index Index that can be used with getNode to get this Node.\n  * @property {number} edge_index Index that can be used to get the first Edge of this Node.\n  * @property {function():EdgeIterator} walkEdges Helper for iterating the edges of a Node.\n  */\n  /**\n  * Gets a Node by index, not by ID. The root Node is at index 0.\n  * @param {number} node_index\n  * @return {NodeResult}\n  */\n  getNode(node_index) {\n    if (node_index > this.provider.getNodeArraySize()) {\n      return null;\n    }\n    const node_buffer = this.provider.getNodeBuffer(node_index);\n    const node = new this.Node(node_buffer);\n    const edge_index = node_buffer.readUInt32BE(node_buffer.length - 4);\n    const self = this;\n    return {\n      node,\n      index: node_index,\n      edge_index,\n      *walkEdges() {\n        let edge_count = node.edge_count;\n        let edge_size = self.meta.edge_fields.length;\n        for (let i = 0; i < edge_count; i++) {\n          let index = (edge_index + i) * edge_size;\n          let e = self.getEdge(index);\n          if (e != null) {\n            yield e;\n          }\n        }\n      }\n    };\n  }\n\n  /**\n  * @typedef {Object} EdgeResult\n  * @property {Edge} edge\n  * @property {number} index Index that can be used with getEdge to get this Edge.\n  * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.\n  */\n  /**\n  * Gets an Edge by index. This should only be used in conjuction with a Node object.\n  * @param {number} edge_index Index of the Edge we wish to get a hold of.\n  * @return {EdgeResult}\n  */\n  getEdge(edge_index) {\n    if (edge_index > this.provider.getEdgeArraySize()) {\n      return null;\n    }\n    const edge_buffer = this.provider.getEdgeBuffer(edge_index);\n    const edge = new this.Edge(edge_buffer);\n    const self = this;\n    return {\n      edge,\n      index: edge_index,\n      getNode() {\n        return self.getNode(edge.to_node);\n      }\n    };\n  }\n}\n/**\n * Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Node class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createNodeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Node {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Node${ret}`;\n    }\n  }\n  let i = 0;\n  for (const field of meta.node_fields) {\n    let field_index = i * 4;\n    let field_type = meta.node_types[i];\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field_type === 'string') {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return provider.getString(this._buffer.readUInt32BE(field_index));\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    i++;\n  };\n  return Node;\n}\n/**\n * Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Edge class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createEdgeClass(snapshot, provider) {\n  class Edge {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.edge_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      ret += ' node.id:' + snapshot.getNode(this.to_node).node.id;\n      return `HeapSnapshot::Edge ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.edge_fields) {\n    (function(){ \n    const field_index = i * 4;\n    const field_type = meta.edge_types[i];\n    i++;\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field === 'name_or_index') {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          let value = this._buffer.readUInt32BE(field_index);\n          if (this.type !== 'element') {\n            value = provider.getString(value).toString();\n          }\n          return value;\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    })();\n  };\n  return Edge;\n}"
+  },
+  {
+    "__docId__": 1,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "HeapSnapshot",
+    "memberof": "lib/HeapSnapshot.js",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot",
+    "access": null,
+    "export": true,
+    "importPath": "snapshot-utils/lib/HeapSnapshot.js",
+    "importStyle": "HeapSnapshot",
+    "description": "Representation for iterating over a snapshot's Nodes and Edges.\nThe structure of a snapshot's Node and Edge is defined within the contents of the snapshot.",
+    "lineNumber": 5,
+    "interface": false
+  },
+  {
+    "__docId__": 2,
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#constructor",
+    "access": null,
+    "description": null,
+    "lineNumber": 9,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "SplitSnapshotProvider"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "provider",
+        "description": "Snapshot data provider"
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 3,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "meta",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#meta",
+    "access": "private",
+    "description": null,
+    "lineNumber": 13,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 4,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "Node",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#Node",
+    "access": "private",
+    "description": null,
+    "lineNumber": 17,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 5,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "Edge",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#Edge",
+    "access": "private",
+    "description": null,
+    "lineNumber": 21,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 6,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "provider",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#provider",
+    "access": "private",
+    "description": null,
+    "lineNumber": 25,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 7,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "NodeResult",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot.NodeResult",
+    "access": null,
+    "description": null,
+    "properties": [
+      {
+        "nullable": null,
+        "types": [
+          "Node"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "node",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "index",
+        "description": "Index that can be used with getNode to get this Node."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "edge_index",
+        "description": "Index that can be used to get the first Edge of this Node."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function():EdgeIterator"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "walkEdges",
+        "description": "Helper for iterating the edges of a Node."
+      }
+    ],
+    "type": {
+      "types": [
+        "Object"
+      ],
+      "optional": false,
+      "name": "NodeResult"
+    }
+  },
+  {
+    "__docId__": 8,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getNode",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#getNode",
+    "access": null,
+    "description": "Gets a Node by index, not by ID. The root Node is at index 0.",
+    "lineNumber": 40,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "node_index",
+        "description": ""
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "NodeResult"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 9,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "EdgeResult",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot.EdgeResult",
+    "access": null,
+    "description": null,
+    "properties": [
+      {
+        "nullable": null,
+        "types": [
+          "Edge"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "edge",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "index",
+        "description": "Index that can be used with getEdge to get this Edge."
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function():NodeResult"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "getNode",
+        "description": "Helper for getting the Node this Edge points to."
+      }
+    ],
+    "type": {
+      "types": [
+        "Object"
+      ],
+      "optional": false,
+      "name": "EdgeResult"
+    }
+  },
+  {
+    "__docId__": 10,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getEdge",
+    "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
+    "longname": "lib/HeapSnapshot.js~HeapSnapshot#getEdge",
+    "access": null,
+    "description": "Gets an Edge by index. This should only be used in conjuction with a Node object.",
+    "lineNumber": 77,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "edge_index",
+        "description": "Index of the Edge we wish to get a hold of."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "EdgeResult"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 11,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "createNodeClass",
+    "memberof": "lib/HeapSnapshot.js",
+    "longname": "lib/HeapSnapshot.js~createNodeClass",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/HeapSnapshot.js",
+    "importStyle": null,
+    "description": "Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.",
+    "lineNumber": 98,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "HeapSnapshot"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "snapshot",
+        "description": "HeapSnapshot that created this Node class"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "SplitSnapshotProvider"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "provider",
+        "description": "Our snapshot data"
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 12,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "createEdgeClass",
+    "memberof": "lib/HeapSnapshot.js",
+    "longname": "lib/HeapSnapshot.js~createEdgeClass",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/HeapSnapshot.js",
+    "importStyle": null,
+    "description": "Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.",
+    "lineNumber": 151,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "HeapSnapshot"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "snapshot",
+        "description": "HeapSnapshot that created this Edge class"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "SplitSnapshotProvider"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "provider",
+        "description": "Our snapshot data"
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 13,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/SplitSnapshotProvider.js",
+    "memberof": null,
+    "longname": "lib/SplitSnapshotProvider.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import fs from \"fs\";\nimport path from \"path\";\nimport parseSnapshotStream from \"./parseSnapshotStream\";\n\n/**\n * An implementation of working directly with snapshot data, not meant for dev consumption.\n * This implementation uses Synchronous file APIs\n */\nexport default class SplitSnapshotProvider {\n\t/**\n\t * @param {Object} snapshot_info Meta information required for understanding a snapshot\n\t * @param {Buffer} node_buffer\n\t * @param {Buffer} edge_buffer\n\t * @param {Buffer} string_indices_buffer\n\t * @param {Buffer} string_buffer\n\t */\n  constructor(\n    snapshot_info,\n    node_buffer,\n    edge_buffer,\n    string_indices_buffer,\n    string_buffer\n  ) {\n    const snapshot = snapshot_info;\n    /**\n     * @private\n     */\n    this.snapshot = snapshot;\n\t\t\n    /**\n     * @private\n     */\n    this.node_fields_length = snapshot.meta.node_fields.length;\n    /**\n     * @private\n     */\n\tthis.node_arr_length = snapshot.node_count * this.node_fields_length;\n    // append edge_buffer index to get 1st edge\n    /**\n     * @private\n     */\n\tthis.node_struct_size = this.node_fields_length * 4 + 4;\n    /**\n     * @private\n     */\n    this.node_buffer = node_buffer;\n\tif (this.node_buffer.length !== this.node_struct_size * snapshot.node_count) {\n\t\tthrow new Error('nodes buffer does not match the expected size (either number of nodes is incorrect, or structure is)');\n\t}\n\n    /**\n     * @private\n     */\n\tthis.edge_fields_length = snapshot.meta.edge_fields.length;\n    /**\n     * @private\n     */\n\tthis.edge_arr_length = snapshot.edge_count * this.edge_fields_length;\n    // prepend node_buffer index to get node\n    /**\n     * @private\n     */\n\tthis.edge_struct_size = snapshot.meta.edge_fields.length * 4;\n    /**\n     * @private\n     */\n    this.edge_buffer = edge_buffer;\n\tif (this.edge_buffer.length !== this.edge_struct_size * snapshot.edge_count) {\n\t\tthrow new Error('edges buffer does not match the expected size (either number of edges is incorrect, or structure is)')\n\t}\n    \n    /**\n     * @private\n     */\n    this.string_indices_buffer = string_indices_buffer;\n    /**\n     * @private\n     */\n    this.strings_buffer = string_buffer;\n    \n    /**\n     * @private\n     */\n\tthis.string_index_struct_size = 4 + 4;\n  }\n\n\n  /**\n   * Get total number of Nodes\n   * @return {number}\n   */\n  getNodeArraySize() {\n    return this.node_arr_length;\n  }\n\n\n  /**\n   * Get the buffer for a Node at the specified index\n   * @param {number} index\n   * @return {Buffer}\n   */\n  getNodeBuffer(index) {\n    let n = index / this.node_fields_length;\n    if (n !== (n | 0)) {\n      throw new RangeError('index is not on a Node boundary');\n    }\n    let offset = n * this.node_struct_size;\n    return this.node_buffer.slice(\n      offset,\n      offset + this.node_struct_size\n    );\n  }\n\n\n  /**\n   * Get total number of Edges\n   * @return {number}\n   */\n  getEdgeArraySize() {\n    return this.edge_arr_length;\n  }\n\n\n  /**\n   * Get the buffer for an Edge at the specified index\n   * @param {number} index\n   * @return {Buffer}\n   */\n  getEdgeBuffer(index) {\n    let n = index / this.edge_fields_length;\n    if (n !== (n | 0)) {\n      throw new RangeError('index is not on a Edge boundary');\n    }\n    let offset = n * this.edge_struct_size;\n    return this.edge_buffer.slice(\n      offset,\n      offset + this.edge_struct_size\n    );\n  }\n\n\n  /**\n   * Gets a string at the specified index.\n   * @param {number} index Index of the string we wish to get.\n   * @return {string} \n   */\n  getString(index) {\n    const index_offset = index * this.string_index_struct_size;\n    const chunk = this.string_indices_buffer.slice(\n      index_offset,\n      index_offset + this.string_index_struct_size\n    );\n    const offset = chunk.readUInt32BE(0);\n    const length = chunk.readUInt32BE(4);\n    return this.strings_buffer.slice(\n      offset,\n      offset + length\n    ).toString();\n  }\n\n  /**\n\t* @return {Object} Metadata from the snapshot data required to find Node and Field structure.\n\t*/\n  getMeta() {\n    return this.snapshot.meta;\n  }\n\t\n  /**\n   * Convenience method for saving snapshot data in a faster loading format to a directory\n   * @param {string} outdir Path of the directory to save to\n   * @param {function(err: *)} callback Callback notified when there is an error or completion\n   * @return {undefined}\n   */\n  writeToDirectory(outdir, callback) {\n\t\tconst meta_file = path.join(outdir, 'snapshot.json');\n\t\tconst nodes_file = path.join(outdir, 'nodes');\n\t\tconst edges_file = path.join(outdir, 'edges');\n\t\tconst strings_file = path.join(outdir, 'strings');\n\t\tconst string_indices_file = path.join(outdir, 'string_indices');\n\t\t\n\t\tlet todo = 5;\n\t\tfunction done(e) {\n\t\t\ttodo--;\n\t\t\tif (todo < 0) {\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tif (e) {\n\t\t\t\tcallback(e);\n\t\t\t\ttodo = 0;\n\t\t\t}\n\t\t\telse if (todo === 0) {\n\t\t\t\tcallback(null);\n\t\t\t}\n\t\t}\n\t\t\n\t\tfs.writeFile(meta_file, this.snapshot, done);\n\t\tfs.writeFile(nodes_file, this.node_buffer, done);\n\t\tfs.writeFile(edges_file, this.edge_buffer, done);\n\t\tfs.writeFile(strings_file, this.strings_buffer, done);\n\t\tfs.writeFile(string_indices_file, this.string_indices_buffer, done);\n\t}\n\t\n  \n\t\n  /**\n   * Convenience method for loading snapshot data from a directory\n   * @param {string} outdir Path of the directory to load\n   * @param {function(err: *, provider: SplitSnapshotProvider)} callback Callback notified when there is an error or completion\n   * @return {undefined}\n   */\n\tstatic fromDirectory(outdir, callback) {\n\t\tconst meta_file = path.join(outdir, 'snapshot.json');\n\t\tconst nodes_file = path.join(outdir, 'nodes');\n\t\tconst edges_file = path.join(outdir, 'edges');\n\t\tconst strings_file = path.join(outdir, 'strings');\n\t\tconst string_indices_file = path.join(outdir, 'string_indices');\n\t\t\n\t\tlet todo = 5;\n\t\tlet snapshot_info;\n\t\tlet nodes_buffer;\n\t\tlet edges_buffer;\n\t\tlet strings_buffer;\n\t\tlet string_indices_buffer;\n\t\tfunction done(e) {\n\t\t\ttodo--;\n\t\t\tif (todo < 0) {\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tif (e) {\n\t\t\t\tcallback(e);\n\t\t\t\ttodo = 0;\n\t\t\t}\n\t\t\telse if (todo === 0) {\n\t\t\t\tcallback(null, new SplitSnapshotProvider(\n\t\t\t\t\tsnapshot_info,\n\t\t\t\t\tnodes_buffer,\n\t\t\t\t\tedges_buffer,\n\t\t\t\t\tstring_indices_buffer,\n\t\t\t\t\tstrings_buffer\n\t\t\t\t));\n\t\t\t}\n\t\t}\n\t\tfs.readFile(meta_file, (e,b) => {\n\t\t\tif (e) {\n\t\t\t\tdone(e);\n\t\t\t\treturn;\n\t\t\t}\n\t\t\ttry {\n\t\t\t\tsnapshot_info = JSON.parse(String(b));\n\t\t\t\tdone();\n\t\t\t}\n\t\t\tcatch (e) {\n\t\t\t\tdone(e);\n\t\t\t}\n\t\t});\n\t\tfs.readFile(nodes_file, (e,b) => {\n\t\t\tif (e) {\n\t\t\t\tdone(e);\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tnodes_buffer = b;\n\t\t\tdone();\n\t\t});\n\t\tfs.readFile(edges_file, (e,b) => {\n\t\t\tif (e) {\n\t\t\t\tdone(e);\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tedges_buffer = b;\n\t\t\tdone();\n\t\t});\n\t\tfs.readFile(strings_file, (e,b) => {\n\t\t\tif (e) {\n\t\t\t\tdone(e);\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tstrings_buffer = b;\n\t\t\tdone();\n\t\t});\n\t\tfs.readFile(string_indices_file, (e,b) => {\n\t\t\tif (e) {\n\t\t\t\tdone(e);\n\t\t\t\treturn;\n\t\t\t}\n\t\t\tstring_indices_buffer = b;\n\t\t\tdone();\n\t\t});\n\t}\n  \n  \n  /**\n   * Convenience method for loading snapshot data from a stream\n   * @param {Stream} stream Path of the directory to load\n   * @param {function(err: *, provider: SplitSnapshotProvider)} callback Callback notified when there is an error or completion\n   * @return {undefined}\n   */\n\tstatic fromStream(stream, callback) {\n\t\t// track this to attach to nodes\n\t\tlet edge_offset = 0;\n\t\t\n\t\tlet edge_count_field = 0;\n\t\t\n\t\tlet snapshot_info = null;\n\t\tlet nodes_buffer_index = 0;\n\t\tlet nodes_buffer = null;\n\t\tlet edges_buffer_index = 0;\n\t\tlet edges_buffer = null;\n\t\tlet strings_buffer_length = 0;\n\t\tlet strings_buffer = null;\n\t\tlet strings_indices_buffer_length = 0;\n\t\tlet strings_indices_buffer = null;\n\t\t\n\t\tstream.pipe(parseSnapshotStream({\n\t\t\tonsnapshot_info(snapshot) {\n\t\t\t\tedge_count_field = snapshot.meta.node_fields.indexOf('edge_count') * 4;\n\t\t\t\tsnapshot_info = snapshot;\n\t\t\t\tconst node_fields_length = snapshot.meta.node_fields.length;\n\t\t\t\t// append edge_buffer index to get 1st edge\n\t\t\t\tconst node_struct_size = node_fields_length * 4 + 4;\n\t\t\t\tnodes_buffer = new Buffer(node_struct_size * snapshot.node_count);\n\t\t\t\n\t\t\t\t// prepend node_buffer index to get node\n\t\t\t\tconst edge_struct_size = snapshot.meta.edge_fields.length * 4;\n\t\t\t\tedges_buffer = new Buffer(edge_struct_size * snapshot.edge_count);\n\t\t\t\t\n\t\t\t\tstrings_indices_buffer = new Buffer(4 * 1024);\n\t\t\t\tstrings_buffer = new Buffer(4 * 1024);\n\t\t\t},\n\t\t\tonnode(buffer) {\n\t\t\t\tif (buffer == null) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tbuffer.copy(nodes_buffer, nodes_buffer_index);\n\t\t\t\tnodes_buffer_index += buffer.length;\n\t\t\t\tnodes_buffer.writeUInt32BE(edge_offset, nodes_buffer_index);\n\t\t\t\tnodes_buffer_index += 4;\n\t\t\t\tconst edge_count = buffer.readUInt32BE(edge_count_field);\n\t\t\t\tedge_offset += edge_count;\n\t\t\t},\n\t\t\tonedge(buffer) {\n\t\t\t\tif (buffer == null) {\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tbuffer.copy(edges_buffer, edges_buffer_index);\n\t\t\t\tedges_buffer_index += buffer.length;\n\t\t\t},\n\t\t\tonstring(str) {\n\t\t\t\tif (str == null) {\n\t\t\t\t\tstrings_indices_buffer = strings_indices_buffer.slice(0, strings_indices_buffer_length);\n\t\t\t\t\tstrings_buffer = strings_buffer.slice(0, strings_buffer_length);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tlet str_buf = new Buffer(str, 'utf8');\n\t\t\t\tlet str_buf_length = str_buf.length;\n\t\t\t\t\n\t\t\t\tif (strings_indices_buffer.length - strings_indices_buffer_length < 8) {\n\t\t\t\t\tstrings_indices_buffer = Buffer.concat([strings_indices_buffer, new Buffer(4096)]);\n\t\t\t\t}\n\t\t\t\tstrings_indices_buffer.writeUInt32BE(strings_buffer_length, strings_indices_buffer_length);\n\t\t\t\tstrings_indices_buffer_length += 4;\n\t\t\t\tstrings_indices_buffer.writeUInt32BE(str_buf_length, strings_indices_buffer_length);\n\t\t\t\tstrings_indices_buffer_length += 4;\n\t\t\t\t\n\t\t\t\tif (strings_buffer.length - strings_buffer_length < str_buf_length) {\n\t\t\t\t\tstrings_buffer = Buffer.concat([strings_buffer, new Buffer(4096)]);\n\t\t\t\t}\n\t\t\t\tstr_buf.copy(strings_buffer, strings_buffer_length);\n\t\t\t\tstrings_buffer_length += str_buf_length;\n\t\t\t}\n\t\t}))\n\t\t.on('error', e=>callback(e))\n\t\t.on('end', ()=>{\n\t\t\tcallback(null, new SplitSnapshotProvider(snapshot_info, nodes_buffer, edges_buffer, strings_indices_buffer, strings_buffer));\n\t\t});\n\t}\n}"
+  },
+  {
+    "__docId__": 14,
+    "kind": "class",
+    "static": true,
+    "variation": null,
+    "name": "SplitSnapshotProvider",
+    "memberof": "lib/SplitSnapshotProvider.js",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "access": null,
+    "export": true,
+    "importPath": "snapshot-utils/lib/SplitSnapshotProvider.js",
+    "importStyle": "SplitSnapshotProvider",
+    "description": "An implementation of working directly with snapshot data, not meant for dev consumption.\nThis implementation uses Synchronous file APIs",
+    "lineNumber": 9,
+    "interface": false
+  },
+  {
+    "__docId__": 15,
+    "kind": "constructor",
+    "static": false,
+    "variation": null,
+    "name": "constructor",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#constructor",
+    "access": null,
+    "description": null,
+    "lineNumber": 17,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Object"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "snapshot_info",
+        "description": "Meta information required for understanding a snapshot"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Buffer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "node_buffer",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Buffer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "edge_buffer",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Buffer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "string_indices_buffer",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "Buffer"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "string_buffer",
+        "description": ""
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 16,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "snapshot",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#snapshot",
+    "access": "private",
+    "description": null,
+    "lineNumber": 28,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 17,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "node_fields_length",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_fields_length",
+    "access": "private",
+    "description": null,
+    "lineNumber": 33,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 18,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "node_arr_length",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_arr_length",
+    "access": "private",
+    "description": null,
+    "lineNumber": 37,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 19,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "node_struct_size",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_struct_size",
+    "access": "private",
+    "description": null,
+    "lineNumber": 42,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 20,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "node_buffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_buffer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 46,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 21,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "edge_fields_length",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_fields_length",
+    "access": "private",
+    "description": null,
+    "lineNumber": 54,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 22,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "edge_arr_length",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_arr_length",
+    "access": "private",
+    "description": null,
+    "lineNumber": 58,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 23,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "edge_struct_size",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_struct_size",
+    "access": "private",
+    "description": null,
+    "lineNumber": 63,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 24,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "edge_buffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_buffer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 67,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 25,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "string_indices_buffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#string_indices_buffer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 75,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 26,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "strings_buffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#strings_buffer",
+    "access": "private",
+    "description": null,
+    "lineNumber": 79,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 27,
+    "kind": "member",
+    "static": false,
+    "variation": null,
+    "name": "string_index_struct_size",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#string_index_struct_size",
+    "access": "private",
+    "description": null,
+    "lineNumber": 84,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 28,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getNodeArraySize",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getNodeArraySize",
+    "access": null,
+    "description": "Get total number of Nodes",
+    "lineNumber": 92,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "number"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 29,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getNodeBuffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getNodeBuffer",
+    "access": null,
+    "description": "Get the buffer for a Node at the specified index",
+    "lineNumber": 102,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "index",
+        "description": ""
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Buffer"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 30,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getEdgeArraySize",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getEdgeArraySize",
+    "access": null,
+    "description": "Get total number of Edges",
+    "lineNumber": 119,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "number"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 31,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getEdgeBuffer",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getEdgeBuffer",
+    "access": null,
+    "description": "Get the buffer for an Edge at the specified index",
+    "lineNumber": 129,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "index",
+        "description": ""
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Buffer"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 32,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getString",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getString",
+    "access": null,
+    "description": "Gets a string at the specified index.",
+    "lineNumber": 147,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "number"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "index",
+        "description": "Index of the string we wish to get."
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "string"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 33,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "getMeta",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getMeta",
+    "access": null,
+    "description": null,
+    "lineNumber": 164,
+    "params": [],
+    "return": {
+      "nullable": null,
+      "types": [
+        "Object"
+      ],
+      "spread": false,
+      "description": "Metadata from the snapshot data required to find Node and Field structure."
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 34,
+    "kind": "method",
+    "static": false,
+    "variation": null,
+    "name": "writeToDirectory",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#writeToDirectory",
+    "access": null,
+    "description": "Convenience method for saving snapshot data in a faster loading format to a directory",
+    "lineNumber": 174,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "outdir",
+        "description": "Path of the directory to save to"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(err: *)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "callback",
+        "description": "Callback notified when there is an error or completion"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "undefined"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 35,
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "fromDirectory",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider.fromDirectory",
+    "access": null,
+    "description": "Convenience method for loading snapshot data from a directory",
+    "lineNumber": 211,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "string"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "outdir",
+        "description": "Path of the directory to load"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(err: *, provider: SplitSnapshotProvider)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "callback",
+        "description": "Callback notified when there is an error or completion"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "undefined"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 36,
+    "kind": "method",
+    "static": true,
+    "variation": null,
+    "name": "fromStream",
+    "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
+    "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider.fromStream",
+    "access": null,
+    "description": "Convenience method for loading snapshot data from a stream",
+    "lineNumber": 297,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "Stream"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "stream",
+        "description": "Path of the directory to load"
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(err: *, provider: SplitSnapshotProvider)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "callback",
+        "description": "Callback notified when there is an error or completion"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "undefined"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 37,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/bin/dump.js",
+    "memberof": null,
+    "longname": "lib/bin/dump.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import HeapSnapshot from '../HeapSnapshot';\nimport SplitSnapshotProvider from '../SplitSnapshotProvider';\n\nif (process.argv[2] && process.argv[2] != '-') {\n  SplitSnapshotProvider.fromDirectory(process.argv[2], go);\n}\nelse {\n  SplitSnapshotProvider.fromStream(process.stdin, go);\n}\nfunction go(err, provider) {\n  if (err) {\n    console.error(err);\n    process.exit(1);\n  }\n  const snapshot = new HeapSnapshot(provider);\n  \n  let edge = {\n    getNode: function () {\n      return snapshot.getNode(0)\n    }\n  };\n  \n  const to_walk = [{edge}];\n  const visited = new Set();\n  walk:\n  while(to_walk.length) {\n    let task = to_walk.shift();\n    let node = task.edge.getNode();\n    if (visited.has(node.index)) {\n      continue;\n    }\n\tconsole.log(node.node);\n    visited.add(node.index);\n    for (const edge of node.walkEdges()) {\n\t  console.log(edge.edge);\n      if (visited.has(edge.edge.to_node)) {\n        continue;\n      }\n      to_walk.push({\n        edge\n      });\n    }\n  }\n}"
+  },
+  {
+    "__docId__": 38,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "go",
+    "memberof": "lib/bin/dump.js",
+    "longname": "lib/bin/dump.js~go",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/bin/dump.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 10,
+    "undocument": true,
+    "params": [
+      {
+        "name": "err",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "provider",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 39,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/bin/preprocess_heapsnapshot.js",
+    "memberof": null,
+    "longname": "lib/bin/preprocess_heapsnapshot.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import SplitSnapshotProvider from \"../SplitSnapshotProvider\";\nimport path from \"path\";\nimport fs from \"fs\";\n\nconst outdir = path.normalize(process.argv[2])\nif (!path.isAbsolute(outdir)) {\n\tconsole.error('You must specify an absolute path for outdir');\n\tprocess.exit(3);\n}\n\nSplitSnapshotProvider.fromStream(process.stdin, function (err, provider) {\n  provider.writeToDirectory(outdir, _=>_);\n})"
+  },
+  {
+    "__docId__": 40,
+    "kind": "variable",
+    "static": true,
+    "variation": null,
+    "name": "outdir",
+    "memberof": "lib/bin/preprocess_heapsnapshot.js",
+    "longname": "lib/bin/preprocess_heapsnapshot.js~outdir",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/bin/preprocess_heapsnapshot.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 5,
+    "undocument": true,
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
+  },
+  {
+    "__docId__": 41,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/bin/script-vars.js",
+    "memberof": null,
+    "longname": "lib/bin/script-vars.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import HeapSnapshot from '../HeapSnapshot';\nimport SplitSnapshotProvider from '../SplitSnapshotProvider';\n\nif (process.argv[2] && process.argv[2] != '-') {\n  SplitSnapshotProvider.fromDirectory(process.argv[2], go);\n}\nelse {\n  SplitSnapshotProvider.fromStream(process.stdin, go);\n}\nfunction go(err, provider) {\n  if (err) {\n    console.error(err);\n    process.exit(1);\n  }\n  const snapshot = new HeapSnapshot(provider);\n  \n  \n  let edge = {\n    getNode: function () {\n      return snapshot.getNode(0)\n    }\n  };\n  \n  function routeNodeEdges(node, route) {\n    var i = 0;\n    for (let item of node.walkEdges()) {\n      const name = item.edge.name_or_index;\n      if (route[name] && Object.prototype.hasOwnProperty.call(route, name)) {\n        route[name](item, item.getNode());\n      }\n      i++;\n    }\n  }\n  \n  // phase 1, gather all indexes that always occur\n  //          in paths to node\n  \n  // simple queue to avoid recursion for postorder traversal\n  const to_walk = [{edge,path}];\n  const visited = new Set();\n  const dominated_by = new Map();\n  const retainers = new Map();\n  walk:\n  while(to_walk.length) {\n    let task = to_walk.shift();\n    let node = task.edge.getNode();\n    // each node gets its own Set for path\n    const path = new Set(task.path);\n    // we always add ourselves to path, since node dominators\n    // include the node themselves\n    path.add(node.index);\n  \n    if (!dominated_by.has(node.index)) {\n      dominated_by.set(node.index, path);\n    }\n    else {\n      const known_doms = dominated_by.get(node.index);\n      // we want to remove any known dominators not in the current path\n      for (const dom of known_doms) {\n        if (!path.has(dom)) {\n          known_doms.delete(dom);\n        }\n      }\n    }\n    if (visited.has(node.index)) {\n      continue;\n    }\n    visited.add(node.index);\n    const refs = new Set();\n    let script_index = null;\n    if (node.node.type === 'closure') {\n      routeNodeEdges(node, {\n        context(item, node) {\n          //console.log('context', node)\n          if (item.edge.type !== 'internal') return;\n          Array.from(node.walkEdges())\n              .filter(i=>i.edge.type==='context')\n              .map(i=>i.getNode().index)\n              .forEach(index=>refs.add(index));\n        },\n        shared(item, node) {\n          if (item.edge.type !== 'internal') return;\n          routeNodeEdges(node, {\n            script(item, node) {\n              script_index = node.index;\n            }\n          });\n        }\n      });\n    }\n    if (refs.size) {\n      for (const ref of refs) {\n        if (!retainers.has(ref)) {\n          retainers.set(ref, new Set());\n        }\n        const retainer = retainers.get(ref);\n        retainer.add(script_index);\n      }\n    }\n    for (const edge of node.walkEdges()) {\n      //console.log('GONNA VISIT', edge.edge)\n      if (visited.has(edge.edge.to_node)) {\n        continue;\n      }\n      to_walk.push({\n        edge,\n        path\n      });\n    }\n  }\n  // invert dominated_by to dominator=>[slave]\n  const dominating = new Map();\n  for (const entry of dominated_by.entries()) {\n    const dominators = entry[1];\n    const node_index = entry[0];\n    const node = snapshot.getNode(node_index);\n    const node_id = node.node.id;\n    for (const dominator of dominators) {\n      const dominator_node = snapshot.getNode(dominator);\n      const dominator_id = dominator_node.node.id;\n      if (!dominating.has(dominator_id)) {\n        dominating.set(dominator_id, new Set());\n      }\n      const slaves = dominating.get(dominator_id);\n      slaves.add({\n        id: node_id,\n        self_size: node.node.self_size\n      });\n    }\n  }\n  // refs, shared\n  const ret = new Map();\n  for (const entry of retainers.entries()) {\n    const ref = snapshot.getNode(entry[0]);\n    const scripts = entry[1];\n    let map = ret;\n    let refs;\n    for (const script of scripts) {\n      if (!map.has(script)) {\n        map.set(script, {\n          refs: refs = new Set(),\n          shared: map = new Map()\n        });\n      }\n      else {\n        let info = map.get(script);\n        map = info.shared;\n        refs = info.refs;\n      }\n    }\n    refs.add({\n      id: ref.node.id,\n      retained_size: Array.from(dominating.get(ref.node.id))\n        .reduce((c,s)=>c+s.self_size, 0)\n    });\n  }\n  process.stdout.write('[\\n');\n  let first = true;\n  function dump(map, path) {\n    for (const entry of map.entries()) {\n      const script_index = entry[0];\n      const info = entry[1];\n      const script_node = snapshot.getNode(script_index);\n      let script_name;\n      routeNodeEdges(script_node,{\n        name(item, node) {\n          script_name = node.node.name;\n        }\n      });\n      const next_path = path.concat({\n        id: script_node.node.id,\n        name: script_name\n      });\n      if (info.refs.size) {\n        if (first) first = false;\n        else process.stdout.write(', ');\n        process.stdout.write(JSON.stringify({\n          scripts: next_path,\n          refs: Array.from(info.refs)\n        }));\n        process.stdout.write('\\n');\n      }\n      if (info.shared.size) {\n        dump(info.shared, next_path);\n      }\n    }\n  }\n  dump(ret, []);\n  process.stdout.write(']\\n');\n}"
+  },
+  {
+    "__docId__": 42,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "go",
+    "memberof": "lib/bin/script-vars.js",
+    "longname": "lib/bin/script-vars.js~go",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/bin/script-vars.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 10,
+    "undocument": true,
+    "params": [
+      {
+        "name": "err",
+        "types": [
+          "*"
+        ]
+      },
+      {
+        "name": "provider",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 43,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/parseSnapshotStream.js",
+    "memberof": null,
+    "longname": "lib/parseSnapshotStream.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "import clarinet from \"clarinet\";\n/**\n * @typedef {Object} parseSnapshotStreamCallbacks\n * @property {function(snapshot_info: {meta:Object})} onsnapshot_info\n * @property {function(node_buffer: Buffer)} onnode\n * @property {function(edge_buffer: Buffer)} onedge\n * @property {function(str: string)} onstring\n */\n/**\n * Create a writable stream for parsing JSON.\n * \n * @param parseSnapshotStreamCallbacks callbacks t\n * @return {undefined}\n */\nexport default function parseSnapshotStream({\n\tonsnapshot_info = Function.prototype,\n\tonnode = Function.prototype,\n\tonedge = Function.prototype,\n\tonstring = Function.prototype,\n}) {\n  const parser = clarinet.createStream();\n\n  const parser_keys = [];\n  const key = (k) => {\n    return parser_keys.push(k);\n  }\n\tconst unkey = () => {\n    return parser_keys.pop();\n  }\n\n  const parser_path = [];\n  const push = (value) => {\n    if (parser_path.length) {\n      const target = parser_path[parser_path.length - 1];\n      const field = parser_keys[parser_keys.length - 1];\n      if (Array.isArray(target)) {\n          parser_keys[parser_keys.length - 1]++;\n      }\n      target[field] = value;\n    }\n    else {\n      parser_path.push(value);\n    }\n  }\n  const nest = (value) => {\n    let first = parser_path.length === 0;\n    push(value);\n    if (!first) parser_path.push(value);\n  }\n  const pop = () => {\n    return parser_path.pop();\n  }\n\n\tlet node_fields_size = 0;\n\tlet edge_fields_size = 0;\n  let field_index = 0;\n  let buffer = null;\n\tlet innodes = false;\n\tlet inedges = false;\n\tlet instrings = false;\n\tconst atsnapshot = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'snapshot';\n\t};\n\tconst insnapshot = () => {\n\t\treturn parser_keys.length >= 1 && parser_keys[0] === 'snapshot';\n\t};\n\tconst atnodes = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'nodes';\n\t};\n\tconst atedges = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'edges';\n\t};\n\tconst atstrings = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'strings';\n\t};\n  parser.on(\"openobject\", (first_key) => {\n    if (insnapshot()) nest({});\n    if (typeof first_key === 'string') key(first_key);\n    else key(undefined);\n  });\n  parser.on(\"closeobject\", () => {\n    unkey();\n    if (atsnapshot()) {\n      const snapshot = pop();\n      node_fields_size = snapshot.meta.node_fields.length * 4;\n      edge_fields_size = snapshot.meta.edge_fields.length * 4;\n      onsnapshot_info(snapshot);\n    }\n    else if (insnapshot()) pop();\n  });\n  parser.on(\"openarray\", () => {\n    if (insnapshot()) nest([]);\n    if (atnodes()) {\n      innodes = true;\n      buffer = new Buffer(node_fields_size);\n      field_index = 0;\n    }\n    if (atedges()) {\n      inedges = true;\n      buffer = new Buffer(edge_fields_size);\n      field_index = 0;\n    }\n    if (atstrings()) {\n      instrings = true;\n    }\n    key(0);\n  });\n  parser.on(\"closearray\", () => {\n    unkey();\n    if (insnapshot()) pop();\n    if (atnodes()) {\n      innodes = false;\n      onnode(null);\n    }\n    if (atedges()) {\n      inedges = false;\n      onedge(null);\n    }\n    if (atstrings()) {\n      instrings = false;\n      onstring(null);\n    }\n  });\n  parser.on(\"key\", (new_key) => {\n    unkey();\n    key(new_key);\n  });\n  parser.on(\"value\", (value) => {\n    if (innodes) {\n      buffer.writeUInt32BE(value, field_index);\n      field_index = (field_index + 4) % node_fields_size;\n      if (field_index === 0) {\n        onnode(buffer);\n        buffer = new Buffer(node_fields_size);\n      }\n    }\n    if (inedges) {\n      buffer.writeUInt32BE(value, field_index);\n      field_index = (field_index + 4) % edge_fields_size;\n      if (field_index === 0) {\n        onedge(buffer);\n        buffer = new Buffer(edge_fields_size);\n      }\n    }\n    if (instrings) {\n      onstring(value);\n    }\n    else if (insnapshot()) push(value);\n  });\n\treturn parser;\n}\n"
+  },
+  {
+    "__docId__": 44,
+    "kind": "typedef",
+    "static": true,
+    "variation": null,
+    "name": "parseSnapshotStreamCallbacks",
+    "memberof": "lib/parseSnapshotStream.js",
+    "longname": "lib/parseSnapshotStream.js~parseSnapshotStreamCallbacks",
+    "access": null,
+    "description": null,
+    "properties": [
+      {
+        "nullable": null,
+        "types": [
+          "function(snapshot_info: {meta:Object})"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "onsnapshot_info",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(node_buffer: Buffer)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "onnode",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(edge_buffer: Buffer)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "onedge",
+        "description": ""
+      },
+      {
+        "nullable": null,
+        "types": [
+          "function(str: string)"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "onstring",
+        "description": ""
+      }
+    ],
+    "type": {
+      "types": [
+        "Object"
+      ],
+      "optional": false,
+      "name": "parseSnapshotStreamCallbacks"
+    }
+  },
+  {
+    "__docId__": 45,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "parseSnapshotStream",
+    "memberof": "lib/parseSnapshotStream.js",
+    "longname": "lib/parseSnapshotStream.js~parseSnapshotStream",
+    "access": null,
+    "export": true,
+    "importPath": "snapshot-utils/lib/parseSnapshotStream.js",
+    "importStyle": "parseSnapshotStream",
+    "description": "Create a writable stream for parsing JSON.",
+    "lineNumber": 15,
+    "params": [
+      {
+        "nullable": null,
+        "types": [
+          "*"
+        ],
+        "spread": false,
+        "optional": false,
+        "name": "parseSnapshotStreamCallbacks",
+        "description": "callbacks t"
+      }
+    ],
+    "return": {
+      "nullable": null,
+      "types": [
+        "undefined"
+      ],
+      "spread": false,
+      "description": ""
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 47,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Infinity",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 48,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NaN",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 49,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "undefined",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 50,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "null",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 51,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 52,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "object",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 53,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 54,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "function",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 55,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 56,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "boolean",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 57,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Symbol",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 58,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Error",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 59,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "EvalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 60,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "InternalError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 61,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RangeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 62,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ReferenceError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 63,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "SyntaxError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 64,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "TypeError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 65,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "URIError",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 66,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 67,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "number",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 68,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Date",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 69,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "String",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 70,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "string",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 71,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "RegExp",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 72,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 73,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 74,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 75,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint8ClampedArray",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 76,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 77,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint16Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 78,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Int32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 79,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Uint32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 80,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float32Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 81,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Float64Array",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 82,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Map",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 83,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Set",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 84,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakMap",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 85,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "WeakSet",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 86,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "ArrayBuffer",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 87,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DataView",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 88,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "JSON",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 89,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Promise",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 90,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Generator",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 91,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "GeneratorFunction",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 92,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Reflect",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 93,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Proxy",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
+    "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 95,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "CanvasRenderingContext2D",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 96,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "DocumentFragment",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 97,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Element",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Element",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 98,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Event",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Event",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 99,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "Node",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~Node",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 100,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "NodeList",
+    "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 101,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "XMLHttpRequest",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  },
+  {
+    "__docId__": 102,
+    "kind": "external",
+    "static": true,
+    "variation": null,
+    "name": "AudioContext",
+    "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
+    "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
+    "access": null,
+    "description": null,
+    "builtinExternal": true
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "name": "snapshot-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "make",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmeck/snapshot-utils"
+  },
+  "author": "bradleymeck",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bmeck/snapshot-utils/issues"
+  },
+  "homepage": "https://github.com/bmeck/snapshot-utils#readme",
+  "dependencies": {
+    "babel-runtime": "^6.1.4",
+    "clarinet": "^0.11.0"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-runtime": "^6.1.4",
+    "babel-preset-es2015": "^6.1.4",
+    "esdoc": "^0.4.3"
+  }
+}

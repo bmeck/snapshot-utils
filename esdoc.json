@@ -1,0 +1,5 @@
+{
+ "debug": true,
+  "source": "./lib",
+  "destination": "./doc"
+}

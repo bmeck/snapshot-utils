@@ -1,3 +1,13 @@
+# Mac
+.DS_Store
+
+# VIM
+*.swp
+*.swo
+
+# Project
+/out/
+
 # Logs
 logs
 *.log

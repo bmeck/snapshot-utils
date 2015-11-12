@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">lib/bin/script-vars.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+https://github.com/bmeck/snapshot-utils.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html">HeapSnapshot</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html">SplitSnapshotProvider</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSnapshotStream">parseSnapshotStream</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-NodeResult">NodeResult</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-parseSnapshotStreamCallbacks">parseSnapshotStreamCallbacks</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">lib/bin/script-vars.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import HeapSnapshot from &apos;../HeapSnapshot&apos;;
+import SplitSnapshotProvider from &apos;../SplitSnapshotProvider&apos;;
+
+if (process.argv[2] &amp;&amp; process.argv[2] != &apos;-&apos;) {
+  SplitSnapshotProvider.fromDirectory(process.argv[2], go);
+}
+else {
+  SplitSnapshotProvider.fromStream(process.stdin, go);
+}
+function go(err, provider) {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
+  const snapshot = new HeapSnapshot(provider);
+  
+  
+  let edge = {
+    getNode: function () {
+      return snapshot.getNode(0)
+    }
+  };
+  
+  function routeNodeEdges(node, route) {
+    var i = 0;
+    for (let item of node.walkEdges()) {
+      const name = item.edge.name_or_index;
+      if (route[name] &amp;&amp; Object.prototype.hasOwnProperty.call(route, name)) {
+        route[name](item, item.getNode());
+      }
+      i++;
+    }
+  }
+  
+  // phase 1, gather all indexes that always occur
+  //          in paths to node
+  
+  // simple queue to avoid recursion for postorder traversal
+  const to_walk = [{edge,path}];
+  const visited = new Set();
+  const dominated_by = new Map();
+  const retainers = new Map();
+  walk:
+  while(to_walk.length) {
+    let task = to_walk.shift();
+    let node = task.edge.getNode();
+    // each node gets its own Set for path
+    const path = new Set(task.path);
+    // we always add ourselves to path, since node dominators
+    // include the node themselves
+    path.add(node.index);
+  
+    if (!dominated_by.has(node.index)) {
+      dominated_by.set(node.index, path);
+    }
+    else {
+      const known_doms = dominated_by.get(node.index);
+      // we want to remove any known dominators not in the current path
+      for (const dom of known_doms) {
+        if (!path.has(dom)) {
+          known_doms.delete(dom);
+        }
+      }
+    }
+    if (visited.has(node.index)) {
+      continue;
+    }
+    visited.add(node.index);
+    const refs = new Set();
+    let script_index = null;
+    if (node.node.type === &apos;closure&apos;) {
+      routeNodeEdges(node, {
+        context(item, node) {
+          //console.log(&apos;context&apos;, node)
+          if (item.edge.type !== &apos;internal&apos;) return;
+          Array.from(node.walkEdges())
+              .filter(i=&gt;i.edge.type===&apos;context&apos;)
+              .map(i=&gt;i.getNode().index)
+              .forEach(index=&gt;refs.add(index));
+        },
+        shared(item, node) {
+          if (item.edge.type !== &apos;internal&apos;) return;
+          routeNodeEdges(node, {
+            script(item, node) {
+              script_index = node.index;
+            }
+          });
+        }
+      });
+    }
+    if (refs.size) {
+      for (const ref of refs) {
+        if (!retainers.has(ref)) {
+          retainers.set(ref, new Set());
+        }
+        const retainer = retainers.get(ref);
+        retainer.add(script_index);
+      }
+    }
+    for (const edge of node.walkEdges()) {
+      //console.log(&apos;GONNA VISIT&apos;, edge.edge)
+      if (visited.has(edge.edge.to_node)) {
+        continue;
+      }
+      to_walk.push({
+        edge,
+        path
+      });
+    }
+  }
+  // invert dominated_by to dominator=&gt;[slave]
+  const dominating = new Map();
+  for (const entry of dominated_by.entries()) {
+    const dominators = entry[1];
+    const node_index = entry[0];
+    const node = snapshot.getNode(node_index);
+    const node_id = node.node.id;
+    for (const dominator of dominators) {
+      const dominator_node = snapshot.getNode(dominator);
+      const dominator_id = dominator_node.node.id;
+      if (!dominating.has(dominator_id)) {
+        dominating.set(dominator_id, new Set());
+      }
+      const slaves = dominating.get(dominator_id);
+      slaves.add({
+        id: node_id,
+        self_size: node.node.self_size
+      });
+    }
+  }
+  // refs, shared
+  const ret = new Map();
+  for (const entry of retainers.entries()) {
+    const ref = snapshot.getNode(entry[0]);
+    const scripts = entry[1];
+    let map = ret;
+    let refs;
+    for (const script of scripts) {
+      if (!map.has(script)) {
+        map.set(script, {
+          refs: refs = new Set(),
+          shared: map = new Map()
+        });
+      }
+      else {
+        let info = map.get(script);
+        map = info.shared;
+        refs = info.refs;
+      }
+    }
+    refs.add({
+      id: ref.node.id,
+      retained_size: Array.from(dominating.get(ref.node.id))
+        .reduce((c,s)=&gt;c+s.self_size, 0)
+    });
+  }
+  process.stdout.write(&apos;[\n&apos;);
+  let first = true;
+  function dump(map, path) {
+    for (const entry of map.entries()) {
+      const script_index = entry[0];
+      const info = entry[1];
+      const script_node = snapshot.getNode(script_index);
+      let script_name;
+      routeNodeEdges(script_node,{
+        name(item, node) {
+          script_name = node.node.name;
+        }
+      });
+      const next_path = path.concat({
+        id: script_node.node.id,
+        name: script_name
+      });
+      if (info.refs.size) {
+        if (first) first = false;
+        else process.stdout.write(&apos;, &apos;);
+        process.stdout.write(JSON.stringify({
+          scripts: next_path,
+          refs: Array.from(info.refs)
+        }));
+        process.stdout.write(&apos;\n&apos;);
+      }
+      if (info.shared.size) {
+        dump(info.shared, next_path);
+      }
+    }
+  }
+  dump(ret, []);
+  process.stdout.write(&apos;]\n&apos;);
+}</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
