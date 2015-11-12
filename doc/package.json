@@ -1,25 +1,22 @@
 {
   "name": "snapshot-utils",
   "version": "1.0.0",
-  "description": "```sh split-snapshot outdir/ <heapdump.json ```",
-  "main": "index.js",
-  "bin": {
-    "snapshot-utils": "script-vars.js"
-  },
+  "description": "Tools to more easily create programs against v8 heap snapshots.",
+  "main": "out/index.js",
   "scripts": {
     "build": "make",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bmeck/snapshot-utils.git"
+    "url": "https://github.com/bmeck/snapshot-utils"
   },
-  "author": "",
+  "author": "bradleymeck",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/bmeck/snapshot-utils/issues"
   },
-  "homepage": "https://github.com/bmeck/snapshot-utils#readme",
+  "homepage": "http://bmeck.github.io/snapshot-utils/doc/identifiers.html",
   "dependencies": {
     "babel-runtime": "^6.1.4",
     "clarinet": "^0.11.0"

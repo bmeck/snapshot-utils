@@ -1,3 +1,6 @@
+## Dumping all the Nodes in a HeapSnapshot
+
+```javascript
 import {HeapSnapshot,SplitSnapshotProvider} from "../";
 
 // We are going to use stdin to read our snapshot
@@ -64,3 +67,4 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
 		}
 	}
 });
+```

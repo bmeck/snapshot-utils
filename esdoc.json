@@ -1,5 +1,8 @@
 {
- "debug": true,
   "source": "./lib",
-  "destination": "./doc"
+  "destination": "./doc",
+  "manual": {
+    "overview": ["./readme.md"],
+    "tutorial": ["./manual/tutorial.md"]
+  }
 }

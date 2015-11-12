@@ -10,7 +10,7 @@
     "access": null,
     "description": null,
     "lineNumber": 5,
-    "content": "/**\n * Representation for iterating over a snapshot's Nodes and Edges.\n * The structure of a snapshot's Node and Edge is defined within the contents of the snapshot.\n */\nexport default class HeapSnapshot {\n  /**\n   * @param {SplitSnapshotProvider} provider Snapshot data provider\n   */\n  constructor(provider) {\n    /**\n     * @private\n     */\n    this.meta = provider.getMeta();\n    /**\n     * @private\n     */\n    this.Node = createNodeClass(this, provider);\n    /**\n     * @private\n     */\n    this.Edge = createEdgeClass(this, provider);\n    /**\n     * @private\n     */\n    this.provider = provider;\n  }\n\n  /**\n  * @typedef {Object} NodeResult\n  * @property {Node} node\n  * @property {number} index Index that can be used with getNode to get this Node.\n  * @property {number} edge_index Index that can be used to get the first Edge of this Node.\n  * @property {function():EdgeIterator} walkEdges Helper for iterating the edges of a Node.\n  */\n  /**\n  * Gets a Node by index, not by ID. The root Node is at index 0.\n  * @param {number} node_index\n  * @return {NodeResult}\n  */\n  getNode(node_index) {\n    if (node_index > this.provider.getNodeArraySize()) {\n      return null;\n    }\n    const node_buffer = this.provider.getNodeBuffer(node_index);\n    const node = new this.Node(node_buffer);\n    const edge_index = node_buffer.readUInt32BE(node_buffer.length - 4);\n    const self = this;\n    return {\n      node,\n      index: node_index,\n      edge_index,\n      *walkEdges() {\n        let edge_count = node.edge_count;\n        let edge_size = self.meta.edge_fields.length;\n        for (let i = 0; i < edge_count; i++) {\n          let index = (edge_index + i) * edge_size;\n          let e = self.getEdge(index);\n          if (e != null) {\n            yield e;\n          }\n        }\n      }\n    };\n  }\n\n  /**\n  * @typedef {Object} EdgeResult\n  * @property {Edge} edge\n  * @property {number} index Index that can be used with getEdge to get this Edge.\n  * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.\n  */\n  /**\n  * Gets an Edge by index. This should only be used in conjuction with a Node object.\n  * @param {number} edge_index Index of the Edge we wish to get a hold of.\n  * @return {EdgeResult}\n  */\n  getEdge(edge_index) {\n    if (edge_index > this.provider.getEdgeArraySize()) {\n      return null;\n    }\n    const edge_buffer = this.provider.getEdgeBuffer(edge_index);\n    const edge = new this.Edge(edge_buffer);\n    const self = this;\n    return {\n      edge,\n      index: edge_index,\n      getNode() {\n        return self.getNode(edge.to_node);\n      }\n    };\n  }\n}\n/**\n * Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Node class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createNodeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Node {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Node${ret}`;\n    }\n  }\n  let i = 0;\n  for (const field of meta.node_fields) {\n    let field_index = i * 4;\n    let field_type = meta.node_types[i];\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field_type === 'string') {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return provider.getString(this._buffer.readUInt32BE(field_index));\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    i++;\n  };\n  return Node;\n}\n/**\n * Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Edge class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createEdgeClass(snapshot, provider) {\n  class Edge {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.edge_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      ret += ' node.id:' + snapshot.getNode(this.to_node).node.id;\n      return `HeapSnapshot::Edge ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.edge_fields) {\n    (function(){ \n    const field_index = i * 4;\n    const field_type = meta.edge_types[i];\n    i++;\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field === 'name_or_index') {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          let value = this._buffer.readUInt32BE(field_index);\n          if (this.type !== 'element') {\n            value = provider.getString(value).toString();\n          }\n          return value;\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    })();\n  };\n  return Edge;\n}"
+    "content": "/**\n * Representation for iterating over a snapshot's Nodes and Edges.\n * The structure of a snapshot's Node and Edge is defined within the contents of the snapshot.\n */\nexport default class HeapSnapshot {\n  /**\n   * @param {SplitSnapshotProvider} provider Snapshot data provider\n   */\n  constructor(provider) {\n    /**\n     * @private\n     */\n    this.meta = provider.getMeta();\n    /**\n     * @private\n     */\n    this.Node = createNodeClass(this, provider);\n    /**\n     * @private\n     */\n    this.Edge = createEdgeClass(this, provider);\n    /**\n     * @private\n     */\n    this.provider = provider;\n  }\n\n  /**\n  * @typedef {Object} NodeResult\n  * @property {Node} fields\n  * @property {number} node_index Index that can be used with getNode to get this Node.\n  * @property {number} edge_index Index that can be used to get the first Edge of this Node.\n  * @property {function():EdgeIterator} walkEdges Helper for iterating the edges of a Node.\n  */\n  /**\n  * Gets a Node by index, not by ID. The root Node is at index 0.\n  * @param {number} node_index\n  * @return {NodeResult}\n  */\n  getNode(node_index) {\n    if (node_index > this.provider.getNodeArraySize()) {\n      return null;\n    }\n    const node_buffer = this.provider.getNodeBuffer(node_index);\n    const node = new this.Node(node_buffer);\n    const edge_index = node_buffer.readUInt32BE(node_buffer.length - 4);\n    const self = this;\n    return {\n      fields: node,\n      node_index,\n      edge_index,\n      *walkEdges() {\n        let edge_count = node.edge_count;\n        let edge_size = self.meta.edge_fields.length;\n        for (let i = 0; i < edge_count; i++) {\n          let index = (edge_index + i) * edge_size;\n          let e = self.getEdge(index);\n          if (e != null) {\n            yield e;\n          }\n        }\n      }\n    };\n  }\n\n  /**\n  * @typedef {Object} EdgeResult\n  * @property {Edge} fields\n  * @property {number} index Index that can be used with getEdge to get this Edge.\n  * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.\n  */\n  /**\n  * Gets an Edge by index. This should only be used in conjuction with a Node object.\n  * @param {number} edge_index Index of the Edge we wish to get a hold of.\n  * @return {EdgeResult}\n  */\n  getEdge(edge_index) {\n    if (edge_index > this.provider.getEdgeArraySize()) {\n      return null;\n    }\n    const edge_buffer = this.provider.getEdgeBuffer(edge_index);\n    const fields = new this.Edge(edge_buffer);\n    const self = this;\n    return {\n      fields,\n      edge_index,\n      getNode() {\n        return self.getNode(fields.to_node);\n      }\n    };\n  }\n}\n/**\n * Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Node class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createNodeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Node {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Node${ret}`;\n    }\n  }\n  let i = 0;\n  for (const field of meta.node_fields) {\n    let field_index = i * 4;\n    let field_type = meta.node_types[i];\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field_type === 'string') {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return provider.getString(this._buffer.readUInt32BE(field_index));\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    i++;\n  };\n  return Node;\n}\n/**\n * Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Edge class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createEdgeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Edge {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.edge_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      ret += ' node.id:' + snapshot.getNode(this.to_node).node.id;\n      return `HeapSnapshot::Edge ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.edge_fields) {\n    (function(){ \n    const field_index = i * 4;\n    const field_type = meta.edge_types[i];\n    i++;\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field === 'name_or_index') {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          let value = this._buffer.readUInt32BE(field_index);\n          if (this.type !== 'element') {\n            value = provider.getString(value).toString();\n          }\n          return value;\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    })();\n  };\n  return Edge;\n}"
   },
   {
     "__docId__": 1,
@@ -139,7 +139,7 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "node",
+        "name": "fields",
         "description": ""
       },
       {
@@ -149,7 +149,7 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "index",
+        "name": "node_index",
         "description": "Index that can be used with getNode to get this Node."
       },
       {
@@ -232,7 +232,7 @@
         ],
         "spread": false,
         "optional": false,
-        "name": "edge",
+        "name": "fields",
         "description": ""
       },
       {
@@ -986,47 +986,37 @@
     "access": null,
     "description": null,
     "lineNumber": 1,
-    "content": "import HeapSnapshot from '../HeapSnapshot';\nimport SplitSnapshotProvider from '../SplitSnapshotProvider';\n\nif (process.argv[2] && process.argv[2] != '-') {\n  SplitSnapshotProvider.fromDirectory(process.argv[2], go);\n}\nelse {\n  SplitSnapshotProvider.fromStream(process.stdin, go);\n}\nfunction go(err, provider) {\n  if (err) {\n    console.error(err);\n    process.exit(1);\n  }\n  const snapshot = new HeapSnapshot(provider);\n  \n  let edge = {\n    getNode: function () {\n      return snapshot.getNode(0)\n    }\n  };\n  \n  const to_walk = [{edge}];\n  const visited = new Set();\n  walk:\n  while(to_walk.length) {\n    let task = to_walk.shift();\n    let node = task.edge.getNode();\n    if (visited.has(node.index)) {\n      continue;\n    }\n\tconsole.log(node.node);\n    visited.add(node.index);\n    for (const edge of node.walkEdges()) {\n\t  console.log(edge.edge);\n      if (visited.has(edge.edge.to_node)) {\n        continue;\n      }\n      to_walk.push({\n        edge\n      });\n    }\n  }\n}"
+    "content": "import {HeapSnapshot,SplitSnapshotProvider} from \"../\";\n\n// We are going to use stdin to read our snapshot\n// pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`\nconst stream = process.stdin;\n\n// This is used to parse the snapshot data.\n// A provider is generally not used for analyzing the snapshot.\n// It is an abstraction to allow saving/loading the snapshot to different\n// location.\nSplitSnapshotProvider.fromStream(stream, (err, provider) => {\n\tif (err) {\n\t\tconsole.error(err);\n\t\tprocess.exit(1);\n\t}\n\t// This gives us an API that can be used to analyze the snapshot.\n\t// Since snapshot data contains the structure of Nodes and Edges\n\t// the Node and Edge classes we obtain from this may be different\n\t// from different snapshots.\n\tconst snapshot = new HeapSnapshot(provider);\n\t\n\t// Heaps are graphs, they can contain cycles! So we use a Set to\n\t// keep track of Nodes we have already seen.\n\tconst visited = new Set();\n\t\n\t// We will be keeping a list of all the Edges we need to cross\n\t// still in an array.\n\tconst edges_to_visit = [];\n\t\n\t// Heaps always have a root Node (index == 0)\n\t// This is the first Node you should visit when walking a Heap\n\t{\n\t\tconst root = snapshot.getNode(0);\n\t\t// for simplicity lets make a mock Edge for our root\n\t\t// so that our walking loop always takes Edges\n\t\t// and push that onto the Edges we should visit\n\t\tedges_to_visit.push({\n\t\t\tgetNode() {return root;}\n\t\t})\n\t}\n\t\n\twhile (edges_to_visit.length) {\n\t\t// While walking we will grab the first Edge off our list\n\t\tconst edge_to_walk = edges_to_visit.shift();\n\t\t\n\t\t// We grab the Node that this edge points to\n\t\tconst node = edge_to_walk.getNode();\n\t\t\n\t\t// We want to be sure we don't start a cycle so we skip\n\t\t// Nodes we have already visited (but not Edges to those Nodes\n\t\t// in this example)\n\t\tif (visited.has(node.node_index)) {\n\t\t\tcontinue;\n\t\t}\n\t\tvisited.add(node.node_index);\n\t\t\n\t\t// Print the data!\n\t\tconsole.log(node.fields);\n\t\t\n\t\t// Add all of the edges of a node to the list of Edges we\n\t\t// need to visit\n\t\tfor (const edge of node.walkEdges()) {\n\t\t\tedges_to_visit.push(edge);\n\t\t}\n\t}\n});"
   },
   {
     "__docId__": 38,
-    "kind": "function",
+    "kind": "variable",
     "static": true,
     "variation": null,
-    "name": "go",
+    "name": "stream",
     "memberof": "lib/bin/dump.js",
-    "longname": "lib/bin/dump.js~go",
+    "longname": "lib/bin/dump.js~stream",
     "access": null,
     "export": false,
     "importPath": "snapshot-utils/lib/bin/dump.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 10,
+    "lineNumber": 5,
     "undocument": true,
-    "params": [
-      {
-        "name": "err",
-        "types": [
-          "*"
-        ]
-      },
-      {
-        "name": "provider",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "generator": false
+    "type": {
+      "types": [
+        "*"
+      ]
+    }
   },
   {
     "__docId__": 39,
     "kind": "file",
     "static": true,
     "variation": null,
-    "name": "lib/bin/preprocess_heapsnapshot.js",
+    "name": "lib/bin/save-to-dir.js",
     "memberof": null,
-    "longname": "lib/bin/preprocess_heapsnapshot.js",
+    "longname": "lib/bin/save-to-dir.js",
     "access": null,
     "description": null,
     "lineNumber": 1,
@@ -1038,11 +1028,11 @@
     "static": true,
     "variation": null,
     "name": "outdir",
-    "memberof": "lib/bin/preprocess_heapsnapshot.js",
-    "longname": "lib/bin/preprocess_heapsnapshot.js~outdir",
+    "memberof": "lib/bin/save-to-dir.js",
+    "longname": "lib/bin/save-to-dir.js~outdir",
     "access": null,
     "export": false,
-    "importPath": "snapshot-utils/lib/bin/preprocess_heapsnapshot.js",
+    "importPath": "snapshot-utils/lib/bin/save-to-dir.js",
     "importStyle": null,
     "description": null,
     "lineNumber": 5,
@@ -1058,47 +1048,16 @@
     "kind": "file",
     "static": true,
     "variation": null,
-    "name": "lib/bin/script-vars.js",
+    "name": "lib/index.js",
     "memberof": null,
-    "longname": "lib/bin/script-vars.js",
+    "longname": "lib/index.js",
     "access": null,
     "description": null,
     "lineNumber": 1,
-    "content": "import HeapSnapshot from '../HeapSnapshot';\nimport SplitSnapshotProvider from '../SplitSnapshotProvider';\n\nif (process.argv[2] && process.argv[2] != '-') {\n  SplitSnapshotProvider.fromDirectory(process.argv[2], go);\n}\nelse {\n  SplitSnapshotProvider.fromStream(process.stdin, go);\n}\nfunction go(err, provider) {\n  if (err) {\n    console.error(err);\n    process.exit(1);\n  }\n  const snapshot = new HeapSnapshot(provider);\n  \n  \n  let edge = {\n    getNode: function () {\n      return snapshot.getNode(0)\n    }\n  };\n  \n  function routeNodeEdges(node, route) {\n    var i = 0;\n    for (let item of node.walkEdges()) {\n      const name = item.edge.name_or_index;\n      if (route[name] && Object.prototype.hasOwnProperty.call(route, name)) {\n        route[name](item, item.getNode());\n      }\n      i++;\n    }\n  }\n  \n  // phase 1, gather all indexes that always occur\n  //          in paths to node\n  \n  // simple queue to avoid recursion for postorder traversal\n  const to_walk = [{edge,path}];\n  const visited = new Set();\n  const dominated_by = new Map();\n  const retainers = new Map();\n  walk:\n  while(to_walk.length) {\n    let task = to_walk.shift();\n    let node = task.edge.getNode();\n    // each node gets its own Set for path\n    const path = new Set(task.path);\n    // we always add ourselves to path, since node dominators\n    // include the node themselves\n    path.add(node.index);\n  \n    if (!dominated_by.has(node.index)) {\n      dominated_by.set(node.index, path);\n    }\n    else {\n      const known_doms = dominated_by.get(node.index);\n      // we want to remove any known dominators not in the current path\n      for (const dom of known_doms) {\n        if (!path.has(dom)) {\n          known_doms.delete(dom);\n        }\n      }\n    }\n    if (visited.has(node.index)) {\n      continue;\n    }\n    visited.add(node.index);\n    const refs = new Set();\n    let script_index = null;\n    if (node.node.type === 'closure') {\n      routeNodeEdges(node, {\n        context(item, node) {\n          //console.log('context', node)\n          if (item.edge.type !== 'internal') return;\n          Array.from(node.walkEdges())\n              .filter(i=>i.edge.type==='context')\n              .map(i=>i.getNode().index)\n              .forEach(index=>refs.add(index));\n        },\n        shared(item, node) {\n          if (item.edge.type !== 'internal') return;\n          routeNodeEdges(node, {\n            script(item, node) {\n              script_index = node.index;\n            }\n          });\n        }\n      });\n    }\n    if (refs.size) {\n      for (const ref of refs) {\n        if (!retainers.has(ref)) {\n          retainers.set(ref, new Set());\n        }\n        const retainer = retainers.get(ref);\n        retainer.add(script_index);\n      }\n    }\n    for (const edge of node.walkEdges()) {\n      //console.log('GONNA VISIT', edge.edge)\n      if (visited.has(edge.edge.to_node)) {\n        continue;\n      }\n      to_walk.push({\n        edge,\n        path\n      });\n    }\n  }\n  // invert dominated_by to dominator=>[slave]\n  const dominating = new Map();\n  for (const entry of dominated_by.entries()) {\n    const dominators = entry[1];\n    const node_index = entry[0];\n    const node = snapshot.getNode(node_index);\n    const node_id = node.node.id;\n    for (const dominator of dominators) {\n      const dominator_node = snapshot.getNode(dominator);\n      const dominator_id = dominator_node.node.id;\n      if (!dominating.has(dominator_id)) {\n        dominating.set(dominator_id, new Set());\n      }\n      const slaves = dominating.get(dominator_id);\n      slaves.add({\n        id: node_id,\n        self_size: node.node.self_size\n      });\n    }\n  }\n  // refs, shared\n  const ret = new Map();\n  for (const entry of retainers.entries()) {\n    const ref = snapshot.getNode(entry[0]);\n    const scripts = entry[1];\n    let map = ret;\n    let refs;\n    for (const script of scripts) {\n      if (!map.has(script)) {\n        map.set(script, {\n          refs: refs = new Set(),\n          shared: map = new Map()\n        });\n      }\n      else {\n        let info = map.get(script);\n        map = info.shared;\n        refs = info.refs;\n      }\n    }\n    refs.add({\n      id: ref.node.id,\n      retained_size: Array.from(dominating.get(ref.node.id))\n        .reduce((c,s)=>c+s.self_size, 0)\n    });\n  }\n  process.stdout.write('[\\n');\n  let first = true;\n  function dump(map, path) {\n    for (const entry of map.entries()) {\n      const script_index = entry[0];\n      const info = entry[1];\n      const script_node = snapshot.getNode(script_index);\n      let script_name;\n      routeNodeEdges(script_node,{\n        name(item, node) {\n          script_name = node.node.name;\n        }\n      });\n      const next_path = path.concat({\n        id: script_node.node.id,\n        name: script_name\n      });\n      if (info.refs.size) {\n        if (first) first = false;\n        else process.stdout.write(', ');\n        process.stdout.write(JSON.stringify({\n          scripts: next_path,\n          refs: Array.from(info.refs)\n        }));\n        process.stdout.write('\\n');\n      }\n      if (info.shared.size) {\n        dump(info.shared, next_path);\n      }\n    }\n  }\n  dump(ret, []);\n  process.stdout.write(']\\n');\n}"
+    "content": "import HeapSnapshot from \"./HeapSnapshot\";\nimport SplitSnapshotProvider from \"./SplitSnapshotProvider\";\nexport {HeapSnapshot,SplitSnapshotProvider};"
   },
   {
     "__docId__": 42,
-    "kind": "function",
-    "static": true,
-    "variation": null,
-    "name": "go",
-    "memberof": "lib/bin/script-vars.js",
-    "longname": "lib/bin/script-vars.js~go",
-    "access": null,
-    "export": false,
-    "importPath": "snapshot-utils/lib/bin/script-vars.js",
-    "importStyle": null,
-    "description": null,
-    "lineNumber": 10,
-    "undocument": true,
-    "params": [
-      {
-        "name": "err",
-        "types": [
-          "*"
-        ]
-      },
-      {
-        "name": "provider",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "generator": false
-  },
-  {
-    "__docId__": 43,
     "kind": "file",
     "static": true,
     "variation": null,
@@ -1111,7 +1070,7 @@
     "content": "import clarinet from \"clarinet\";\n/**\n * @typedef {Object} parseSnapshotStreamCallbacks\n * @property {function(snapshot_info: {meta:Object})} onsnapshot_info\n * @property {function(node_buffer: Buffer)} onnode\n * @property {function(edge_buffer: Buffer)} onedge\n * @property {function(str: string)} onstring\n */\n/**\n * Create a writable stream for parsing JSON.\n * \n * @param parseSnapshotStreamCallbacks callbacks t\n * @return {undefined}\n */\nexport default function parseSnapshotStream({\n\tonsnapshot_info = Function.prototype,\n\tonnode = Function.prototype,\n\tonedge = Function.prototype,\n\tonstring = Function.prototype,\n}) {\n  const parser = clarinet.createStream();\n\n  const parser_keys = [];\n  const key = (k) => {\n    return parser_keys.push(k);\n  }\n\tconst unkey = () => {\n    return parser_keys.pop();\n  }\n\n  const parser_path = [];\n  const push = (value) => {\n    if (parser_path.length) {\n      const target = parser_path[parser_path.length - 1];\n      const field = parser_keys[parser_keys.length - 1];\n      if (Array.isArray(target)) {\n          parser_keys[parser_keys.length - 1]++;\n      }\n      target[field] = value;\n    }\n    else {\n      parser_path.push(value);\n    }\n  }\n  const nest = (value) => {\n    let first = parser_path.length === 0;\n    push(value);\n    if (!first) parser_path.push(value);\n  }\n  const pop = () => {\n    return parser_path.pop();\n  }\n\n\tlet node_fields_size = 0;\n\tlet edge_fields_size = 0;\n  let field_index = 0;\n  let buffer = null;\n\tlet innodes = false;\n\tlet inedges = false;\n\tlet instrings = false;\n\tconst atsnapshot = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'snapshot';\n\t};\n\tconst insnapshot = () => {\n\t\treturn parser_keys.length >= 1 && parser_keys[0] === 'snapshot';\n\t};\n\tconst atnodes = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'nodes';\n\t};\n\tconst atedges = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'edges';\n\t};\n\tconst atstrings = () => {\n\t\treturn parser_keys.length === 1 && parser_keys[0] === 'strings';\n\t};\n  parser.on(\"openobject\", (first_key) => {\n    if (insnapshot()) nest({});\n    if (typeof first_key === 'string') key(first_key);\n    else key(undefined);\n  });\n  parser.on(\"closeobject\", () => {\n    unkey();\n    if (atsnapshot()) {\n      const snapshot = pop();\n      node_fields_size = snapshot.meta.node_fields.length * 4;\n      edge_fields_size = snapshot.meta.edge_fields.length * 4;\n      onsnapshot_info(snapshot);\n    }\n    else if (insnapshot()) pop();\n  });\n  parser.on(\"openarray\", () => {\n    if (insnapshot()) nest([]);\n    if (atnodes()) {\n      innodes = true;\n      buffer = new Buffer(node_fields_size);\n      field_index = 0;\n    }\n    if (atedges()) {\n      inedges = true;\n      buffer = new Buffer(edge_fields_size);\n      field_index = 0;\n    }\n    if (atstrings()) {\n      instrings = true;\n    }\n    key(0);\n  });\n  parser.on(\"closearray\", () => {\n    unkey();\n    if (insnapshot()) pop();\n    if (atnodes()) {\n      innodes = false;\n      onnode(null);\n    }\n    if (atedges()) {\n      inedges = false;\n      onedge(null);\n    }\n    if (atstrings()) {\n      instrings = false;\n      onstring(null);\n    }\n  });\n  parser.on(\"key\", (new_key) => {\n    unkey();\n    key(new_key);\n  });\n  parser.on(\"value\", (value) => {\n    if (innodes) {\n      buffer.writeUInt32BE(value, field_index);\n      field_index = (field_index + 4) % node_fields_size;\n      if (field_index === 0) {\n        onnode(buffer);\n        buffer = new Buffer(node_fields_size);\n      }\n    }\n    if (inedges) {\n      buffer.writeUInt32BE(value, field_index);\n      field_index = (field_index + 4) % edge_fields_size;\n      if (field_index === 0) {\n        onedge(buffer);\n        buffer = new Buffer(edge_fields_size);\n      }\n    }\n    if (instrings) {\n      onstring(value);\n    }\n    else if (insnapshot()) push(value);\n  });\n\treturn parser;\n}\n"
   },
   {
-    "__docId__": 44,
+    "__docId__": 43,
     "kind": "typedef",
     "static": true,
     "variation": null,
@@ -1171,7 +1130,7 @@
     }
   },
   {
-    "__docId__": 45,
+    "__docId__": 44,
     "kind": "function",
     "static": true,
     "variation": null,
@@ -1207,7 +1166,7 @@
     "generator": false
   },
   {
-    "__docId__": 47,
+    "__docId__": 46,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1220,7 +1179,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 48,
+    "__docId__": 47,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1233,7 +1192,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 49,
+    "__docId__": 48,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1246,7 +1205,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 50,
+    "__docId__": 49,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1259,7 +1218,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 51,
+    "__docId__": 50,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1272,7 +1231,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 52,
+    "__docId__": 51,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1285,7 +1244,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 53,
+    "__docId__": 52,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1298,7 +1257,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 54,
+    "__docId__": 53,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1311,7 +1270,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 55,
+    "__docId__": 54,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1324,7 +1283,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 56,
+    "__docId__": 55,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1337,7 +1296,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 57,
+    "__docId__": 56,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1350,7 +1309,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 58,
+    "__docId__": 57,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1363,7 +1322,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 59,
+    "__docId__": 58,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1376,7 +1335,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 60,
+    "__docId__": 59,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1389,7 +1348,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 61,
+    "__docId__": 60,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1402,7 +1361,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 62,
+    "__docId__": 61,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1415,7 +1374,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 63,
+    "__docId__": 62,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1428,7 +1387,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 64,
+    "__docId__": 63,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1441,7 +1400,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 65,
+    "__docId__": 64,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1454,7 +1413,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 66,
+    "__docId__": 65,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1467,7 +1426,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 67,
+    "__docId__": 66,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1480,7 +1439,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 68,
+    "__docId__": 67,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1493,7 +1452,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 69,
+    "__docId__": 68,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1506,7 +1465,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 70,
+    "__docId__": 69,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1519,7 +1478,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 71,
+    "__docId__": 70,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1532,7 +1491,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 72,
+    "__docId__": 71,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1545,7 +1504,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 73,
+    "__docId__": 72,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1558,7 +1517,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 74,
+    "__docId__": 73,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1571,7 +1530,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1584,7 +1543,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 75,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1597,7 +1556,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 77,
+    "__docId__": 76,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1610,7 +1569,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 77,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1623,7 +1582,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 78,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1636,7 +1595,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 79,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1649,7 +1608,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 80,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1662,7 +1621,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 81,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1675,7 +1634,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 82,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1688,7 +1647,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 83,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1701,7 +1660,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 84,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1714,7 +1673,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 85,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1727,7 +1686,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 87,
+    "__docId__": 86,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1740,7 +1699,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 88,
+    "__docId__": 87,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1753,7 +1712,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 89,
+    "__docId__": 88,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1766,7 +1725,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 90,
+    "__docId__": 89,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1779,7 +1738,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 91,
+    "__docId__": 90,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1792,7 +1751,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 92,
+    "__docId__": 91,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1805,7 +1764,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 92,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1818,7 +1777,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 94,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1831,7 +1790,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 96,
+    "__docId__": 95,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1844,7 +1803,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 96,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1857,7 +1816,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 98,
+    "__docId__": 97,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1870,7 +1829,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 98,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1883,7 +1842,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 99,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1896,7 +1855,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 101,
+    "__docId__": 100,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1909,7 +1868,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 101,
     "kind": "external",
     "static": true,
     "variation": null,

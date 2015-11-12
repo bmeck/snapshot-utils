@@ -456,15 +456,15 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "lib/bin/preprocess_heapsnapshot.js",
-    "file/lib/bin/preprocess_heapsnapshot.js.html",
-    "lib/bin/preprocess_heapsnapshot.js",
+    "lib/bin/save-to-dir.js",
+    "file/lib/bin/save-to-dir.js.html",
+    "lib/bin/save-to-dir.js",
     "file"
   ],
   [
-    "lib/bin/script-vars.js",
-    "file/lib/bin/script-vars.js.html",
-    "lib/bin/script-vars.js",
+    "lib/index.js",
+    "file/lib/index.js.html",
+    "lib/index.js",
     "file"
   ],
   [
