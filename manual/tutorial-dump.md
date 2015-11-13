@@ -1,4 +1,4 @@
-## Get All Nodes in a HeapSnapshot
+## Get All Nodes
 
 ```javascript
 import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
