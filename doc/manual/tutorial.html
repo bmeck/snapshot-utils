@@ -44,8 +44,8 @@
     <h1 class="manual-toc-title"><a href="manual/tutorial.html" data-ice="title">Tutorial</a></h1>
     <ul class="manual-toc">
       
-    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#dumping-all-the-nodes-in-a-heapsnapshot" data-ice="link">Dumping all the Nodes in a HeapSnapshot</a></li>
-<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#dumping-all-the-variables-used-by-functions-and-globals-in-a-heapsnapshot" data-ice="link">Dumping all the variables used by functions and globals in a HeapSnapshot</a></li>
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-all-nodes-in-a-heapsnapshot" data-ice="link">Get All Nodes in a HeapSnapshot</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-variables-in-a-heapsnapshot" data-ice="link">Get Variables in a HeapSnapshot</a></li>
 </ul>
   </div>
 <div data-ice="manual" data-toc-name="reference">
@@ -66,7 +66,7 @@
     <span>&#xBB;</span>
     <span data-ice="title">Tutorial</span>
   </div>
-  <div data-ice="content"><h2 id="dumping-all-the-nodes-in-a-heapsnapshot">Dumping all the Nodes in a HeapSnapshot</h2>
+  <div data-ice="content"><h2 id="get-all-nodes-in-a-heapsnapshot">Get All Nodes in a HeapSnapshot</h2>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
 
 // We are going to use stdin to read our snapshot
@@ -134,7 +134,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
     }
 });</code>
 </code></pre>
-<h2 id="dumping-all-the-variables-used-by-functions-and-globals-in-a-heapsnapshot">Dumping all the variables used by functions and globals in a HeapSnapshot</h2>
+<h2 id="get-variables-in-a-heapsnapshot">Get Variables in a HeapSnapshot</h2>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
 
 // We are going to use stdin to read our snapshot

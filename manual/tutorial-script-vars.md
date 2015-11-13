@@ -1,4 +1,4 @@
-## Dumping all the variables used by functions and globals in a HeapSnapshot
+## Get Variables in a HeapSnapshot
 
 ```javascript
 import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
