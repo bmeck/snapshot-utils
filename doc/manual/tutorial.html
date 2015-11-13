@@ -45,6 +45,7 @@
     <ul class="manual-toc">
       
     <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#dumping-all-the-nodes-in-a-heapsnapshot" data-ice="link">Dumping all the Nodes in a HeapSnapshot</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#dumping-all-the-variables-used-by-functions-and-globals-in-a-heapsnapshot" data-ice="link">Dumping all the variables used by functions and globals in a HeapSnapshot</a></li>
 </ul>
   </div>
 <div data-ice="manual" data-toc-name="reference">
@@ -66,7 +67,7 @@
     <span data-ice="title">Tutorial</span>
   </div>
   <div data-ice="content"><h2 id="dumping-all-the-nodes-in-a-heapsnapshot">Dumping all the Nodes in a HeapSnapshot</h2>
-<pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;../&quot;;
+<pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
 
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node dump.js &lt;&quot;my.heapsnapshot&quot;`
@@ -129,6 +130,148 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
         // need to visit
         for (const edge of node.walkEdges()) {
             edges_to_visit.push(edge);
+        }
+    }
+});</code>
+</code></pre>
+<h2 id="dumping-all-the-variables-used-by-functions-and-globals-in-a-heapsnapshot">Dumping all the variables used by functions and globals in a HeapSnapshot</h2>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
+
+// We are going to use stdin to read our snapshot
+// pipe a snapshot in via: `node script-vars.js &lt;&quot;my.heapsnapshot&quot;`
+const stream = process.stdin;
+
+// This is used to parse the snapshot data.
+// A provider is generally not used for analyzing the snapshot.
+// It is an abstraction to allow saving/loading the snapshot to different
+// location.
+SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
+    if (err) {
+        console.error(err);
+        process.exit(1);
+    }
+    // This gives us an API that can be used to analyze the snapshot.
+    // Since snapshot data contains the structure of Nodes and Edges
+    // the Node and Edge classes we obtain from this may be different
+    // from different snapshots.
+    const snapshot = new HeapSnapshot(provider);
+
+    // Heaps are graphs, they can contain cycles! So we use a Set to
+    // keep track of Nodes we have already seen.
+    const visited = new Set();
+
+    // We are going to keep track of all the parent Nodes to our
+    // current Node.
+    const path = [];
+
+    // We will be keeping a list of all the Edges we need to cross
+    // still in an array.
+    const edges_to_visit = [];
+
+    // Heaps always have a root Node (index == 0)
+    // This is the first Node you should visit when walking a Heap
+    {
+        const root = snapshot.getNode(0);
+        // for simplicity lets make a mock Edge for our root
+        // so that our walking loop always takes Edges
+        // and push that onto the Edges we should visit
+        edges_to_visit.push({
+            getNode() {return root;}
+        })
+    }
+
+    // we will keep a list of all the globals we have seen and visit them at the end
+    // this is because global Nodes have a type of &quot;object&quot; and can be confused easily
+    // unless we grab them from context Nodes
+    const globals = new Set();
+    while (edges_to_visit.length) {
+        // While walking we will grab the first Edge off our list
+        const edge_to_walk = edges_to_visit.shift();
+
+        // We grab the Node that this edge points to
+        const node = edge_to_walk.getNode();
+
+        // We want to be sure we don&apos;t start a cycle so we skip
+        // Nodes we have already visited (but not Edges to those Nodes
+        // in this example)
+        if (visited.has(node.node_index)) {
+            continue;
+        }
+        visited.add(node.node_index);
+
+        // Every function instance Node has a type of &quot;closure&quot;
+        // So... for every function 
+        if (node.fields.type === &apos;closure&apos;) {
+            // Store information that we want to print out
+            // This is because the information is split up
+            // and we want to have all of it at once
+            const vars = [];
+            let script = null;
+            let global = null;
+            for (const edge of node.walkEdges()) {
+                // closures that have variables create context Nodes
+                // these will list all the variables that a closure
+                // uses. unused variables are not listed.
+                if (edge.fields.name_or_index === &apos;context&apos;) {
+                    for (const context_edge of edge.getNode().walkEdges()) {
+                        // context Nodes have Edges with a type of &quot;context&quot;
+                        // to represent where variables are
+                        if (context_edge.fields.type === &apos;context&apos;) {
+                            // grab the name of the variable and
+                            // the id of the Node that is in the variable
+                            const name = context_edge.fields.name_or_index;
+                            const val_id = context_edge.getNode().fields.id;
+                            vars.push(`${name} = @${val_id}`);
+                        }
+                        // context Nodes always keep track of the global they
+                        // are attached to, just like frames in a browser
+                        // there can be multiple globals
+                        else if (context_edge.fields.type === &apos;internal&apos;
+                        &amp;&amp; context_edge.fields.name_or_index === &apos;global&apos;) {
+                            // it is easier to lookup Nodes by index than id
+                            globals.add(context_edge.fields.to_node);
+                            global = context_edge.getNode().fields.id;
+                        }
+                    }
+                }
+                // closures have what is called shared script information
+                // this information is shared between *all* instances of a
+                // function and includes things like what script the closure
+                // was from
+                if (edge.fields.name_or_index === &apos;shared&apos;) {
+                    for (const shared_edge of edge.getNode().walkEdges()) {
+                        if (shared_edge.fields.name_or_index === &apos;script&apos;) {
+                            script = shared_edge.getNode().fields.name;
+                        }
+                    }
+                }
+            }
+            // print our closure data!
+            for (const line of vars) {
+                if (script != null) {
+                    console.log(`${line} in script ${script} in global @${global}`)
+                }
+                else {
+                    console.log(`${line} in global @${global}`)
+                }
+            }
+        }
+
+        // Add all of the edges of a node to the list of Edges we
+        // need to visit
+        for (const edge of node.walkEdges()) {
+            edges_to_visit.push(edge);
+        }
+    }
+
+    // next we walk all of the global objects we saw
+    for (const global_index of globals) {
+        let node = snapshot.getNode(global_index);
+        for (const edge of node.walkEdges()) {
+            if (edge.fields.type === &apos;property&apos;) {
+                const property_node = edge.getNode();
+                console.log(`${edge.fields.name_or_index} = @${property_node.fields.id} on global @${node.fields.id}`)
+            }
         }
     }
 });</code>

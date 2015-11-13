@@ -79,7 +79,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 		// for simplicity lets make a mock Edge for our root
 		// so that our walking loop always takes Edges
 		// and push that onto the Edges we should visit
-		edges_to_visit.push({
+		edges_to_visit.unshift({
 			getNode() {return root;}
 		})
 	}

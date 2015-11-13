@@ -1642,10 +1642,10 @@
                           },
                           "property": {
                             "type": "Identifier",
-                            "name": "push",
+                            "name": "unshift",
                             "range": [
                               1370,
-                              1374
+                              1377
                             ],
                             "loc": {
                               "start": {
@@ -1654,13 +1654,13 @@
                               },
                               "end": {
                                 "line": 37,
-                                "column": 21
+                                "column": 24
                               }
                             }
                           },
                           "range": [
                             1355,
-                            1374
+                            1377
                           ],
                           "loc": {
                             "start": {
@@ -1669,7 +1669,7 @@
                             },
                             "end": {
                               "line": 37,
-                              "column": 21
+                              "column": 24
                             }
                           }
                         },
@@ -1683,8 +1683,8 @@
                                   "type": "Identifier",
                                   "name": "getNode",
                                   "range": [
-                                    1380,
-                                    1387
+                                    1383,
+                                    1390
                                   ],
                                   "loc": {
                                     "start": {
@@ -1710,8 +1710,8 @@
                                           "type": "Identifier",
                                           "name": "root",
                                           "range": [
-                                            1398,
-                                            1402
+                                            1401,
+                                            1405
                                           ],
                                           "loc": {
                                             "start": {
@@ -1725,8 +1725,8 @@
                                           }
                                         },
                                         "range": [
-                                          1391,
-                                          1403
+                                          1394,
+                                          1406
                                         ],
                                         "loc": {
                                           "start": {
@@ -1741,8 +1741,8 @@
                                       }
                                     ],
                                     "range": [
-                                      1390,
-                                      1404
+                                      1393,
+                                      1407
                                     ],
                                     "loc": {
                                       "start": {
@@ -1758,8 +1758,8 @@
                                   "generator": false,
                                   "expression": false,
                                   "range": [
-                                    1387,
-                                    1404
+                                    1390,
+                                    1407
                                   ],
                                   "loc": {
                                     "start": {
@@ -1777,8 +1777,8 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  1380,
-                                  1404
+                                  1383,
+                                  1407
                                 ],
                                 "loc": {
                                   "start": {
@@ -1793,13 +1793,13 @@
                               }
                             ],
                             "range": [
-                              1375,
-                              1408
+                              1378,
+                              1411
                             ],
                             "loc": {
                               "start": {
                                 "line": 37,
-                                "column": 22
+                                "column": 25
                               },
                               "end": {
                                 "line": 39,
@@ -1810,7 +1810,7 @@
                         ],
                         "range": [
                           1355,
-                          1409
+                          1412
                         ],
                         "loc": {
                           "start": {
@@ -1825,7 +1825,7 @@
                       },
                       "range": [
                         1355,
-                        1411
+                        1414
                       ],
                       "loc": {
                         "start": {
@@ -1897,7 +1897,7 @@
                   ],
                   "range": [
                     1161,
-                    1412
+                    1415
                   ],
                   "loc": {
                     "start": {
@@ -1957,8 +1957,8 @@
                       "type": "Identifier",
                       "name": "edges_to_visit",
                       "range": [
-                        1423,
-                        1437
+                        1426,
+                        1440
                       ],
                       "loc": {
                         "start": {
@@ -1975,8 +1975,8 @@
                       "type": "Identifier",
                       "name": "length",
                       "range": [
-                        1438,
-                        1444
+                        1441,
+                        1447
                       ],
                       "loc": {
                         "start": {
@@ -1990,8 +1990,8 @@
                       }
                     },
                     "range": [
-                      1423,
-                      1444
+                      1426,
+                      1447
                     ],
                     "loc": {
                       "start": {
@@ -2016,8 +2016,8 @@
                               "type": "Identifier",
                               "name": "edge_to_walk",
                               "range": [
-                                1516,
-                                1528
+                                1519,
+                                1531
                               ],
                               "loc": {
                                 "start": {
@@ -2039,8 +2039,8 @@
                                   "type": "Identifier",
                                   "name": "edges_to_visit",
                                   "range": [
-                                    1531,
-                                    1545
+                                    1534,
+                                    1548
                                   ],
                                   "loc": {
                                     "start": {
@@ -2057,8 +2057,8 @@
                                   "type": "Identifier",
                                   "name": "shift",
                                   "range": [
-                                    1546,
-                                    1551
+                                    1549,
+                                    1554
                                   ],
                                   "loc": {
                                     "start": {
@@ -2072,8 +2072,8 @@
                                   }
                                 },
                                 "range": [
-                                  1531,
-                                  1551
+                                  1534,
+                                  1554
                                 ],
                                 "loc": {
                                   "start": {
@@ -2088,8 +2088,8 @@
                               },
                               "arguments": [],
                               "range": [
-                                1531,
-                                1553
+                                1534,
+                                1556
                               ],
                               "loc": {
                                 "start": {
@@ -2103,8 +2103,8 @@
                               }
                             },
                             "range": [
-                              1516,
-                              1553
+                              1519,
+                              1556
                             ],
                             "loc": {
                               "start": {
@@ -2120,8 +2120,8 @@
                         ],
                         "kind": "const",
                         "range": [
-                          1510,
-                          1554
+                          1513,
+                          1557
                         ],
                         "loc": {
                           "start": {
@@ -2138,8 +2138,8 @@
                             "type": "Line",
                             "value": " While walking we will grab the first Edge off our list",
                             "range": [
-                              1450,
-                              1507
+                              1453,
+                              1510
                             ],
                             "loc": {
                               "start": {
@@ -2158,8 +2158,8 @@
                             "type": "Line",
                             "value": " We grab the Node that this edge points to",
                             "range": [
-                              1560,
-                              1604
+                              1563,
+                              1607
                             ],
                             "loc": {
                               "start": {
@@ -2183,8 +2183,8 @@
                               "type": "Identifier",
                               "name": "node",
                               "range": [
-                                1613,
-                                1617
+                                1616,
+                                1620
                               ],
                               "loc": {
                                 "start": {
@@ -2206,8 +2206,8 @@
                                   "type": "Identifier",
                                   "name": "edge_to_walk",
                                   "range": [
-                                    1620,
-                                    1632
+                                    1623,
+                                    1635
                                   ],
                                   "loc": {
                                     "start": {
@@ -2224,8 +2224,8 @@
                                   "type": "Identifier",
                                   "name": "getNode",
                                   "range": [
-                                    1633,
-                                    1640
+                                    1636,
+                                    1643
                                   ],
                                   "loc": {
                                     "start": {
@@ -2239,8 +2239,8 @@
                                   }
                                 },
                                 "range": [
-                                  1620,
-                                  1640
+                                  1623,
+                                  1643
                                 ],
                                 "loc": {
                                   "start": {
@@ -2255,8 +2255,8 @@
                               },
                               "arguments": [],
                               "range": [
-                                1620,
-                                1642
+                                1623,
+                                1645
                               ],
                               "loc": {
                                 "start": {
@@ -2270,8 +2270,8 @@
                               }
                             },
                             "range": [
-                              1613,
-                              1642
+                              1616,
+                              1645
                             ],
                             "loc": {
                               "start": {
@@ -2287,8 +2287,8 @@
                         ],
                         "kind": "const",
                         "range": [
-                          1607,
-                          1643
+                          1610,
+                          1646
                         ],
                         "loc": {
                           "start": {
@@ -2305,8 +2305,8 @@
                             "type": "Line",
                             "value": " We grab the Node that this edge points to",
                             "range": [
-                              1560,
-                              1604
+                              1563,
+                              1607
                             ],
                             "loc": {
                               "start": {
@@ -2325,8 +2325,8 @@
                             "type": "Line",
                             "value": " We want to be sure we don't start a cycle so we skip",
                             "range": [
-                              1649,
-                              1704
+                              1652,
+                              1707
                             ],
                             "loc": {
                               "start": {
@@ -2343,8 +2343,8 @@
                             "type": "Line",
                             "value": " Nodes we have already visited (but not Edges to those Nodes",
                             "range": [
-                              1707,
-                              1769
+                              1710,
+                              1772
                             ],
                             "loc": {
                               "start": {
@@ -2361,8 +2361,8 @@
                             "type": "Line",
                             "value": " in this example)",
                             "range": [
-                              1772,
-                              1791
+                              1775,
+                              1794
                             ],
                             "loc": {
                               "start": {
@@ -2388,8 +2388,8 @@
                               "type": "Identifier",
                               "name": "visited",
                               "range": [
-                                1798,
-                                1805
+                                1801,
+                                1808
                               ],
                               "loc": {
                                 "start": {
@@ -2406,8 +2406,8 @@
                               "type": "Identifier",
                               "name": "has",
                               "range": [
-                                1806,
-                                1809
+                                1809,
+                                1812
                               ],
                               "loc": {
                                 "start": {
@@ -2421,8 +2421,8 @@
                               }
                             },
                             "range": [
-                              1798,
-                              1809
+                              1801,
+                              1812
                             ],
                             "loc": {
                               "start": {
@@ -2443,8 +2443,8 @@
                                 "type": "Identifier",
                                 "name": "node",
                                 "range": [
-                                  1810,
-                                  1814
+                                  1813,
+                                  1817
                                 ],
                                 "loc": {
                                   "start": {
@@ -2461,8 +2461,8 @@
                                 "type": "Identifier",
                                 "name": "node_index",
                                 "range": [
-                                  1815,
-                                  1825
+                                  1818,
+                                  1828
                                 ],
                                 "loc": {
                                   "start": {
@@ -2476,8 +2476,8 @@
                                 }
                               },
                               "range": [
-                                1810,
-                                1825
+                                1813,
+                                1828
                               ],
                               "loc": {
                                 "start": {
@@ -2492,8 +2492,8 @@
                             }
                           ],
                           "range": [
-                            1798,
-                            1826
+                            1801,
+                            1829
                           ],
                           "loc": {
                             "start": {
@@ -2513,8 +2513,8 @@
                               "type": "ContinueStatement",
                               "label": null,
                               "range": [
-                                1833,
-                                1842
+                                1836,
+                                1845
                               ],
                               "loc": {
                                 "start": {
@@ -2529,8 +2529,8 @@
                             }
                           ],
                           "range": [
-                            1828,
-                            1846
+                            1831,
+                            1849
                           ],
                           "loc": {
                             "start": {
@@ -2545,8 +2545,8 @@
                         },
                         "alternate": null,
                         "range": [
-                          1794,
-                          1846
+                          1797,
+                          1849
                         ],
                         "loc": {
                           "start": {
@@ -2563,8 +2563,8 @@
                             "type": "Line",
                             "value": " We want to be sure we don't start a cycle so we skip",
                             "range": [
-                              1649,
-                              1704
+                              1652,
+                              1707
                             ],
                             "loc": {
                               "start": {
@@ -2581,8 +2581,8 @@
                             "type": "Line",
                             "value": " Nodes we have already visited (but not Edges to those Nodes",
                             "range": [
-                              1707,
-                              1769
+                              1710,
+                              1772
                             ],
                             "loc": {
                               "start": {
@@ -2599,8 +2599,8 @@
                             "type": "Line",
                             "value": " in this example)",
                             "range": [
-                              1772,
-                              1791
+                              1775,
+                              1794
                             ],
                             "loc": {
                               "start": {
@@ -2626,8 +2626,8 @@
                               "type": "Identifier",
                               "name": "visited",
                               "range": [
-                                1849,
-                                1856
+                                1852,
+                                1859
                               ],
                               "loc": {
                                 "start": {
@@ -2644,8 +2644,8 @@
                               "type": "Identifier",
                               "name": "add",
                               "range": [
-                                1857,
-                                1860
+                                1860,
+                                1863
                               ],
                               "loc": {
                                 "start": {
@@ -2659,8 +2659,8 @@
                               }
                             },
                             "range": [
-                              1849,
-                              1860
+                              1852,
+                              1863
                             ],
                             "loc": {
                               "start": {
@@ -2681,8 +2681,8 @@
                                 "type": "Identifier",
                                 "name": "node",
                                 "range": [
-                                  1861,
-                                  1865
+                                  1864,
+                                  1868
                                 ],
                                 "loc": {
                                   "start": {
@@ -2699,8 +2699,8 @@
                                 "type": "Identifier",
                                 "name": "node_index",
                                 "range": [
-                                  1866,
-                                  1876
+                                  1869,
+                                  1879
                                 ],
                                 "loc": {
                                   "start": {
@@ -2714,8 +2714,8 @@
                                 }
                               },
                               "range": [
-                                1861,
-                                1876
+                                1864,
+                                1879
                               ],
                               "loc": {
                                 "start": {
@@ -2730,8 +2730,8 @@
                             }
                           ],
                           "range": [
-                            1849,
-                            1877
+                            1852,
+                            1880
                           ],
                           "loc": {
                             "start": {
@@ -2745,8 +2745,8 @@
                           }
                         },
                         "range": [
-                          1849,
-                          1878
+                          1852,
+                          1881
                         ],
                         "loc": {
                           "start": {
@@ -2763,8 +2763,8 @@
                             "type": "Line",
                             "value": " Print the data!",
                             "range": [
-                              1884,
-                              1902
+                              1887,
+                              1905
                             ],
                             "loc": {
                               "start": {
@@ -2790,8 +2790,8 @@
                               "type": "Identifier",
                               "name": "console",
                               "range": [
-                                1905,
-                                1912
+                                1908,
+                                1915
                               ],
                               "loc": {
                                 "start": {
@@ -2808,8 +2808,8 @@
                               "type": "Identifier",
                               "name": "log",
                               "range": [
-                                1913,
-                                1916
+                                1916,
+                                1919
                               ],
                               "loc": {
                                 "start": {
@@ -2823,8 +2823,8 @@
                               }
                             },
                             "range": [
-                              1905,
-                              1916
+                              1908,
+                              1919
                             ],
                             "loc": {
                               "start": {
@@ -2845,8 +2845,8 @@
                                 "type": "Identifier",
                                 "name": "node",
                                 "range": [
-                                  1917,
-                                  1921
+                                  1920,
+                                  1924
                                 ],
                                 "loc": {
                                   "start": {
@@ -2863,8 +2863,8 @@
                                 "type": "Identifier",
                                 "name": "fields",
                                 "range": [
-                                  1922,
-                                  1928
+                                  1925,
+                                  1931
                                 ],
                                 "loc": {
                                   "start": {
@@ -2878,8 +2878,8 @@
                                 }
                               },
                               "range": [
-                                1917,
-                                1928
+                                1920,
+                                1931
                               ],
                               "loc": {
                                 "start": {
@@ -2894,8 +2894,8 @@
                             }
                           ],
                           "range": [
-                            1905,
-                            1929
+                            1908,
+                            1932
                           ],
                           "loc": {
                             "start": {
@@ -2909,8 +2909,8 @@
                           }
                         },
                         "range": [
-                          1905,
-                          1930
+                          1908,
+                          1933
                         ],
                         "loc": {
                           "start": {
@@ -2927,8 +2927,8 @@
                             "type": "Line",
                             "value": " Print the data!",
                             "range": [
-                              1884,
-                              1902
+                              1887,
+                              1905
                             ],
                             "loc": {
                               "start": {
@@ -2947,8 +2947,8 @@
                             "type": "Line",
                             "value": " Add all of the edges of a node to the list of Edges we",
                             "range": [
-                              1936,
-                              1993
+                              1939,
+                              1996
                             ],
                             "loc": {
                               "start": {
@@ -2965,8 +2965,8 @@
                             "type": "Line",
                             "value": " need to visit",
                             "range": [
-                              1996,
-                              2012
+                              1999,
+                              2015
                             ],
                             "loc": {
                               "start": {
@@ -2992,8 +2992,8 @@
                                 "type": "Identifier",
                                 "name": "edge",
                                 "range": [
-                                  2026,
-                                  2030
+                                  2029,
+                                  2033
                                 ],
                                 "loc": {
                                   "start": {
@@ -3008,8 +3008,8 @@
                               },
                               "init": null,
                               "range": [
-                                2026,
-                                2030
+                                2029,
+                                2033
                               ],
                               "loc": {
                                 "start": {
@@ -3025,8 +3025,8 @@
                           ],
                           "kind": "const",
                           "range": [
-                            2020,
-                            2030
+                            2023,
+                            2033
                           ],
                           "loc": {
                             "start": {
@@ -3048,8 +3048,8 @@
                               "type": "Identifier",
                               "name": "node",
                               "range": [
-                                2034,
-                                2038
+                                2037,
+                                2041
                               ],
                               "loc": {
                                 "start": {
@@ -3066,8 +3066,8 @@
                               "type": "Identifier",
                               "name": "walkEdges",
                               "range": [
-                                2039,
-                                2048
+                                2042,
+                                2051
                               ],
                               "loc": {
                                 "start": {
@@ -3081,8 +3081,8 @@
                               }
                             },
                             "range": [
-                              2034,
-                              2048
+                              2037,
+                              2051
                             ],
                             "loc": {
                               "start": {
@@ -3097,8 +3097,8 @@
                           },
                           "arguments": [],
                           "range": [
-                            2034,
-                            2050
+                            2037,
+                            2053
                           ],
                           "loc": {
                             "start": {
@@ -3125,8 +3125,8 @@
                                     "type": "Identifier",
                                     "name": "edges_to_visit",
                                     "range": [
-                                      2057,
-                                      2071
+                                      2060,
+                                      2074
                                     ],
                                     "loc": {
                                       "start": {
@@ -3143,8 +3143,8 @@
                                     "type": "Identifier",
                                     "name": "push",
                                     "range": [
-                                      2072,
-                                      2076
+                                      2075,
+                                      2079
                                     ],
                                     "loc": {
                                       "start": {
@@ -3158,8 +3158,8 @@
                                     }
                                   },
                                   "range": [
-                                    2057,
-                                    2076
+                                    2060,
+                                    2079
                                   ],
                                   "loc": {
                                     "start": {
@@ -3177,8 +3177,8 @@
                                     "type": "Identifier",
                                     "name": "edge",
                                     "range": [
-                                      2077,
-                                      2081
+                                      2080,
+                                      2084
                                     ],
                                     "loc": {
                                       "start": {
@@ -3193,8 +3193,8 @@
                                   }
                                 ],
                                 "range": [
-                                  2057,
-                                  2082
+                                  2060,
+                                  2085
                                 ],
                                 "loc": {
                                   "start": {
@@ -3208,8 +3208,8 @@
                                 }
                               },
                               "range": [
-                                2057,
-                                2083
+                                2060,
+                                2086
                               ],
                               "loc": {
                                 "start": {
@@ -3224,8 +3224,8 @@
                             }
                           ],
                           "range": [
-                            2052,
-                            2087
+                            2055,
+                            2090
                           ],
                           "loc": {
                             "start": {
@@ -3239,8 +3239,8 @@
                           }
                         },
                         "range": [
-                          2015,
-                          2087
+                          2018,
+                          2090
                         ],
                         "loc": {
                           "start": {
@@ -3257,8 +3257,8 @@
                             "type": "Line",
                             "value": " Add all of the edges of a node to the list of Edges we",
                             "range": [
-                              1936,
-                              1993
+                              1939,
+                              1996
                             ],
                             "loc": {
                               "start": {
@@ -3275,8 +3275,8 @@
                             "type": "Line",
                             "value": " need to visit",
                             "range": [
-                              1996,
-                              2012
+                              1999,
+                              2015
                             ],
                             "loc": {
                               "start": {
@@ -3293,8 +3293,8 @@
                       }
                     ],
                     "range": [
-                      1446,
-                      2090
+                      1449,
+                      2093
                     ],
                     "loc": {
                       "start": {
@@ -3308,8 +3308,8 @@
                     }
                   },
                   "range": [
-                    1416,
-                    2090
+                    1419,
+                    2093
                   ],
                   "loc": {
                     "start": {
@@ -3325,7 +3325,7 @@
               ],
               "range": [
                 454,
-                2092
+                2095
               ],
               "loc": {
                 "start": {
@@ -3342,7 +3342,7 @@
             "expression": false,
             "range": [
               435,
-              2092
+              2095
             ],
             "loc": {
               "start": {
@@ -3358,7 +3358,7 @@
         ],
         "range": [
           394,
-          2093
+          2096
         ],
         "loc": {
           "start": {
@@ -3373,7 +3373,7 @@
       },
       "range": [
         394,
-        2094
+        2097
       ],
       "loc": {
         "start": {
@@ -3464,7 +3464,7 @@
   "sourceType": "module",
   "range": [
     0,
-    2094
+    2097
   ],
   "loc": {
     "start": {
@@ -3823,8 +3823,8 @@
       "type": "Line",
       "value": " While walking we will grab the first Edge off our list",
       "range": [
-        1450,
-        1507
+        1453,
+        1510
       ],
       "loc": {
         "start": {
@@ -3841,8 +3841,8 @@
       "type": "Line",
       "value": " We grab the Node that this edge points to",
       "range": [
-        1560,
-        1604
+        1563,
+        1607
       ],
       "loc": {
         "start": {
@@ -3859,8 +3859,8 @@
       "type": "Line",
       "value": " We want to be sure we don't start a cycle so we skip",
       "range": [
-        1649,
-        1704
+        1652,
+        1707
       ],
       "loc": {
         "start": {
@@ -3877,8 +3877,8 @@
       "type": "Line",
       "value": " Nodes we have already visited (but not Edges to those Nodes",
       "range": [
-        1707,
-        1769
+        1710,
+        1772
       ],
       "loc": {
         "start": {
@@ -3895,8 +3895,8 @@
       "type": "Line",
       "value": " in this example)",
       "range": [
-        1772,
-        1791
+        1775,
+        1794
       ],
       "loc": {
         "start": {
@@ -3913,8 +3913,8 @@
       "type": "Line",
       "value": " Print the data!",
       "range": [
-        1884,
-        1902
+        1887,
+        1905
       ],
       "loc": {
         "start": {
@@ -3931,8 +3931,8 @@
       "type": "Line",
       "value": " Add all of the edges of a node to the list of Edges we",
       "range": [
-        1936,
-        1993
+        1939,
+        1996
       ],
       "loc": {
         "start": {
@@ -3949,8 +3949,8 @@
       "type": "Line",
       "value": " need to visit",
       "range": [
-        1996,
-        2012
+        1999,
+        2015
       ],
       "loc": {
         "start": {

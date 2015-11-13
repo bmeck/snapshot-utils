@@ -1,7 +1,7 @@
 ## Dumping all the Nodes in a HeapSnapshot
 
 ```javascript
-import {HeapSnapshot,SplitSnapshotProvider} from "../";
+import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
 
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node dump.js <"my.heapsnapshot"`

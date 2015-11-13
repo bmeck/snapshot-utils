@@ -462,6 +462,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "lib/bin/script-vars.js",
+    "file/lib/bin/script-vars.js.html",
+    "lib/bin/script-vars.js",
+    "file"
+  ],
+  [
     "lib/index.js",
     "file/lib/index.js.html",
     "lib/index.js",

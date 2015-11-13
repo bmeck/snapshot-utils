@@ -1,59 +1,17 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">lib/bin/script-vars.js | API Document</title>
-  <link type="text/css" rel="stylesheet" href="css/style.css">
-  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
-  <script src="script/prettify/prettify.js"></script>
-  
-  
-  <script src="script/manual.js"></script>
-</head>
-<body class="layout-container" data-ice="rootContainer">
+## Dumping all the variables used by functions and globals in a HeapSnapshot
 
-<header>
-  <a href="./">Home</a>
-  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
-  <a href="identifiers.html">Reference</a>
-  <a href="source.html">Source</a>
-  
-  <a data-ice="repoURL" href="https://github.com/bmeck/snapshot-utils" class="repo-url-github">Repository</a>
-  <div class="search-box">
-  <span>
-    <img src="./image/search.png">
-    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
-  </span>
-    <ul class="search-result"></ul>
-  </div>
-</header>
-
-<nav class="navigation" data-ice="nav"><div>
-  <ul>
-    
-  <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html">HeapSnapshot</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html">SplitSnapshotProvider</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSnapshotStream">parseSnapshotStream</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-NodeResult">NodeResult</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-parseSnapshotStreamCallbacks">parseSnapshotStreamCallbacks</a></span></span></li>
-</ul>
-</div>
-</nav>
-
-<div class="content" data-ice="content"><h1 data-ice="title">lib/bin/script-vars.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {HeapSnapshot,SplitSnapshotProvider} from &quot;../&quot;;
+```javascript
+import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
 
 // We are going to use stdin to read our snapshot
-// pipe a snapshot in via: `node script-vars.js &lt;&quot;my.heapsnapshot&quot;`
+// pipe a snapshot in via: `node script-vars.js <"my.heapsnapshot"`
 const stream = process.stdin;
 
 // This is used to parse the snapshot data.
 // A provider is generally not used for analyzing the snapshot.
 // It is an abstraction to allow saving/loading the snapshot to different
 // location.
-SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
+SplitSnapshotProvider.fromStream(stream, (err, provider) => {
 	if (err) {
 		console.error(err);
 		process.exit(1);
@@ -89,7 +47,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	}
 	
 	// we will keep a list of all the globals we have seen and visit them at the end
-	// this is because global Nodes have a type of &quot;object&quot; and can be confused easily
+	// this is because global Nodes have a type of "object" and can be confused easily
 	// unless we grab them from context Nodes
 	const globals = new Set();
 	while (edges_to_visit.length) {
@@ -99,7 +57,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 		// We grab the Node that this edge points to
 		const node = edge_to_walk.getNode();
 		
-		// We want to be sure we don&apos;t start a cycle so we skip
+		// We want to be sure we don't start a cycle so we skip
 		// Nodes we have already visited (but not Edges to those Nodes
 		// in this example)
 		if (visited.has(node.node_index)) {
@@ -107,9 +65,9 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 		}
 		visited.add(node.node_index);
 		
-		// Every function instance Node has a type of &quot;closure&quot;
+		// Every function instance Node has a type of "closure"
 		// So... for every function 
-		if (node.fields.type === &apos;closure&apos;) {
+		if (node.fields.type === 'closure') {
 			// Store information that we want to print out
 			// This is because the information is split up
 			// and we want to have all of it at once
@@ -120,11 +78,11 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 				// closures that have variables create context Nodes
 				// these will list all the variables that a closure
 				// uses. unused variables are not listed.
-				if (edge.fields.name_or_index === &apos;context&apos;) {
+				if (edge.fields.name_or_index === 'context') {
 					for (const context_edge of edge.getNode().walkEdges()) {
-						// context Nodes have Edges with a type of &quot;context&quot;
+						// context Nodes have Edges with a type of "context"
 						// to represent where variables are
-						if (context_edge.fields.type === &apos;context&apos;) {
+						if (context_edge.fields.type === 'context') {
 							// grab the name of the variable and
 							// the id of the Node that is in the variable
 							const name = context_edge.fields.name_or_index;
@@ -134,8 +92,8 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 						// context Nodes always keep track of the global they
 						// are attached to, just like frames in a browser
 						// there can be multiple globals
-						else if (context_edge.fields.type === &apos;internal&apos;
-						&amp;&amp; context_edge.fields.name_or_index === &apos;global&apos;) {
+						else if (context_edge.fields.type === 'internal'
+						&& context_edge.fields.name_or_index === 'global') {
 							// it is easier to lookup Nodes by index than id
 							globals.add(context_edge.fields.to_node);
 							global = context_edge.getNode().fields.id;
@@ -146,9 +104,9 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 				// this information is shared between *all* instances of a
 				// function and includes things like what script the closure
 				// was from
-				if (edge.fields.name_or_index === &apos;shared&apos;) {
+				if (edge.fields.name_or_index === 'shared') {
 					for (const shared_edge of edge.getNode().walkEdges()) {
-						if (shared_edge.fields.name_or_index === &apos;script&apos;) {
+						if (shared_edge.fields.name_or_index === 'script') {
 							script = shared_edge.getNode().fields.name;
 						}
 					}
@@ -176,26 +134,11 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	for (const global_index of globals) {
 		let node = snapshot.getNode(global_index);
 		for (const edge of node.walkEdges()) {
-			if (edge.fields.type === &apos;property&apos;) {
+			if (edge.fields.type === 'property') {
 				const property_node = edge.getNode();
 				console.log(`${edge.fields.name_or_index} = @${property_node.fields.id} on global @${node.fields.id}`)
 			}
 		}
 	}
-});</code></pre>
-
-</div>
-
-<footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.3)</span></a>
-</footer>
-
-<script src="script/search_index.js"></script>
-<script src="script/search.js"></script>
-<script src="script/pretty-print.js"></script>
-<script src="script/inherited-summary.js"></script>
-<script src="script/test-summary.js"></script>
-<script src="script/inner-link.js"></script>
-<script src="script/patch-for-local.js"></script>
-</body>
-</html>
+});
+```

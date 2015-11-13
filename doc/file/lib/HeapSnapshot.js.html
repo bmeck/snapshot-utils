@@ -111,7 +111,8 @@ export default class HeapSnapshot {
   /**
   * @typedef {Object} EdgeResult
   * @property {Edge} fields
-  * @property {number} index Index that can be used with getEdge to get this Edge.
+  * @property {number} edge_index Index that can be used with getEdge to get this Edge.
+  * @property {number} node_index Index that can be used with getNode to get the owner of this Edge.
   * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.
   */
   /**
@@ -125,12 +126,17 @@ export default class HeapSnapshot {
     }
     const edge_buffer = this.provider.getEdgeBuffer(edge_index);
     const fields = new this.Edge(edge_buffer);
+    const node_index = edge_buffer.readUInt32BE(edge_buffer.length - 4);
     const self = this;
     return {
       fields,
       edge_index,
+      node_index,
       getNode() {
         return self.getNode(fields.to_node);
+      },
+      getOwner() {
+        return self.getNode(node_index);
       }
     };
   }
@@ -206,7 +212,7 @@ function createEdgeClass(snapshot, provider) {
         ret += &apos; &apos;+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString(&apos;hex&apos;)].join(&apos;:&apos;);
         i++;
       }
-      ret += &apos; node.id:&apos; + snapshot.getNode(this.to_node).node.id;
+      ret += &apos; node.id:&apos; + snapshot.getNode(this.to_node).fields.id;
       return `HeapSnapshot::Edge ${ret}`;
     }
   }

@@ -3,6 +3,6 @@
   "destination": "./doc",
   "manual": {
     "overview": ["./readme.md"],
-    "tutorial": ["./manual/tutorial.md"]
+    "tutorial": ["./manual/tutorial-dump.md", "./manual/tutorial-script-vars.md"]
   }
 }
