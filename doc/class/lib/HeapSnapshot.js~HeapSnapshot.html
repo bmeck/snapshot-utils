@@ -37,19 +37,20 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-parseSnapshotStream">parseSnapshotStream</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-NodeResult">NodeResult</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-WalkCallbacks">WalkCallbacks</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-parseSnapshotStreamCallbacks">parseSnapshotStreamCallbacks</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import HeapSnapshot from &apos;<span><a href="file/lib/HeapSnapshot.js.html#lineNumber5">snapshot-utils/lib/HeapSnapshot.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import HeapSnapshot from &apos;<span><a href="file/lib/HeapSnapshot.js.html#lineNumber6">snapshot-utils/lib/HeapSnapshot.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/lib/HeapSnapshot.js.html#lineNumber5">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/lib/HeapSnapshot.js.html#lineNumber6">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -132,13 +133,13 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getEdge">getEdge</a></span></span><span data-ice="signature">(edge_index: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></span>
+           <span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getNode">getNode</a></span></span><span data-ice="signature">(node_index: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span><a href="typedef/index.html#static-typedef-NodeResult">NodeResult</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Gets an Edge by index.</p>
+        <div data-ice="description"><p>Gets a Node by index, not by ID.</p>
 </div>
       </div>
     </td>
@@ -158,13 +159,14 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getNode">getNode</a></span></span><span data-ice="signature">(node_index: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span><a href="typedef/index.html#static-typedef-NodeResult">NodeResult</a></span></span>
+           <span data-ice="name"><span><a href="class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-walk">walk</a></span></span><span data-ice="signature">(callbacks: <span><a href="typedef/index.html#static-typedef-WalkCallbacks">WalkCallbacks</a></span>): <span>Iterator</span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Gets a Node by index, not by ID.</p>
+        <div data-ice="description"><p>Helper function that performs a depth first pre order traversal of
+the nodes of a HeapSnapshot.</p>
 </div>
       </div>
     </td>
@@ -194,7 +196,7 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber9">source</a></span></span>
+      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber10">source</a></span></span>
     </span>
   </h3>
 
@@ -245,74 +247,6 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-getEdge">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">getEdge</span><span data-ice="signature">(edge_index: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>): <span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber78">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Gets an Edge by index. This should only be used in conjuction with a Node object.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">edge_index</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Index of the Edge we wish to get a hold of.</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="typedef/index.html#static-typedef-EdgeResult">EdgeResult</a></span></td>
-        
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-getNode">
     <span class="access" data-ice="access">public</span>
     
@@ -323,7 +257,7 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber40">source</a></span></span>
+      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber128">source</a></span></span>
     </span>
   </h3>
 
@@ -372,7 +306,94 @@ The structure of a snapshot&apos;s Node and Edge is defined within the contents 
 
   
 
+  <div data-ice="example">
+    <h4>Example:</h4>
+    
+  <div class="example-doc" data-ice="exampleDoc">
+      
+      <pre class="prettyprint source-code"><code data-ice="exampleCode">const root = snapshot.getNode(0);</code></pre>
+    </div>
+</div>
+
   
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-walk">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">walk</span><span data-ice="signature">(callbacks: <span><a href="typedef/index.html#static-typedef-WalkCallbacks">WalkCallbacks</a></span>): <span>Iterator</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/lib/HeapSnapshot.js.html#lineNumber53">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Helper function that performs a depth first pre order traversal of
+the nodes of a HeapSnapshot. This will only visit each Node once, but
+will visit all Edges of a HeapSnapshot. Since this can be a costly
+operation it uses an iterator to allow chunked processing.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">callbacks</td>
+      <td data-ice="type"><span><a href="typedef/index.html#static-typedef-WalkCallbacks">WalkCallbacks</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span>Iterator</span></td>
+        <td class="return-desc" data-ice="returnDescription"><p>iterator to continue walking by calling .next</p>
+</td>
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  <div data-ice="example">
+    <h4>Example:</h4>
+    
+  <div class="example-doc" data-ice="exampleDoc">
+      
+      <pre class="prettyprint source-code"><code data-ice="exampleCode">let walker = walk(console.log);
+// the iterator does not return a value it is purely a controller
+for (const _ of walker) {}</code></pre>
+    </div>
+</div>
 
   
 

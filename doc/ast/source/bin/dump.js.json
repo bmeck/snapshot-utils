@@ -1057,10 +1057,10 @@
                   "trailingComments": [
                     {
                       "type": "Line",
-                      "value": " Heaps are graphs, they can contain cycles! So we use a Set to",
+                      "value": " setup the walk",
                       "range": [
                         791,
-                        855
+                        808
                       ],
                       "loc": {
                         "start": {
@@ -1069,25 +1069,7 @@
                         },
                         "end": {
                           "line": 22,
-                          "column": 65
-                        }
-                      }
-                    },
-                    {
-                      "type": "Line",
-                      "value": " keep track of Nodes we have already seen.",
-                      "range": [
-                        857,
-                        901
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 23,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 23,
-                          "column": 45
+                          "column": 18
                         }
                       }
                     }
@@ -1100,576 +1082,75 @@
                       "type": "VariableDeclarator",
                       "id": {
                         "type": "Identifier",
-                        "name": "visited",
+                        "name": "iter",
                         "range": [
-                          909,
-                          916
+                          816,
+                          820
                         ],
                         "loc": {
                           "start": {
-                            "line": 24,
+                            "line": 23,
                             "column": 7
                           },
                           "end": {
-                            "line": 24,
-                            "column": 14
+                            "line": 23,
+                            "column": 11
                           }
                         }
                       },
                       "init": {
-                        "type": "NewExpression",
-                        "callee": {
-                          "type": "Identifier",
-                          "name": "Set",
-                          "range": [
-                            923,
-                            926
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 24,
-                              "column": 21
-                            },
-                            "end": {
-                              "line": 24,
-                              "column": 24
-                            }
-                          }
-                        },
-                        "arguments": [],
-                        "range": [
-                          919,
-                          928
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 24,
-                            "column": 17
-                          },
-                          "end": {
-                            "line": 24,
-                            "column": 26
-                          }
-                        }
-                      },
-                      "range": [
-                        909,
-                        928
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 24,
-                          "column": 7
-                        },
-                        "end": {
-                          "line": 24,
-                          "column": 26
-                        }
-                      }
-                    }
-                  ],
-                  "kind": "const",
-                  "range": [
-                    903,
-                    929
-                  ],
-                  "loc": {
-                    "start": {
-                      "line": 24,
-                      "column": 1
-                    },
-                    "end": {
-                      "line": 24,
-                      "column": 27
-                    }
-                  },
-                  "leadingComments": [
-                    {
-                      "type": "Line",
-                      "value": " Heaps are graphs, they can contain cycles! So we use a Set to",
-                      "range": [
-                        791,
-                        855
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 22,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 22,
-                          "column": 65
-                        }
-                      }
-                    },
-                    {
-                      "type": "Line",
-                      "value": " keep track of Nodes we have already seen.",
-                      "range": [
-                        857,
-                        901
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 23,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 23,
-                          "column": 45
-                        }
-                      }
-                    }
-                  ],
-                  "trailingComments": [
-                    {
-                      "type": "Line",
-                      "value": " We will be keeping a list of all the Edges we need to cross",
-                      "range": [
-                        933,
-                        995
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 26,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 26,
-                          "column": 63
-                        }
-                      }
-                    },
-                    {
-                      "type": "Line",
-                      "value": " still in an array.",
-                      "range": [
-                        997,
-                        1018
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 27,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 27,
-                          "column": 22
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "VariableDeclaration",
-                  "declarations": [
-                    {
-                      "type": "VariableDeclarator",
-                      "id": {
-                        "type": "Identifier",
-                        "name": "edges_to_visit",
-                        "range": [
-                          1026,
-                          1040
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 28,
-                            "column": 7
-                          },
-                          "end": {
-                            "line": 28,
-                            "column": 21
-                          }
-                        }
-                      },
-                      "init": {
-                        "type": "ArrayExpression",
-                        "elements": [],
-                        "range": [
-                          1043,
-                          1045
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 28,
-                            "column": 24
-                          },
-                          "end": {
-                            "line": 28,
-                            "column": 26
-                          }
-                        }
-                      },
-                      "range": [
-                        1026,
-                        1045
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 28,
-                          "column": 7
-                        },
-                        "end": {
-                          "line": 28,
-                          "column": 26
-                        }
-                      }
-                    }
-                  ],
-                  "kind": "const",
-                  "range": [
-                    1020,
-                    1046
-                  ],
-                  "loc": {
-                    "start": {
-                      "line": 28,
-                      "column": 1
-                    },
-                    "end": {
-                      "line": 28,
-                      "column": 27
-                    }
-                  },
-                  "leadingComments": [
-                    {
-                      "type": "Line",
-                      "value": " We will be keeping a list of all the Edges we need to cross",
-                      "range": [
-                        933,
-                        995
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 26,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 26,
-                          "column": 63
-                        }
-                      }
-                    },
-                    {
-                      "type": "Line",
-                      "value": " still in an array.",
-                      "range": [
-                        997,
-                        1018
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 27,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 27,
-                          "column": 22
-                        }
-                      }
-                    }
-                  ],
-                  "trailingComments": [
-                    {
-                      "type": "Line",
-                      "value": " Heaps always have a root Node (index == 0)",
-                      "range": [
-                        1050,
-                        1095
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 30,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 30,
-                          "column": 46
-                        }
-                      }
-                    },
-                    {
-                      "type": "Line",
-                      "value": " This is the first Node you should visit when walking a Heap",
-                      "range": [
-                        1097,
-                        1159
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 31,
-                          "column": 1
-                        },
-                        "end": {
-                          "line": 31,
-                          "column": 63
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "BlockStatement",
-                  "body": [
-                    {
-                      "type": "VariableDeclaration",
-                      "declarations": [
-                        {
-                          "type": "VariableDeclarator",
-                          "id": {
-                            "type": "Identifier",
-                            "name": "root",
-                            "range": [
-                              1171,
-                              1175
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 33,
-                                "column": 8
-                              },
-                              "end": {
-                                "line": 33,
-                                "column": 12
-                              }
-                            }
-                          },
-                          "init": {
-                            "type": "CallExpression",
-                            "callee": {
-                              "type": "MemberExpression",
-                              "computed": false,
-                              "object": {
-                                "type": "Identifier",
-                                "name": "snapshot",
-                                "range": [
-                                  1178,
-                                  1186
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 33,
-                                    "column": 15
-                                  },
-                                  "end": {
-                                    "line": 33,
-                                    "column": 23
-                                  }
-                                }
-                              },
-                              "property": {
-                                "type": "Identifier",
-                                "name": "getNode",
-                                "range": [
-                                  1187,
-                                  1194
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 33,
-                                    "column": 24
-                                  },
-                                  "end": {
-                                    "line": 33,
-                                    "column": 31
-                                  }
-                                }
-                              },
-                              "range": [
-                                1178,
-                                1194
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 33,
-                                  "column": 15
-                                },
-                                "end": {
-                                  "line": 33,
-                                  "column": 31
-                                }
-                              }
-                            },
-                            "arguments": [
-                              {
-                                "type": "Literal",
-                                "value": 0,
-                                "raw": "0",
-                                "range": [
-                                  1195,
-                                  1196
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 33,
-                                    "column": 32
-                                  },
-                                  "end": {
-                                    "line": 33,
-                                    "column": 33
-                                  }
-                                }
-                              }
-                            ],
-                            "range": [
-                              1178,
-                              1197
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 33,
-                                "column": 15
-                              },
-                              "end": {
-                                "line": 33,
-                                "column": 34
-                              }
-                            }
-                          },
-                          "range": [
-                            1171,
-                            1197
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 33,
-                              "column": 8
-                            },
-                            "end": {
-                              "line": 33,
-                              "column": 34
-                            }
-                          }
-                        }
-                      ],
-                      "kind": "const",
-                      "range": [
-                        1165,
-                        1198
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 33,
-                          "column": 2
-                        },
-                        "end": {
-                          "line": 33,
-                          "column": 35
-                        }
-                      },
-                      "trailingComments": [
-                        {
-                          "type": "Line",
-                          "value": " for simplicity lets make a mock Edge for our root",
-                          "range": [
-                            1201,
-                            1253
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 34,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 34,
-                              "column": 54
-                            }
-                          }
-                        },
-                        {
-                          "type": "Line",
-                          "value": " so that our walking loop always takes Edges",
-                          "range": [
-                            1256,
-                            1302
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 35,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 35,
-                              "column": 48
-                            }
-                          }
-                        },
-                        {
-                          "type": "Line",
-                          "value": " and push that onto the Edges we should visit",
-                          "range": [
-                            1305,
-                            1352
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 36,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 36,
-                              "column": 49
-                            }
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "type": "ExpressionStatement",
-                      "expression": {
                         "type": "CallExpression",
                         "callee": {
                           "type": "MemberExpression",
                           "computed": false,
                           "object": {
                             "type": "Identifier",
-                            "name": "edges_to_visit",
+                            "name": "snapshot",
                             "range": [
-                              1355,
-                              1369
+                              823,
+                              831
                             ],
                             "loc": {
                               "start": {
-                                "line": 37,
-                                "column": 2
+                                "line": 23,
+                                "column": 14
                               },
                               "end": {
-                                "line": 37,
-                                "column": 16
+                                "line": 23,
+                                "column": 22
                               }
                             }
                           },
                           "property": {
                             "type": "Identifier",
-                            "name": "unshift",
+                            "name": "walk",
                             "range": [
-                              1370,
-                              1377
+                              832,
+                              836
                             ],
                             "loc": {
                               "start": {
-                                "line": 37,
-                                "column": 17
+                                "line": 23,
+                                "column": 23
                               },
                               "end": {
-                                "line": 37,
-                                "column": 24
+                                "line": 23,
+                                "column": 27
                               }
                             }
                           },
                           "range": [
-                            1355,
-                            1377
+                            823,
+                            836
                           ],
                           "loc": {
                             "start": {
-                              "line": 37,
-                              "column": 2
+                              "line": 23,
+                              "column": 14
                             },
                             "end": {
-                              "line": 37,
-                              "column": 24
+                              "line": 23,
+                              "column": 27
                             }
                           }
                         },
@@ -1681,94 +1162,186 @@
                                 "type": "Property",
                                 "key": {
                                   "type": "Identifier",
-                                  "name": "getNode",
+                                  "name": "onNodeOpen",
                                   "range": [
-                                    1383,
-                                    1390
+                                    841,
+                                    851
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 38,
-                                      "column": 3
+                                      "line": 24,
+                                      "column": 2
                                     },
                                     "end": {
-                                      "line": 38,
-                                      "column": 10
+                                      "line": 24,
+                                      "column": 12
                                     }
                                   }
                                 },
                                 "value": {
                                   "type": "FunctionExpression",
                                   "id": null,
-                                  "params": [],
+                                  "params": [
+                                    {
+                                      "type": "Identifier",
+                                      "name": "node",
+                                      "range": [
+                                        852,
+                                        856
+                                      ],
+                                      "loc": {
+                                        "start": {
+                                          "line": 24,
+                                          "column": 13
+                                        },
+                                        "end": {
+                                          "line": 24,
+                                          "column": 17
+                                        }
+                                      }
+                                    }
+                                  ],
                                   "body": {
                                     "type": "BlockStatement",
                                     "body": [
                                       {
-                                        "type": "ReturnStatement",
-                                        "argument": {
-                                          "type": "Identifier",
-                                          "name": "root",
+                                        "type": "ExpressionStatement",
+                                        "expression": {
+                                          "type": "CallExpression",
+                                          "callee": {
+                                            "type": "MemberExpression",
+                                            "computed": false,
+                                            "object": {
+                                              "type": "Identifier",
+                                              "name": "console",
+                                              "range": [
+                                                860,
+                                                867
+                                              ],
+                                              "loc": {
+                                                "start": {
+                                                  "line": 24,
+                                                  "column": 21
+                                                },
+                                                "end": {
+                                                  "line": 24,
+                                                  "column": 28
+                                                }
+                                              }
+                                            },
+                                            "property": {
+                                              "type": "Identifier",
+                                              "name": "log",
+                                              "range": [
+                                                868,
+                                                871
+                                              ],
+                                              "loc": {
+                                                "start": {
+                                                  "line": 24,
+                                                  "column": 29
+                                                },
+                                                "end": {
+                                                  "line": 24,
+                                                  "column": 32
+                                                }
+                                              }
+                                            },
+                                            "range": [
+                                              860,
+                                              871
+                                            ],
+                                            "loc": {
+                                              "start": {
+                                                "line": 24,
+                                                "column": 21
+                                              },
+                                              "end": {
+                                                "line": 24,
+                                                "column": 32
+                                              }
+                                            }
+                                          },
+                                          "arguments": [
+                                            {
+                                              "type": "Identifier",
+                                              "name": "node",
+                                              "range": [
+                                                872,
+                                                876
+                                              ],
+                                              "loc": {
+                                                "start": {
+                                                  "line": 24,
+                                                  "column": 33
+                                                },
+                                                "end": {
+                                                  "line": 24,
+                                                  "column": 37
+                                                }
+                                              }
+                                            }
+                                          ],
                                           "range": [
-                                            1401,
-                                            1405
+                                            860,
+                                            877
                                           ],
                                           "loc": {
                                             "start": {
-                                              "line": 38,
+                                              "line": 24,
                                               "column": 21
                                             },
                                             "end": {
-                                              "line": 38,
-                                              "column": 25
+                                              "line": 24,
+                                              "column": 38
                                             }
                                           }
                                         },
                                         "range": [
-                                          1394,
-                                          1406
+                                          860,
+                                          878
                                         ],
                                         "loc": {
                                           "start": {
-                                            "line": 38,
-                                            "column": 14
+                                            "line": 24,
+                                            "column": 21
                                           },
                                           "end": {
-                                            "line": 38,
-                                            "column": 26
+                                            "line": 24,
+                                            "column": 39
                                           }
                                         }
                                       }
                                     ],
                                     "range": [
-                                      1393,
-                                      1407
+                                      858,
+                                      879
                                     ],
                                     "loc": {
                                       "start": {
-                                        "line": 38,
-                                        "column": 13
+                                        "line": 24,
+                                        "column": 19
                                       },
                                       "end": {
-                                        "line": 38,
-                                        "column": 27
+                                        "line": 24,
+                                        "column": 40
                                       }
                                     }
                                   },
                                   "generator": false,
                                   "expression": false,
                                   "range": [
-                                    1390,
-                                    1407
+                                    851,
+                                    879
                                   ],
                                   "loc": {
                                     "start": {
-                                      "line": 38,
-                                      "column": 10
+                                      "line": 24,
+                                      "column": 12
                                     },
                                     "end": {
-                                      "line": 38,
-                                      "column": 27
+                                      "line": 24,
+                                      "column": 40
                                     }
                                   }
                                 },
@@ -1777,1555 +1350,451 @@
                                 "shorthand": false,
                                 "computed": false,
                                 "range": [
-                                  1383,
-                                  1407
+                                  841,
+                                  879
                                 ],
                                 "loc": {
                                   "start": {
-                                    "line": 38,
-                                    "column": 3
+                                    "line": 24,
+                                    "column": 2
                                   },
                                   "end": {
-                                    "line": 38,
-                                    "column": 27
+                                    "line": 24,
+                                    "column": 40
+                                  }
+                                }
+                              },
+                              {
+                                "type": "Property",
+                                "key": {
+                                  "type": "Identifier",
+                                  "name": "onEdge",
+                                  "range": [
+                                    883,
+                                    889
+                                  ],
+                                  "loc": {
+                                    "start": {
+                                      "line": 25,
+                                      "column": 2
+                                    },
+                                    "end": {
+                                      "line": 25,
+                                      "column": 8
+                                    }
+                                  }
+                                },
+                                "value": {
+                                  "type": "FunctionExpression",
+                                  "id": null,
+                                  "params": [
+                                    {
+                                      "type": "Identifier",
+                                      "name": "edge",
+                                      "range": [
+                                        890,
+                                        894
+                                      ],
+                                      "loc": {
+                                        "start": {
+                                          "line": 25,
+                                          "column": 9
+                                        },
+                                        "end": {
+                                          "line": 25,
+                                          "column": 13
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "body": {
+                                    "type": "BlockStatement",
+                                    "body": [],
+                                    "range": [
+                                      896,
+                                      898
+                                    ],
+                                    "loc": {
+                                      "start": {
+                                        "line": 25,
+                                        "column": 15
+                                      },
+                                      "end": {
+                                        "line": 25,
+                                        "column": 17
+                                      }
+                                    }
+                                  },
+                                  "generator": false,
+                                  "expression": false,
+                                  "range": [
+                                    889,
+                                    898
+                                  ],
+                                  "loc": {
+                                    "start": {
+                                      "line": 25,
+                                      "column": 8
+                                    },
+                                    "end": {
+                                      "line": 25,
+                                      "column": 17
+                                    }
+                                  }
+                                },
+                                "kind": "init",
+                                "method": true,
+                                "shorthand": false,
+                                "computed": false,
+                                "range": [
+                                  883,
+                                  898
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 25,
+                                    "column": 2
+                                  },
+                                  "end": {
+                                    "line": 25,
+                                    "column": 17
+                                  }
+                                }
+                              },
+                              {
+                                "type": "Property",
+                                "key": {
+                                  "type": "Identifier",
+                                  "name": "onNodeClose",
+                                  "range": [
+                                    902,
+                                    913
+                                  ],
+                                  "loc": {
+                                    "start": {
+                                      "line": 26,
+                                      "column": 2
+                                    },
+                                    "end": {
+                                      "line": 26,
+                                      "column": 13
+                                    }
+                                  }
+                                },
+                                "value": {
+                                  "type": "FunctionExpression",
+                                  "id": null,
+                                  "params": [
+                                    {
+                                      "type": "Identifier",
+                                      "name": "node",
+                                      "range": [
+                                        914,
+                                        918
+                                      ],
+                                      "loc": {
+                                        "start": {
+                                          "line": 26,
+                                          "column": 14
+                                        },
+                                        "end": {
+                                          "line": 26,
+                                          "column": 18
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "body": {
+                                    "type": "BlockStatement",
+                                    "body": [],
+                                    "range": [
+                                      920,
+                                      922
+                                    ],
+                                    "loc": {
+                                      "start": {
+                                        "line": 26,
+                                        "column": 20
+                                      },
+                                      "end": {
+                                        "line": 26,
+                                        "column": 22
+                                      }
+                                    }
+                                  },
+                                  "generator": false,
+                                  "expression": false,
+                                  "range": [
+                                    913,
+                                    922
+                                  ],
+                                  "loc": {
+                                    "start": {
+                                      "line": 26,
+                                      "column": 13
+                                    },
+                                    "end": {
+                                      "line": 26,
+                                      "column": 22
+                                    }
+                                  }
+                                },
+                                "kind": "init",
+                                "method": true,
+                                "shorthand": false,
+                                "computed": false,
+                                "range": [
+                                  902,
+                                  922
+                                ],
+                                "loc": {
+                                  "start": {
+                                    "line": 26,
+                                    "column": 2
+                                  },
+                                  "end": {
+                                    "line": 26,
+                                    "column": 22
                                   }
                                 }
                               }
                             ],
                             "range": [
-                              1378,
-                              1411
+                              837,
+                              925
                             ],
                             "loc": {
                               "start": {
-                                "line": 37,
-                                "column": 25
+                                "line": 23,
+                                "column": 28
                               },
                               "end": {
-                                "line": 39,
-                                "column": 3
+                                "line": 27,
+                                "column": 2
                               }
                             }
                           }
                         ],
                         "range": [
-                          1355,
-                          1412
+                          823,
+                          926
                         ],
                         "loc": {
                           "start": {
-                            "line": 37,
-                            "column": 2
+                            "line": 23,
+                            "column": 14
                           },
                           "end": {
-                            "line": 39,
-                            "column": 4
+                            "line": 27,
+                            "column": 3
                           }
                         }
                       },
                       "range": [
-                        1355,
-                        1414
+                        816,
+                        926
                       ],
                       "loc": {
                         "start": {
-                          "line": 37,
-                          "column": 2
+                          "line": 23,
+                          "column": 7
                         },
                         "end": {
-                          "line": 40,
-                          "column": 1
+                          "line": 27,
+                          "column": 3
                         }
-                      },
-                      "leadingComments": [
-                        {
-                          "type": "Line",
-                          "value": " for simplicity lets make a mock Edge for our root",
-                          "range": [
-                            1201,
-                            1253
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 34,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 34,
-                              "column": 54
-                            }
-                          }
-                        },
-                        {
-                          "type": "Line",
-                          "value": " so that our walking loop always takes Edges",
-                          "range": [
-                            1256,
-                            1302
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 35,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 35,
-                              "column": 48
-                            }
-                          }
-                        },
-                        {
-                          "type": "Line",
-                          "value": " and push that onto the Edges we should visit",
-                          "range": [
-                            1305,
-                            1352
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 36,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 36,
-                              "column": 49
-                            }
-                          }
-                        }
-                      ]
+                      }
                     }
                   ],
+                  "kind": "const",
                   "range": [
-                    1161,
-                    1415
+                    810,
+                    927
                   ],
                   "loc": {
                     "start": {
-                      "line": 32,
+                      "line": 23,
                       "column": 1
                     },
                     "end": {
-                      "line": 40,
-                      "column": 2
+                      "line": 27,
+                      "column": 4
                     }
                   },
                   "leadingComments": [
                     {
                       "type": "Line",
-                      "value": " Heaps always have a root Node (index == 0)",
+                      "value": " setup the walk",
                       "range": [
-                        1050,
-                        1095
+                        791,
+                        808
                       ],
                       "loc": {
                         "start": {
-                          "line": 30,
+                          "line": 22,
                           "column": 1
                         },
                         "end": {
-                          "line": 30,
-                          "column": 46
+                          "line": 22,
+                          "column": 18
                         }
                       }
-                    },
+                    }
+                  ],
+                  "trailingComments": [
                     {
                       "type": "Line",
-                      "value": " This is the first Node you should visit when walking a Heap",
+                      "value": " perform the walk",
                       "range": [
-                        1097,
-                        1159
+                        929,
+                        948
                       ],
                       "loc": {
                         "start": {
-                          "line": 31,
+                          "line": 28,
                           "column": 1
                         },
                         "end": {
-                          "line": 31,
-                          "column": 63
+                          "line": 28,
+                          "column": 20
                         }
                       }
                     }
                   ]
                 },
                 {
-                  "type": "WhileStatement",
-                  "test": {
-                    "type": "MemberExpression",
-                    "computed": false,
-                    "object": {
-                      "type": "Identifier",
-                      "name": "edges_to_visit",
-                      "range": [
-                        1426,
-                        1440
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 42,
-                          "column": 8
+                  "type": "ForOfStatement",
+                  "left": {
+                    "type": "VariableDeclaration",
+                    "declarations": [
+                      {
+                        "type": "VariableDeclarator",
+                        "id": {
+                          "type": "Identifier",
+                          "name": "_",
+                          "range": [
+                            961,
+                            962
+                          ],
+                          "loc": {
+                            "start": {
+                              "line": 29,
+                              "column": 12
+                            },
+                            "end": {
+                              "line": 29,
+                              "column": 13
+                            }
+                          }
                         },
-                        "end": {
-                          "line": 42,
-                          "column": 22
+                        "init": null,
+                        "range": [
+                          961,
+                          962
+                        ],
+                        "loc": {
+                          "start": {
+                            "line": 29,
+                            "column": 12
+                          },
+                          "end": {
+                            "line": 29,
+                            "column": 13
+                          }
                         }
                       }
-                    },
-                    "property": {
-                      "type": "Identifier",
-                      "name": "length",
-                      "range": [
-                        1441,
-                        1447
-                      ],
-                      "loc": {
-                        "start": {
-                          "line": 42,
-                          "column": 23
-                        },
-                        "end": {
-                          "line": 42,
-                          "column": 29
-                        }
-                      }
-                    },
+                    ],
+                    "kind": "const",
                     "range": [
-                      1426,
-                      1447
+                      955,
+                      962
                     ],
                     "loc": {
                       "start": {
-                        "line": 42,
-                        "column": 8
+                        "line": 29,
+                        "column": 6
                       },
                       "end": {
-                        "line": 42,
-                        "column": 29
+                        "line": 29,
+                        "column": 13
+                      }
+                    }
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "name": "iter",
+                    "range": [
+                      966,
+                      970
+                    ],
+                    "loc": {
+                      "start": {
+                        "line": 29,
+                        "column": 17
+                      },
+                      "end": {
+                        "line": 29,
+                        "column": 21
                       }
                     }
                   },
                   "body": {
                     "type": "BlockStatement",
-                    "body": [
-                      {
-                        "type": "VariableDeclaration",
-                        "declarations": [
-                          {
-                            "type": "VariableDeclarator",
-                            "id": {
-                              "type": "Identifier",
-                              "name": "edge_to_walk",
-                              "range": [
-                                1519,
-                                1531
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 44,
-                                  "column": 8
-                                },
-                                "end": {
-                                  "line": 44,
-                                  "column": 20
-                                }
-                              }
-                            },
-                            "init": {
-                              "type": "CallExpression",
-                              "callee": {
-                                "type": "MemberExpression",
-                                "computed": false,
-                                "object": {
-                                  "type": "Identifier",
-                                  "name": "edges_to_visit",
-                                  "range": [
-                                    1534,
-                                    1548
-                                  ],
-                                  "loc": {
-                                    "start": {
-                                      "line": 44,
-                                      "column": 23
-                                    },
-                                    "end": {
-                                      "line": 44,
-                                      "column": 37
-                                    }
-                                  }
-                                },
-                                "property": {
-                                  "type": "Identifier",
-                                  "name": "shift",
-                                  "range": [
-                                    1549,
-                                    1554
-                                  ],
-                                  "loc": {
-                                    "start": {
-                                      "line": 44,
-                                      "column": 38
-                                    },
-                                    "end": {
-                                      "line": 44,
-                                      "column": 43
-                                    }
-                                  }
-                                },
-                                "range": [
-                                  1534,
-                                  1554
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 44,
-                                    "column": 23
-                                  },
-                                  "end": {
-                                    "line": 44,
-                                    "column": 43
-                                  }
-                                }
-                              },
-                              "arguments": [],
-                              "range": [
-                                1534,
-                                1556
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 44,
-                                  "column": 23
-                                },
-                                "end": {
-                                  "line": 44,
-                                  "column": 45
-                                }
-                              }
-                            },
-                            "range": [
-                              1519,
-                              1556
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 44,
-                                "column": 8
-                              },
-                              "end": {
-                                "line": 44,
-                                "column": 45
-                              }
-                            }
-                          }
-                        ],
-                        "kind": "const",
-                        "range": [
-                          1513,
-                          1557
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 44,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 44,
-                            "column": 46
-                          }
-                        },
-                        "leadingComments": [
-                          {
-                            "type": "Line",
-                            "value": " While walking we will grab the first Edge off our list",
-                            "range": [
-                              1453,
-                              1510
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 43,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 43,
-                                "column": 59
-                              }
-                            }
-                          }
-                        ],
-                        "trailingComments": [
-                          {
-                            "type": "Line",
-                            "value": " We grab the Node that this edge points to",
-                            "range": [
-                              1563,
-                              1607
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 46,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 46,
-                                "column": 46
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "VariableDeclaration",
-                        "declarations": [
-                          {
-                            "type": "VariableDeclarator",
-                            "id": {
-                              "type": "Identifier",
-                              "name": "node",
-                              "range": [
-                                1616,
-                                1620
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 47,
-                                  "column": 8
-                                },
-                                "end": {
-                                  "line": 47,
-                                  "column": 12
-                                }
-                              }
-                            },
-                            "init": {
-                              "type": "CallExpression",
-                              "callee": {
-                                "type": "MemberExpression",
-                                "computed": false,
-                                "object": {
-                                  "type": "Identifier",
-                                  "name": "edge_to_walk",
-                                  "range": [
-                                    1623,
-                                    1635
-                                  ],
-                                  "loc": {
-                                    "start": {
-                                      "line": 47,
-                                      "column": 15
-                                    },
-                                    "end": {
-                                      "line": 47,
-                                      "column": 27
-                                    }
-                                  }
-                                },
-                                "property": {
-                                  "type": "Identifier",
-                                  "name": "getNode",
-                                  "range": [
-                                    1636,
-                                    1643
-                                  ],
-                                  "loc": {
-                                    "start": {
-                                      "line": 47,
-                                      "column": 28
-                                    },
-                                    "end": {
-                                      "line": 47,
-                                      "column": 35
-                                    }
-                                  }
-                                },
-                                "range": [
-                                  1623,
-                                  1643
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 47,
-                                    "column": 15
-                                  },
-                                  "end": {
-                                    "line": 47,
-                                    "column": 35
-                                  }
-                                }
-                              },
-                              "arguments": [],
-                              "range": [
-                                1623,
-                                1645
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 47,
-                                  "column": 15
-                                },
-                                "end": {
-                                  "line": 47,
-                                  "column": 37
-                                }
-                              }
-                            },
-                            "range": [
-                              1616,
-                              1645
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 47,
-                                "column": 8
-                              },
-                              "end": {
-                                "line": 47,
-                                "column": 37
-                              }
-                            }
-                          }
-                        ],
-                        "kind": "const",
-                        "range": [
-                          1610,
-                          1646
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 47,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 47,
-                            "column": 38
-                          }
-                        },
-                        "leadingComments": [
-                          {
-                            "type": "Line",
-                            "value": " We grab the Node that this edge points to",
-                            "range": [
-                              1563,
-                              1607
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 46,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 46,
-                                "column": 46
-                              }
-                            }
-                          }
-                        ],
-                        "trailingComments": [
-                          {
-                            "type": "Line",
-                            "value": " We want to be sure we don't start a cycle so we skip",
-                            "range": [
-                              1652,
-                              1707
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 49,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 49,
-                                "column": 57
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " Nodes we have already visited (but not Edges to those Nodes",
-                            "range": [
-                              1710,
-                              1772
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 50,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 50,
-                                "column": 64
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " in this example)",
-                            "range": [
-                              1775,
-                              1794
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 51,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 51,
-                                "column": 21
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "IfStatement",
-                        "test": {
-                          "type": "CallExpression",
-                          "callee": {
-                            "type": "MemberExpression",
-                            "computed": false,
-                            "object": {
-                              "type": "Identifier",
-                              "name": "visited",
-                              "range": [
-                                1801,
-                                1808
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 52,
-                                  "column": 6
-                                },
-                                "end": {
-                                  "line": 52,
-                                  "column": 13
-                                }
-                              }
-                            },
-                            "property": {
-                              "type": "Identifier",
-                              "name": "has",
-                              "range": [
-                                1809,
-                                1812
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 52,
-                                  "column": 14
-                                },
-                                "end": {
-                                  "line": 52,
-                                  "column": 17
-                                }
-                              }
-                            },
-                            "range": [
-                              1801,
-                              1812
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 52,
-                                "column": 6
-                              },
-                              "end": {
-                                "line": 52,
-                                "column": 17
-                              }
-                            }
-                          },
-                          "arguments": [
-                            {
-                              "type": "MemberExpression",
-                              "computed": false,
-                              "object": {
-                                "type": "Identifier",
-                                "name": "node",
-                                "range": [
-                                  1813,
-                                  1817
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 52,
-                                    "column": 18
-                                  },
-                                  "end": {
-                                    "line": 52,
-                                    "column": 22
-                                  }
-                                }
-                              },
-                              "property": {
-                                "type": "Identifier",
-                                "name": "node_index",
-                                "range": [
-                                  1818,
-                                  1828
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 52,
-                                    "column": 23
-                                  },
-                                  "end": {
-                                    "line": 52,
-                                    "column": 33
-                                  }
-                                }
-                              },
-                              "range": [
-                                1813,
-                                1828
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 52,
-                                  "column": 18
-                                },
-                                "end": {
-                                  "line": 52,
-                                  "column": 33
-                                }
-                              }
-                            }
-                          ],
-                          "range": [
-                            1801,
-                            1829
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 52,
-                              "column": 6
-                            },
-                            "end": {
-                              "line": 52,
-                              "column": 34
-                            }
-                          }
-                        },
-                        "consequent": {
-                          "type": "BlockStatement",
-                          "body": [
-                            {
-                              "type": "ContinueStatement",
-                              "label": null,
-                              "range": [
-                                1836,
-                                1845
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 53,
-                                  "column": 3
-                                },
-                                "end": {
-                                  "line": 53,
-                                  "column": 12
-                                }
-                              }
-                            }
-                          ],
-                          "range": [
-                            1831,
-                            1849
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 52,
-                              "column": 36
-                            },
-                            "end": {
-                              "line": 54,
-                              "column": 3
-                            }
-                          }
-                        },
-                        "alternate": null,
-                        "range": [
-                          1797,
-                          1849
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 52,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 54,
-                            "column": 3
-                          }
-                        },
-                        "leadingComments": [
-                          {
-                            "type": "Line",
-                            "value": " We want to be sure we don't start a cycle so we skip",
-                            "range": [
-                              1652,
-                              1707
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 49,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 49,
-                                "column": 57
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " Nodes we have already visited (but not Edges to those Nodes",
-                            "range": [
-                              1710,
-                              1772
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 50,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 50,
-                                "column": 64
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " in this example)",
-                            "range": [
-                              1775,
-                              1794
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 51,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 51,
-                                "column": 21
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "ExpressionStatement",
-                        "expression": {
-                          "type": "CallExpression",
-                          "callee": {
-                            "type": "MemberExpression",
-                            "computed": false,
-                            "object": {
-                              "type": "Identifier",
-                              "name": "visited",
-                              "range": [
-                                1852,
-                                1859
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 55,
-                                  "column": 2
-                                },
-                                "end": {
-                                  "line": 55,
-                                  "column": 9
-                                }
-                              }
-                            },
-                            "property": {
-                              "type": "Identifier",
-                              "name": "add",
-                              "range": [
-                                1860,
-                                1863
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 55,
-                                  "column": 10
-                                },
-                                "end": {
-                                  "line": 55,
-                                  "column": 13
-                                }
-                              }
-                            },
-                            "range": [
-                              1852,
-                              1863
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 55,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 55,
-                                "column": 13
-                              }
-                            }
-                          },
-                          "arguments": [
-                            {
-                              "type": "MemberExpression",
-                              "computed": false,
-                              "object": {
-                                "type": "Identifier",
-                                "name": "node",
-                                "range": [
-                                  1864,
-                                  1868
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 55,
-                                    "column": 14
-                                  },
-                                  "end": {
-                                    "line": 55,
-                                    "column": 18
-                                  }
-                                }
-                              },
-                              "property": {
-                                "type": "Identifier",
-                                "name": "node_index",
-                                "range": [
-                                  1869,
-                                  1879
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 55,
-                                    "column": 19
-                                  },
-                                  "end": {
-                                    "line": 55,
-                                    "column": 29
-                                  }
-                                }
-                              },
-                              "range": [
-                                1864,
-                                1879
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 55,
-                                  "column": 14
-                                },
-                                "end": {
-                                  "line": 55,
-                                  "column": 29
-                                }
-                              }
-                            }
-                          ],
-                          "range": [
-                            1852,
-                            1880
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 55,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 55,
-                              "column": 30
-                            }
-                          }
-                        },
-                        "range": [
-                          1852,
-                          1881
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 55,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 55,
-                            "column": 31
-                          }
-                        },
-                        "trailingComments": [
-                          {
-                            "type": "Line",
-                            "value": " Print the data!",
-                            "range": [
-                              1887,
-                              1905
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 57,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 57,
-                                "column": 20
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "ExpressionStatement",
-                        "expression": {
-                          "type": "CallExpression",
-                          "callee": {
-                            "type": "MemberExpression",
-                            "computed": false,
-                            "object": {
-                              "type": "Identifier",
-                              "name": "console",
-                              "range": [
-                                1908,
-                                1915
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 58,
-                                  "column": 2
-                                },
-                                "end": {
-                                  "line": 58,
-                                  "column": 9
-                                }
-                              }
-                            },
-                            "property": {
-                              "type": "Identifier",
-                              "name": "log",
-                              "range": [
-                                1916,
-                                1919
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 58,
-                                  "column": 10
-                                },
-                                "end": {
-                                  "line": 58,
-                                  "column": 13
-                                }
-                              }
-                            },
-                            "range": [
-                              1908,
-                              1919
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 58,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 58,
-                                "column": 13
-                              }
-                            }
-                          },
-                          "arguments": [
-                            {
-                              "type": "MemberExpression",
-                              "computed": false,
-                              "object": {
-                                "type": "Identifier",
-                                "name": "node",
-                                "range": [
-                                  1920,
-                                  1924
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 58,
-                                    "column": 14
-                                  },
-                                  "end": {
-                                    "line": 58,
-                                    "column": 18
-                                  }
-                                }
-                              },
-                              "property": {
-                                "type": "Identifier",
-                                "name": "fields",
-                                "range": [
-                                  1925,
-                                  1931
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 58,
-                                    "column": 19
-                                  },
-                                  "end": {
-                                    "line": 58,
-                                    "column": 25
-                                  }
-                                }
-                              },
-                              "range": [
-                                1920,
-                                1931
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 58,
-                                  "column": 14
-                                },
-                                "end": {
-                                  "line": 58,
-                                  "column": 25
-                                }
-                              }
-                            }
-                          ],
-                          "range": [
-                            1908,
-                            1932
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 58,
-                              "column": 2
-                            },
-                            "end": {
-                              "line": 58,
-                              "column": 26
-                            }
-                          }
-                        },
-                        "range": [
-                          1908,
-                          1933
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 58,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 58,
-                            "column": 27
-                          }
-                        },
-                        "leadingComments": [
-                          {
-                            "type": "Line",
-                            "value": " Print the data!",
-                            "range": [
-                              1887,
-                              1905
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 57,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 57,
-                                "column": 20
-                              }
-                            }
-                          }
-                        ],
-                        "trailingComments": [
-                          {
-                            "type": "Line",
-                            "value": " Add all of the edges of a node to the list of Edges we",
-                            "range": [
-                              1939,
-                              1996
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 60,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 60,
-                                "column": 59
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " need to visit",
-                            "range": [
-                              1999,
-                              2015
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 61,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 61,
-                                "column": 18
-                              }
-                            }
-                          }
-                        ]
-                      },
-                      {
-                        "type": "ForOfStatement",
-                        "left": {
-                          "type": "VariableDeclaration",
-                          "declarations": [
-                            {
-                              "type": "VariableDeclarator",
-                              "id": {
-                                "type": "Identifier",
-                                "name": "edge",
-                                "range": [
-                                  2029,
-                                  2033
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 62,
-                                    "column": 13
-                                  },
-                                  "end": {
-                                    "line": 62,
-                                    "column": 17
-                                  }
-                                }
-                              },
-                              "init": null,
-                              "range": [
-                                2029,
-                                2033
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 62,
-                                  "column": 13
-                                },
-                                "end": {
-                                  "line": 62,
-                                  "column": 17
-                                }
-                              }
-                            }
-                          ],
-                          "kind": "const",
-                          "range": [
-                            2023,
-                            2033
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 62,
-                              "column": 7
-                            },
-                            "end": {
-                              "line": 62,
-                              "column": 17
-                            }
-                          }
-                        },
-                        "right": {
-                          "type": "CallExpression",
-                          "callee": {
-                            "type": "MemberExpression",
-                            "computed": false,
-                            "object": {
-                              "type": "Identifier",
-                              "name": "node",
-                              "range": [
-                                2037,
-                                2041
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 62,
-                                  "column": 21
-                                },
-                                "end": {
-                                  "line": 62,
-                                  "column": 25
-                                }
-                              }
-                            },
-                            "property": {
-                              "type": "Identifier",
-                              "name": "walkEdges",
-                              "range": [
-                                2042,
-                                2051
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 62,
-                                  "column": 26
-                                },
-                                "end": {
-                                  "line": 62,
-                                  "column": 35
-                                }
-                              }
-                            },
-                            "range": [
-                              2037,
-                              2051
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 62,
-                                "column": 21
-                              },
-                              "end": {
-                                "line": 62,
-                                "column": 35
-                              }
-                            }
-                          },
-                          "arguments": [],
-                          "range": [
-                            2037,
-                            2053
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 62,
-                              "column": 21
-                            },
-                            "end": {
-                              "line": 62,
-                              "column": 37
-                            }
-                          }
-                        },
-                        "body": {
-                          "type": "BlockStatement",
-                          "body": [
-                            {
-                              "type": "ExpressionStatement",
-                              "expression": {
-                                "type": "CallExpression",
-                                "callee": {
-                                  "type": "MemberExpression",
-                                  "computed": false,
-                                  "object": {
-                                    "type": "Identifier",
-                                    "name": "edges_to_visit",
-                                    "range": [
-                                      2060,
-                                      2074
-                                    ],
-                                    "loc": {
-                                      "start": {
-                                        "line": 63,
-                                        "column": 3
-                                      },
-                                      "end": {
-                                        "line": 63,
-                                        "column": 17
-                                      }
-                                    }
-                                  },
-                                  "property": {
-                                    "type": "Identifier",
-                                    "name": "push",
-                                    "range": [
-                                      2075,
-                                      2079
-                                    ],
-                                    "loc": {
-                                      "start": {
-                                        "line": 63,
-                                        "column": 18
-                                      },
-                                      "end": {
-                                        "line": 63,
-                                        "column": 22
-                                      }
-                                    }
-                                  },
-                                  "range": [
-                                    2060,
-                                    2079
-                                  ],
-                                  "loc": {
-                                    "start": {
-                                      "line": 63,
-                                      "column": 3
-                                    },
-                                    "end": {
-                                      "line": 63,
-                                      "column": 22
-                                    }
-                                  }
-                                },
-                                "arguments": [
-                                  {
-                                    "type": "Identifier",
-                                    "name": "edge",
-                                    "range": [
-                                      2080,
-                                      2084
-                                    ],
-                                    "loc": {
-                                      "start": {
-                                        "line": 63,
-                                        "column": 23
-                                      },
-                                      "end": {
-                                        "line": 63,
-                                        "column": 27
-                                      }
-                                    }
-                                  }
-                                ],
-                                "range": [
-                                  2060,
-                                  2085
-                                ],
-                                "loc": {
-                                  "start": {
-                                    "line": 63,
-                                    "column": 3
-                                  },
-                                  "end": {
-                                    "line": 63,
-                                    "column": 28
-                                  }
-                                }
-                              },
-                              "range": [
-                                2060,
-                                2086
-                              ],
-                              "loc": {
-                                "start": {
-                                  "line": 63,
-                                  "column": 3
-                                },
-                                "end": {
-                                  "line": 63,
-                                  "column": 29
-                                }
-                              }
-                            }
-                          ],
-                          "range": [
-                            2055,
-                            2090
-                          ],
-                          "loc": {
-                            "start": {
-                              "line": 62,
-                              "column": 39
-                            },
-                            "end": {
-                              "line": 64,
-                              "column": 3
-                            }
-                          }
-                        },
-                        "range": [
-                          2018,
-                          2090
-                        ],
-                        "loc": {
-                          "start": {
-                            "line": 62,
-                            "column": 2
-                          },
-                          "end": {
-                            "line": 64,
-                            "column": 3
-                          }
-                        },
-                        "leadingComments": [
-                          {
-                            "type": "Line",
-                            "value": " Add all of the edges of a node to the list of Edges we",
-                            "range": [
-                              1939,
-                              1996
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 60,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 60,
-                                "column": 59
-                              }
-                            }
-                          },
-                          {
-                            "type": "Line",
-                            "value": " need to visit",
-                            "range": [
-                              1999,
-                              2015
-                            ],
-                            "loc": {
-                              "start": {
-                                "line": 61,
-                                "column": 2
-                              },
-                              "end": {
-                                "line": 61,
-                                "column": 18
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    ],
+                    "body": [],
                     "range": [
-                      1449,
-                      2093
+                      972,
+                      974
                     ],
                     "loc": {
                       "start": {
-                        "line": 42,
-                        "column": 31
+                        "line": 29,
+                        "column": 23
                       },
                       "end": {
-                        "line": 65,
-                        "column": 2
+                        "line": 29,
+                        "column": 25
                       }
                     }
                   },
                   "range": [
-                    1419,
-                    2093
+                    950,
+                    974
                   ],
                   "loc": {
                     "start": {
-                      "line": 42,
+                      "line": 29,
                       "column": 1
                     },
                     "end": {
-                      "line": 65,
-                      "column": 2
+                      "line": 29,
+                      "column": 25
                     }
-                  }
+                  },
+                  "leadingComments": [
+                    {
+                      "type": "Line",
+                      "value": " perform the walk",
+                      "range": [
+                        929,
+                        948
+                      ],
+                      "loc": {
+                        "start": {
+                          "line": 28,
+                          "column": 1
+                        },
+                        "end": {
+                          "line": 28,
+                          "column": 20
+                        }
+                      }
+                    }
+                  ]
                 }
               ],
               "range": [
                 454,
-                2095
+                976
               ],
               "loc": {
                 "start": {
@@ -3333,7 +1802,7 @@
                   "column": 60
                 },
                 "end": {
-                  "line": 66,
+                  "line": 30,
                   "column": 1
                 }
               }
@@ -3342,7 +1811,7 @@
             "expression": false,
             "range": [
               435,
-              2095
+              976
             ],
             "loc": {
               "start": {
@@ -3350,7 +1819,7 @@
                 "column": 41
               },
               "end": {
-                "line": 66,
+                "line": 30,
                 "column": 1
               }
             }
@@ -3358,7 +1827,7 @@
         ],
         "range": [
           394,
-          2096
+          977
         ],
         "loc": {
           "start": {
@@ -3366,14 +1835,14 @@
             "column": 0
           },
           "end": {
-            "line": 66,
+            "line": 30,
             "column": 2
           }
         }
       },
       "range": [
         394,
-        2097
+        978
       ],
       "loc": {
         "start": {
@@ -3381,7 +1850,7 @@
           "column": 0
         },
         "end": {
-          "line": 66,
+          "line": 30,
           "column": 3
         }
       },
@@ -3464,7 +1933,7 @@
   "sourceType": "module",
   "range": [
     0,
-    2097
+    978
   ],
   "loc": {
     "start": {
@@ -3472,7 +1941,7 @@
       "column": 0
     },
     "end": {
-      "line": 66,
+      "line": 30,
       "column": 3
     }
   },
@@ -3659,10 +2128,10 @@
     },
     {
       "type": "Line",
-      "value": " Heaps are graphs, they can contain cycles! So we use a Set to",
+      "value": " setup the walk",
       "range": [
         791,
-        855
+        808
       ],
       "loc": {
         "start": {
@@ -3671,295 +2140,25 @@
         },
         "end": {
           "line": 22,
-          "column": 65
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " keep track of Nodes we have already seen.",
-      "range": [
-        857,
-        901
-      ],
-      "loc": {
-        "start": {
-          "line": 23,
-          "column": 1
-        },
-        "end": {
-          "line": 23,
-          "column": 45
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " We will be keeping a list of all the Edges we need to cross",
-      "range": [
-        933,
-        995
-      ],
-      "loc": {
-        "start": {
-          "line": 26,
-          "column": 1
-        },
-        "end": {
-          "line": 26,
-          "column": 63
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " still in an array.",
-      "range": [
-        997,
-        1018
-      ],
-      "loc": {
-        "start": {
-          "line": 27,
-          "column": 1
-        },
-        "end": {
-          "line": 27,
-          "column": 22
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " Heaps always have a root Node (index == 0)",
-      "range": [
-        1050,
-        1095
-      ],
-      "loc": {
-        "start": {
-          "line": 30,
-          "column": 1
-        },
-        "end": {
-          "line": 30,
-          "column": 46
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " This is the first Node you should visit when walking a Heap",
-      "range": [
-        1097,
-        1159
-      ],
-      "loc": {
-        "start": {
-          "line": 31,
-          "column": 1
-        },
-        "end": {
-          "line": 31,
-          "column": 63
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " for simplicity lets make a mock Edge for our root",
-      "range": [
-        1201,
-        1253
-      ],
-      "loc": {
-        "start": {
-          "line": 34,
-          "column": 2
-        },
-        "end": {
-          "line": 34,
-          "column": 54
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " so that our walking loop always takes Edges",
-      "range": [
-        1256,
-        1302
-      ],
-      "loc": {
-        "start": {
-          "line": 35,
-          "column": 2
-        },
-        "end": {
-          "line": 35,
-          "column": 48
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " and push that onto the Edges we should visit",
-      "range": [
-        1305,
-        1352
-      ],
-      "loc": {
-        "start": {
-          "line": 36,
-          "column": 2
-        },
-        "end": {
-          "line": 36,
-          "column": 49
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " While walking we will grab the first Edge off our list",
-      "range": [
-        1453,
-        1510
-      ],
-      "loc": {
-        "start": {
-          "line": 43,
-          "column": 2
-        },
-        "end": {
-          "line": 43,
-          "column": 59
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " We grab the Node that this edge points to",
-      "range": [
-        1563,
-        1607
-      ],
-      "loc": {
-        "start": {
-          "line": 46,
-          "column": 2
-        },
-        "end": {
-          "line": 46,
-          "column": 46
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " We want to be sure we don't start a cycle so we skip",
-      "range": [
-        1652,
-        1707
-      ],
-      "loc": {
-        "start": {
-          "line": 49,
-          "column": 2
-        },
-        "end": {
-          "line": 49,
-          "column": 57
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " Nodes we have already visited (but not Edges to those Nodes",
-      "range": [
-        1710,
-        1772
-      ],
-      "loc": {
-        "start": {
-          "line": 50,
-          "column": 2
-        },
-        "end": {
-          "line": 50,
-          "column": 64
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " in this example)",
-      "range": [
-        1775,
-        1794
-      ],
-      "loc": {
-        "start": {
-          "line": 51,
-          "column": 2
-        },
-        "end": {
-          "line": 51,
-          "column": 21
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " Print the data!",
-      "range": [
-        1887,
-        1905
-      ],
-      "loc": {
-        "start": {
-          "line": 57,
-          "column": 2
-        },
-        "end": {
-          "line": 57,
-          "column": 20
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " Add all of the edges of a node to the list of Edges we",
-      "range": [
-        1939,
-        1996
-      ],
-      "loc": {
-        "start": {
-          "line": 60,
-          "column": 2
-        },
-        "end": {
-          "line": 60,
-          "column": 59
-        }
-      }
-    },
-    {
-      "type": "Line",
-      "value": " need to visit",
-      "range": [
-        1999,
-        2015
-      ],
-      "loc": {
-        "start": {
-          "line": 61,
-          "column": 2
-        },
-        "end": {
-          "line": 61,
           "column": 18
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " perform the walk",
+      "range": [
+        929,
+        948
+      ],
+      "loc": {
+        "start": {
+          "line": 28,
+          "column": 1
+        },
+        "end": {
+          "line": 28,
+          "column": 20
         }
       }
     }

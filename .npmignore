@@ -1,0 +1,7 @@
+/lib/
+/doc/
+/manual/
+Makefile
+esdoc.json
+.babelrc
+jsconfig.json

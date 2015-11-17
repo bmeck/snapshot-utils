@@ -1,5 +1,6 @@
-all:
+all: doc
 	@mkdir -p out
+	@esdoc -c esdoc.json 
 	@babel lib\
 		--optional runtime\
 		--out-dir out\

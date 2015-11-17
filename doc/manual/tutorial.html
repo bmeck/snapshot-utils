@@ -44,8 +44,8 @@
     <h1 class="manual-toc-title"><a href="manual/tutorial.html" data-ice="title">Tutorial</a></h1>
     <ul class="manual-toc">
       
-    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-all-nodes-in-a-heapsnapshot" data-ice="link">Get All Nodes in a HeapSnapshot</a></li>
-<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-variables-in-a-heapsnapshot" data-ice="link">Get Variables in a HeapSnapshot</a></li>
+    <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-all-nodes" data-ice="link">Get All Nodes</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/tutorial.html#get-all-variables" data-ice="link">Get All Variables</a></li>
 </ul>
   </div>
 <div data-ice="manual" data-toc-name="reference">
@@ -66,9 +66,8 @@
     <span>&#xBB;</span>
     <span data-ice="title">Tutorial</span>
   </div>
-  <div data-ice="content"><h2 id="get-all-nodes-in-a-heapsnapshot">Get All Nodes in a HeapSnapshot</h2>
+  <div data-ice="content"><h2 id="get-all-nodes">Get All Nodes</h2>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
-
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node dump.js &lt;&quot;my.heapsnapshot&quot;`
 const stream = process.stdin;
@@ -88,53 +87,20 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
     // from different snapshots.
     const snapshot = new HeapSnapshot(provider);
 
-    // Heaps are graphs, they can contain cycles! So we use a Set to
-    // keep track of Nodes we have already seen.
-    const visited = new Set();
-
-    // We will be keeping a list of all the Edges we need to cross
-    // still in an array.
-    const edges_to_visit = [];
-
-    // Heaps always have a root Node (index == 0)
-    // This is the first Node you should visit when walking a Heap
-    {
-        const root = snapshot.getNode(0);
-        // for simplicity lets make a mock Edge for our root
-        // so that our walking loop always takes Edges
-        // and push that onto the Edges we should visit
-        edges_to_visit.push({
-            getNode() {return root;}
-        })
-    }
-
-    while (edges_to_visit.length) {
-        // While walking we will grab the first Edge off our list
-        const edge_to_walk = edges_to_visit.shift();
-
-        // We grab the Node that this edge points to
-        const node = edge_to_walk.getNode();
-
-        // We want to be sure we don&apos;t start a cycle so we skip
-        // Nodes we have already visited (but not Edges to those Nodes
-        // in this example)
-        if (visited.has(node.node_index)) {
-            continue;
-        }
-        visited.add(node.node_index);
-
-        // Print the data!
-        console.log(node.fields);
-
-        // Add all of the edges of a node to the list of Edges we
-        // need to visit
-        for (const edge of node.walkEdges()) {
-            edges_to_visit.push(edge);
-        }
-    }
+    // setup the walk
+    const iter = snapshot.walk(
+        // node opened function
+        node =&gt; console.log(node),
+        // edge walked function
+        edge =&gt; {},
+        // node closed function
+        node =&gt; {}
+    );
+    // perform the walk
+    for (const _ of iter) {}
 });</code>
 </code></pre>
-<h2 id="get-variables-in-a-heapsnapshot">Get Variables in a HeapSnapshot</h2>
+<h2 id="get-all-variables">Get All Variables</h2>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
 
 // We are going to use stdin to read our snapshot
@@ -156,51 +122,20 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
     // from different snapshots.
     const snapshot = new HeapSnapshot(provider);
 
-    // Heaps are graphs, they can contain cycles! So we use a Set to
-    // keep track of Nodes we have already seen.
-    const visited = new Set();
-
-    // We are going to keep track of all the parent Nodes to our
-    // current Node.
-    const path = [];
-
-    // We will be keeping a list of all the Edges we need to cross
-    // still in an array.
-    const edges_to_visit = [];
-
-    // Heaps always have a root Node (index == 0)
-    // This is the first Node you should visit when walking a Heap
-    {
-        const root = snapshot.getNode(0);
-        // for simplicity lets make a mock Edge for our root
-        // so that our walking loop always takes Edges
-        // and push that onto the Edges we should visit
-        edges_to_visit.push({
-            getNode() {return root;}
-        })
-    }
-
     // we will keep a list of all the globals we have seen and visit them at the end
     // this is because global Nodes have a type of &quot;object&quot; and can be confused easily
     // unless we grab them from context Nodes
     const globals = new Set();
-    while (edges_to_visit.length) {
-        // While walking we will grab the first Edge off our list
-        const edge_to_walk = edges_to_visit.shift();
 
-        // We grab the Node that this edge points to
-        const node = edge_to_walk.getNode();
+    // setup the walk
+    const iter = snapshot.walk({
+        onNodeOpen
+    });
 
-        // We want to be sure we don&apos;t start a cycle so we skip
-        // Nodes we have already visited (but not Edges to those Nodes
-        // in this example)
-        if (visited.has(node.node_index)) {
-            continue;
-        }
-        visited.add(node.node_index);
+    // perform the walk, we don&apos;t need to process it in chunks for the example
+    for (const _ of iter) {}
 
-        // Every function instance Node has a type of &quot;closure&quot;
-        // So... for every function 
+    function onNodeOpen(node) {
         if (node.fields.type === &apos;closure&apos;) {
             // Store information that we want to print out
             // This is because the information is split up
@@ -249,18 +184,12 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
             // print our closure data!
             for (const line of vars) {
                 if (script != null) {
-                    console.log(`${line} in script ${script} in global @${global}`)
+                    console.log(`${line} in function ${node.fields.name} in script ${script} in global @${global}`)
                 }
                 else {
                     console.log(`${line} in global @${global}`)
                 }
             }
-        }
-
-        // Add all of the edges of a node to the list of Edges we
-        // need to visit
-        for (const edge of node.walkEdges()) {
-            edges_to_visit.push(edge);
         }
     }
 

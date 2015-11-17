@@ -360,15 +360,15 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "lib/heapsnapshot.js~heapsnapshot#getedge",
-    "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getEdge",
-    "lib/HeapSnapshot.js~HeapSnapshot#getEdge",
-    "method"
-  ],
-  [
     "lib/heapsnapshot.js~heapsnapshot#getnode",
     "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getNode",
     "lib/HeapSnapshot.js~HeapSnapshot#getNode",
+    "method"
+  ],
+  [
+    "lib/heapsnapshot.js~heapsnapshot#walk",
+    "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-walk",
+    "lib/HeapSnapshot.js~HeapSnapshot#walk",
     "method"
   ],
   [
@@ -381,6 +381,12 @@ window.esdocSearchIndex = [
     "lib/heapsnapshot.js~heapsnapshot.noderesult",
     "typedef/index.html#static-typedef-NodeResult",
     "lib/HeapSnapshot.js~HeapSnapshot.NodeResult",
+    "typedef"
+  ],
+  [
+    "lib/heapsnapshot.js~heapsnapshot.walkcallbacks",
+    "typedef/index.html#static-typedef-WalkCallbacks",
+    "lib/HeapSnapshot.js~HeapSnapshot.WalkCallbacks",
     "typedef"
   ],
   [
@@ -465,6 +471,12 @@ window.esdocSearchIndex = [
     "lib/bin/script-vars.js",
     "file/lib/bin/script-vars.js.html",
     "lib/bin/script-vars.js",
+    "file"
+  ],
+  [
+    "lib/bin/visible-nodes.js",
+    "file/lib/bin/visible-nodes.js.html",
+    "lib/bin/visible-nodes.js",
     "file"
   ],
   [
