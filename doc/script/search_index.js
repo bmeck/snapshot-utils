@@ -438,6 +438,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "lib/splitsnapshotprovider.js~splitsnapshotprovider#gettracebufferframe",
+    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getTraceBufferFrame",
+    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getTraceBufferFrame",
+    "method"
+  ],
+  [
+    "lib/splitsnapshotprovider.js~splitsnapshotprovider#gettracelocation",
+    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getTraceLocation",
+    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getTraceLocation",
+    "method"
+  ],
+  [
     "lib/splitsnapshotprovider.js~splitsnapshotprovider#writetodirectory",
     "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-writeToDirectory",
     "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#writeToDirectory",
@@ -456,6 +468,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "lib/bin/closed-size.js",
+    "file/lib/bin/closed-size.js.html",
+    "lib/bin/closed-size.js",
+    "file"
+  ],
+  [
     "lib/bin/dump.js",
     "file/lib/bin/dump.js.html",
     "lib/bin/dump.js",
@@ -471,12 +489,6 @@ window.esdocSearchIndex = [
     "lib/bin/script-vars.js",
     "file/lib/bin/script-vars.js.html",
     "lib/bin/script-vars.js",
-    "file"
-  ],
-  [
-    "lib/bin/visible-nodes.js",
-    "file/lib/bin/visible-nodes.js.html",
-    "lib/bin/visible-nodes.js",
     "file"
   ],
   [

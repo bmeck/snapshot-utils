@@ -1,6 +1,6 @@
 {
-  "coverage": "100%",
-  "expectCount": 16,
+  "coverage": "88.88%",
+  "expectCount": 18,
   "actualCount": 16,
   "files": {
     "lib/HeapSnapshot.js": {
@@ -9,9 +9,12 @@
       "undocumentLines": []
     },
     "lib/SplitSnapshotProvider.js": {
-      "expectCount": 11,
+      "expectCount": 13,
       "actualCount": 11,
-      "undocumentLines": []
+      "undocumentLines": [
+        141,
+        145
+      ]
     },
     "lib/parseSnapshotStream.js": {
       "expectCount": 1,

@@ -78,6 +78,8 @@ export default class HeapSnapshot {
    *   is first encountered
    * @property {function(edge: Edge)} onEdge callback called when traversing
    *   an Edge
+   * @property {function(node: Node)} onNodeSkipped callback called when a Node
+   *   is skipped because it has already been encountered
    * @property {function(node: Node)} onNodeClose callback called when all
    *   children of a Node are guaranteed to have been encountered
    */
@@ -99,6 +101,7 @@ export default class HeapSnapshot {
   walk({
     onNodeOpen = Function.prototype,
     onEdge = Function.prototype,
+    onNodeSkipped = Function.prototype,
     onNodeClose = Function.prototype
   }) {
     const snapshot = this;
@@ -138,6 +141,7 @@ export default class HeapSnapshot {
         // Nodes we have already visited (but not Edges to those Nodes
         // in this example)
         if (visited.has(node.node_index)) {
+          onNodeSkipped(node);
           continue;
         }
         visited.add(node.node_index);
@@ -191,6 +195,13 @@ export default class HeapSnapshot {
         const edge_size = self.meta.edge_fields.length;
         const index = (edge_index + i) * edge_size;
         return self.getEdge(index);
+      },
+      getTrace() {
+        return {
+          id: -1,
+          line: -1,
+          column: -1
+        };
       },
       *walkEdges() {
         const edge_count = node.edge_count;
@@ -357,6 +368,72 @@ function createEdgeClass(snapshot, provider) {
     })();
   };
   return Edge;
+}
+function createTraceFrameClass(provider) {
+  const meta = provider.getMeta();
+  class TraceFrame {
+    constructor(buffer) {
+      this._buffer = buffer;
+    }
+    parent() {
+      
+    }
+    inspect() {
+      let ret = &apos;&apos;;
+      let i = 0;
+      for (const field of meta.trace_node_fields) {
+        ret += &apos; &apos;+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString(&apos;hex&apos;)].join(&apos;:&apos;);
+        i++;
+      }
+      return `HeapSnapshot::TraceFrame ${ret}`;
+    }
+  }
+  let i = 0;
+  for (let field of meta.trace_node_fields) {
+    (function(){ 
+      const field_index = i * 4;
+      Object.defineProperty(TraceFrame.prototype, field, {
+        enumerable: true,
+        get() {
+          return this._buffer.readUInt32BE(field_index);
+        }
+      });
+    })();
+  };
+  return TraceFrame;
+}
+function createTraceLocationClass(provider) {
+  const meta = provider.getMeta();
+  class TraceFrame {
+    constructor(buffer) {
+      this._buffer = buffer;
+    }
+    parent() {
+      
+    }
+    inspect() {
+      let ret = &apos;&apos;;
+      let i = 0;
+      for (const field of meta.trace_node_fields) {
+        ret += &apos; &apos;+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString(&apos;hex&apos;)].join(&apos;:&apos;);
+        i++;
+      }
+      return `HeapSnapshot::TraceFrame ${ret}`;
+    }
+  }
+  let i = 0;
+  for (let field of meta.trace_node_fields) {
+    (function(){ 
+      const field_index = i * 4;
+      Object.defineProperty(TraceFrame.prototype, field, {
+        enumerable: true,
+        get() {
+          return this._buffer.readUInt32BE(field_index);
+        }
+      });
+    })();
+  };
+  return TraceFrame;
 }</code></pre>
 
 </div>
