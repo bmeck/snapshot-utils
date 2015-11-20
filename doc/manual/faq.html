@@ -73,9 +73,14 @@
 <li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#self-size" data-ice="link">Self Size</a></li>
 <li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#retained-size" data-ice="link">Retained Size</a></li>
 <li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/faq.html#the-sharing-gotcha" data-ice="link">The Sharing Gotcha</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#closed-size" data-ice="link">Closed Size</a></li>
+<li data-ice="manualNav" class="indent-h3"><span class="manual-dot"></span><a href="manual/faq.html#the-global-gotcha" data-ice="link">The Global Gotcha</a></li>
+<li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#retained-size-vs-closed-size" data-ice="link">Retained Size vs. Closed Size</a></li>
 <li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/faq.html#edge" data-ice="link">Edge</a></li>
 <li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#edge-type" data-ice="link">edge.type</a></li>
 <li data-ice="manualNav" class="indent-h2"><span class="manual-dot"></span><a href="manual/faq.html#edge-name" data-ice="link">edge.name</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/faq.html#security" data-ice="link">Security</a></li>
+<li data-ice="manualNav" class="indent-h1"><span class="manual-dot"></span><a href="manual/faq.html#processing-considerations" data-ice="link">Processing Considerations</a></li>
 </ul>
   </div>
 </div>
@@ -87,9 +92,13 @@
     <span>&#xBB;</span>
     <span data-ice="title">FAQ</span>
   </div>
-  <div data-ice="content"><h1 id="snapshot">Snapshot</h1>
+  <div data-ice="content"><p>This page consists mostly of definitions (es-doc won&apos;t let me name manual pages anything I want).</p>
+<h1 id="snapshot">Snapshot</h1>
 <p>synonyms: <a href="#Snapshot">Heapsnapshot</a>, <a href="#Snapshot">Heapdump</a></p>
-<p>This is the representation of all <em>non-primitive</em> objects on that a GC is tracking. It is a graph that may contain cycles, but has a defined entry point.</p>
+<p>This is the representation of all <em>non-primitive</em> objects on that a GC is tracking. For our purposes, primitives are anything with type <code>number</code>, <code>boolean</code>, <code>undefined</code>, and the value <code>null</code>.</p>
+<p><strong>Stings are not primitives.</strong></p>
+<p>So, given that knowledge, while <code>a={}</code>&apos;s value of <code>a</code> will be represented in the snapshot <code>b=1</code> will appear as an empty property called <code>b</code> only. There will be no knowledge of what is contained within <code>b</code> not even a type.</p>
+<p>A Snapshot is a graph that may contain cycles, but has a defined entry point. The entry point is always defined by the VM and does not represent any particular user code. Cycles are caused by objects with circular references such as <code>x={};x.self=x</code>.</p>
 <h2 id="root">Root</h2>
 <p>This is the defined entry point that determines what objects are going to survive GC. It is a <a href="#Node">Node</a>. Once a Node is no longer accessible from the root and the root&apos;s children, it can be garbage collected.</p>
 <h1 id="node">Node</h1>
@@ -195,6 +204,12 @@ parent(b) contains node
 grand_parent contains parents(a,b)</code>
 </code></pre>
 <p>If <code>node</code> grows in size, the retained size would only grow for <code>grand_parent</code>. This becomes complicated when a Node is shared between files. If <code>parent(a)</code> represents <code>a.js</code> and <code>parent(b)</code> represents <code>b.js</code> then grand_parent could be the <a href="#root">root</a> which would not grow the retained size of <code>a.js</code> or <code>b.js</code>! Use this with caution.</p>
+<h2 id="closed-size">Closed Size</h2>
+<p>Given a closure Node&apos;s child, this is the size of all Nodes visible from the current Node without entering another closure. This is the amount of memory that is reachable from this Node with respect to source code.</p>
+<h3 id="the-global-gotcha">The Global Gotcha</h3>
+<p>Since we are viewing <strong>all</strong> reachable nodes, we will reach the global context object. This size will be added to all closed sizes. This means that any closed size can be thought of as <code>all_globals + all_properties(obj)</code>.</p>
+<h2 id="retained-size-vs-closed-size">Retained Size vs. Closed Size</h2>
+<p>Retained size is great for finding out how much memory would be released when a Node is removed. However, it does not accurately represent how much memory is being held by a Node with knowledge of the source code. Closed size does represent the memory used by the source code, but does not accurately represent what would happen when a Node is removed.</p>
 <h1 id="edge">Edge</h1>
 <p>This represents the path between Nodes. Their memory is actually held within the Node</p>
 <h2 id="edge-type">edge.type</h2>
@@ -238,6 +253,22 @@ grand_parent contains parents(a,b)</code>
 </table>
 <h2 id="edge-name">edge.name</h2>
 <p>The name of an edge is always descriptive. For <code>element</code> and <code>property</code> Edges it represents things visible via JS property access. For <code>context</code> it represents things visible via JS variables.</p>
+<h1 id="security">Security</h1>
+<p>Since Strings are visible from Snapshots you could accidentally leak information if Snapshots are sent over the network. Be particularly wary since these will be visible:</p>
+<ul>
+<li>Source code of Javascript files</li>
+<li>Any string held by Javascript</li>
+</ul>
+<p>So, any configuration options, command line arguments, and any proprietary source code will be available to the consumer of a snapshot.</p>
+<p>Some things are not visible from a Snapshot:</p>
+<ul>
+<li>Buffers</li>
+<li>Typed Arrays</li>
+<li>Primitives</li>
+</ul>
+<p>Consider placing data inside those types when you want to avoid it being in a snapshot.</p>
+<h1 id="processing-considerations">Processing Considerations</h1>
+<p>Almost all processing of Snapshots should be done with a depth first search in order to preserve memory. Most Snapshots are very wide (Nodes can have many edges), but not very deep (Nodes don&apos;t have many ancestors).</p>
 </div>
 </div>
 </div>

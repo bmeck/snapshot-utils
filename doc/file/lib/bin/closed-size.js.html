@@ -66,10 +66,6 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	const snapshot = new HeapSnapshot(provider);
 	
 	const path = [];
-	const pending = [];
-	const contains = new Map();
-	const children = new Map();
-	const fulfill = new Map();
 	
 	// setup the walk
 	const iter = snapshot.walk({
@@ -77,9 +73,6 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 		onNodeSkipped,
 		onNodeClose
 	});
-	
-	// perform the walk, we don&apos;t need to process it in chunks for the example
-	for (const _ of iter) {}
 	
 	function allClosedParentChildSets() {
 		let i = path.length - 1;
@@ -92,60 +85,150 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	}
 	
 	function _id(node) {
-		return node.node_index;
+		return node.fields.id;
+	}
+	const commited = new Set();
+	const vis_nodes = new Map();
+	// uncommited =&gt; [children waiting]
+	const pending_commit_nodes = new Map();
+	function commit(id) {
+		commited.add(id);
+		const newly_commited = vis_nodes.get(id).commited || new Set();
+		// console.log(id, &apos;commited to&apos;, newly_commited);
+		if (pending_commit_nodes.has(id)) {
+			for (const waiting_id of pending_commit_nodes.get(id)) {
+				// console.log(id, &apos;notifying&apos;, waiting_id);
+				const waiting_vis_node = vis_nodes.get(waiting_id);
+				waiting_vis_node.notify(id, newly_commited);
+			}
+		}
+	}
+	function wait(id, pending_id) {
+		if (commited.has(pending_id)) {
+			throw new Error(&apos;pending id is already commited&apos;);
+		}
+		// console.log(id, &apos;waiting on&apos;, pending_id);
+		if (!pending_commit_nodes.has(pending_id)) {
+			pending_commit_nodes.set(pending_id, new Set());
+		}
+		pending_commit_nodes.get(pending_id).add(id);
 	}
 	function onNodeOpen(node) {
+		console.log(node.fields)
 		const id = _id(node);
-		contains.set(id, new Set());
-		children.set(id, new Promise(f =&gt; {
-			fulfill.set(id, f);
-		}));
-		path.push(node);
-		pending.push([]);
-	}
-	function addContained(node) {
-		// add to all parents, until type == closure
-		for (let parentChildren of allClosedParentChildSets()) {
-			parentChildren.add(_id(node));
-		}
-	}
-	function awaitChildren(node) {
-		return children.get(_id(node));
-	}
-	function commit(node) {
-		const id = _id(node);
-		fulfill.get(id)(children.get(id));
-		fulfill.delete(id);
+		const vis_node = new VisibilityNode(id, wait, commit);
+		vis_nodes.set(id, vis_node);
+		path.push(vis_node);
 	}
 	function onNodeSkipped(node) {
+		const id = _id(node);
+		if (path.length === 0) {
+			return;
+		}
 		// grab the eventual or existing value
-		// append to contains
-		const parents = allClosedParentChildSets();
-		children.get(_id(node)).then(children =&gt; {
-			for (const child_id of children) {
-				for (const parent of parents) {
-					parents.add(child_id);
-				}
-			}
-		});
-	}
-	function onNodeClosed(node) {
-		addContained(node);
-		const todo = pending.pop();
-		if (todo.length === 0) {
-			commit(node);
+		// append to self
+		const vis_node = path[path.length - 1];
+		if (commited.has(id)) {
+			vis_node.add(vis_nodes.get(id));
 		}
 		else {
-			// await pending
-			Promise.all(
-				pending.map(id =&gt; children.get(id))
-			).then(() =&gt; {
-				commit(node);
-			});
+			vis_node.wait(id);
 		}
-		path.pop();
 	}
-});</code></pre>
+	function onNodeClose(node) {
+		const vis_node = path.pop();
+		const id = _id(node);
+		vis_node.close();
+		if (vis_node.isReadyToCommit()) {
+			vis_node.commit();
+		}
+		if (path.length &gt; 0) {
+			const parent = path[path.length - 1];
+			parent.add(vis_node);
+		}
+	}
+	
+	// perform the walk, we don&apos;t need to process it in chunks for the example
+	for (const _ of iter) {}
+	
+	for(const [id,vis_node] of vis_nodes.entries()) {
+		if (vis_node &amp;&amp; vis_node.commited) console.log(id, Array.from(vis_node.commited));
+		else console.log(id)
+	}
+});
+
+class VisibilityNode {
+	constructor(id, wait, commit) {
+		this.id = id;
+		this._wait = wait;
+		this._commit = commit;
+		this.closed = false;
+		this.commited = null;// = new Set();
+		this.pending = null;// = new Set();
+	}
+	add(vis_node) {
+		if (this.closed) {
+			throw new EvalError(&apos;already closed&apos;);
+		}
+		if (!this.commited) {
+			this.commited = new Set();
+		}
+		this.commited.add(vis_node.id);
+		if (vis_node.commited) {
+			for (const commited_id of vis_node.commited) {
+				if (commited_id != this.id) {
+					this.commited.add(commited_id);
+				}
+			}
+		}
+		if (vis_node.pending) {
+			for (const pending_id of vis_node.pending) {
+				this.wait(pending_id);
+			}
+		}
+	}
+	
+	notify(pending_id, commited_ids) {
+		this.pending.delete(pending_id);
+		if (!this.commited) {
+			this.commited = new Set();
+		}
+		this.commited.add(pending_id);
+		for (const commited_id of commited_ids) {
+			if (commited_id != this.id) {
+				this.commited.add(commited_id);
+			}
+		}
+		if (this.isReadyToCommit()) {
+			this.commit();
+		}
+	}
+	
+	wait(pending_id) {
+		if (this.closed) {
+			throw new EvalError(&apos;already closed&apos;);
+		}
+		if (pending_id != this.id) {
+			if (!this.pending) {
+				this.pending = new Set();
+			}
+			this.pending.add(pending_id);
+			this._wait(this.id, pending_id);
+		}
+	}
+	close() {
+		this.closed = true;
+	}
+	isReadyToCommit() {
+		return this.closed &amp;&amp; (this.pending ? this.pending.size === 0 : true);
+	}
+	commit() {
+		if (!this.isReadyToCommit()) {
+			throw new EvalError(&quot;unable to commit&quot;);
+		}
+		this._commit(this.id);
+	}
+}</code></pre>
 
 </div>
 

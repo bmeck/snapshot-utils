@@ -1,7 +1,15 @@
+This page consists mostly of definitions (es-doc won't let me name manual pages anything I want).
+
 # Snapshot
 synonyms: [Heapsnapshot](#Snapshot), [Heapdump](#Snapshot)
 
-This is the representation of all *non-primitive* objects on that a GC is tracking. It is a graph that may contain cycles, but has a defined entry point.
+This is the representation of all *non-primitive* objects on that a GC is tracking. For our purposes, primitives are anything with type `number`, `boolean`, `undefined`, and the value `null`.
+
+**Stings are not primitives.**
+
+So, given that knowledge, while `a={}`'s value of `a` will be represented in the snapshot `b=1` will appear as an empty property called `b` only. There will be no knowledge of what is contained within `b` not even a type.
+
+A Snapshot is a graph that may contain cycles, but has a defined entry point. The entry point is always defined by the VM and does not represent any particular user code. Cycles are caused by objects with circular references such as `x={};x.self=x`.
 
 ## Root
 
@@ -100,6 +108,18 @@ grand_parent contains parents(a,b)
 
 If `node` grows in size, the retained size would only grow for `grand_parent`. This becomes complicated when a Node is shared between files. If `parent(a)` represents `a.js` and `parent(b)` represents `b.js` then grand_parent could be the [root](#root) which would not grow the retained size of `a.js` or `b.js`! Use this with caution.
 
+## Closed Size
+
+Given a closure Node's child, this is the size of all Nodes visible from the current Node without entering another closure. This is the amount of memory that is reachable from this Node with respect to source code.
+
+### The Global Gotcha
+
+Since we are viewing **all** reachable nodes, we will reach the global context object. This size will be added to all closed sizes. This means that any closed size can be thought of as `all_globals + all_properties(obj)`.
+
+## Retained Size vs. Closed Size
+
+Retained size is great for finding out how much memory would be released when a Node is removed. However, it does not accurately represent how much memory is being held by a Node with knowledge of the source code. Closed size does represent the memory used by the source code, but does not accurately represent what would happen when a Node is removed.
+
 # Edge
 
 This represents the path between Nodes. Their memory is actually held within the Node
@@ -119,3 +139,24 @@ This represents the path between Nodes. Their memory is actually held within the
 ## edge.name
 
 The name of an edge is always descriptive. For `element` and `property` Edges it represents things visible via JS property access. For `context` it represents things visible via JS variables.
+
+# Security
+
+Since Strings are visible from Snapshots you could accidentally leak information if Snapshots are sent over the network. Be particularly wary since these will be visible:
+
+* Source code of Javascript files
+* Any string held by Javascript
+
+So, any configuration options, command line arguments, and any proprietary source code will be available to the consumer of a snapshot.
+
+Some things are not visible from a Snapshot:
+
+* Buffers
+* Typed Arrays
+* Primitives
+
+Consider placing data inside those types when you want to avoid it being in a snapshot.
+
+# Processing Considerations
+
+Almost all processing of Snapshots should be done with a depth first search in order to preserve memory. Most Snapshots are very wide (Nodes can have many edges), but not very deep (Nodes don't have many ancestors).

@@ -474,6 +474,12 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "lib/bin/dominators.js",
+    "file/lib/bin/dominators.js.html",
+    "lib/bin/dominators.js",
+    "file"
+  ],
+  [
     "lib/bin/dump.js",
     "file/lib/bin/dump.js.html",
     "lib/bin/dump.js",
