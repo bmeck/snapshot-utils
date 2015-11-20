@@ -9,11 +9,20 @@ This is the representation of all *non-primitive* objects on that a GC is tracki
 
 So, given that knowledge, while `a={}`'s value of `a` will be represented in the snapshot `b=1` will appear as an empty property called `b` only. There will be no knowledge of what is contained within `b` not even a type.
 
-A Snapshot is a graph that may contain cycles, but has a defined entry point. The entry point is always defined by the VM and does not represent any particular user code. Cycles are caused by objects with circular references such as `x={};x.self=x`.
+A Snapshot is a directed graph that may contain cycles; but Snapshots have a single defined entry point. The entry point is always defined by the VM and does not represent any particular user code. Cycles are caused by objects with circular references such as:
+
+```
+x={};
+x.self=x
+```
+
+which causes a cycle by having a [Node](#Node) for `x` having an [Edge](#Edge) named `self` pointing to `x`.
 
 ## Root
 
-This is the defined entry point that determines what objects are going to survive GC. It is a [Node](#Node). Once a Node is no longer accessible from the root and the root's children, it can be garbage collected.
+This is the defined entry point that determines what objects are going to survive GC. It is a Node just like any other in the graph with one slight exception. The root's Edges represents what the exact references VM is keeping alive, even if JS has no access to a Node, C++ may be keeping the Node alive! In that case it would show up in the Root still.
+
+The root is important since, once a Node is no longer accessible from the root and the root's children, it can be garbage collected.
 
 # Node
 
@@ -42,7 +51,7 @@ The meaning of a Node's name relates to it's type. For the most part names only 
 
 ## Retainers
 
-A retainer is any Node keeping this Node alive. This means that there is an [Edge](#Edge) from all the retainers of this Node to this Node.
+A retainer is any Node keeping another Node alive. This means that there is a single [Edge](#Edge) from all the retainers of a Node to the retainer.
 
 Given:
 
@@ -70,7 +79,9 @@ node(c) contains node(a)
 node(d) contains node(b), node(c)
 ```
 
-The Dominator of `node(a)` is `node(d)` since all paths to `node(a)` must go through `node(d)`. However, `node(c)` is the only Node that is not weakly containing `node(a)`. Since `node(b)` is weakly containing `node(a)` it is not preventing `node(a)` from being garbage collected. The only Node keeping `node(a)` from being garbage collected is `node(c)`.
+The Dominator of `node(a)` is `node(d)`! But the only thing keeping `node(a)` alive is `node(c)`!
+
+This is due to all paths to `node(a)` must go through `node(d)`. However, `node(c)` is the only Node that is not weakly containing `node(a)`. Since `node(b)` is weakly containing `node(a)` it is not preventing `node(a)` from being garbage collected. The only Node keeping `node(a)` from being garbage collected is `node(c)`.
 
 ## Distance
 
@@ -83,7 +94,6 @@ This is the exact amount of memory that a Node occuppies without traversing any 
 
 1. VM optimizations have occured so this Node takes more space
 2. A property was added that is a primitive, this may or may not be represented in the edges called `"properties"` and `"elements"`
-
 
 Both of these specific scenarios are detectable by [retained size](#retained-size) since they are only accessible through this Node.
 
@@ -122,7 +132,13 @@ Retained size is great for finding out how much memory would be released when a 
 
 # Edge
 
-This represents the path between Nodes. Their memory is actually held within the Node
+This represents the path between Nodes. Memory is actually held within the Node and edges are just a description of a property. They do not have memory associated with themselves. The simples example of an Edge is a property on an object:
+
+```
+obj = { x : [] };
+```
+
+The Node for `obj` has an edge named `x` that points to `[]`.
 
 ## edge.type
 
@@ -158,5 +174,8 @@ Some things are not visible from a Snapshot:
 Consider placing data inside those types when you want to avoid it being in a snapshot.
 
 # Processing Considerations
+related: [Tree Traversal](https://en.wikipedia.org/wiki/Tree_traversal)
+
+Since Snapshots have well defined entry points (the [root](#root)), it is most useful not to treat them as a graph, but as a tree when aggregating data. Even though they are graphs we can still find all of the Nodes and Edges with a single tree traversal.
 
 Almost all processing of Snapshots should be done with a depth first search in order to preserve memory. Most Snapshots are very wide (Nodes can have many edges), but not very deep (Nodes don't have many ancestors).
