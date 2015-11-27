@@ -64,6 +64,7 @@ export default class SplitSnapshotProvider {
     snapshot_info,
     node_buffer,
     edge_buffer,
+	samples_buffer,
     string_indices_buffer,
     string_buffer
   ) {
@@ -114,6 +115,19 @@ export default class SplitSnapshotProvider {
 	if (this.edge_buffer.length !== this.edge_struct_size * snapshot.edge_count) {
 		throw new Error(&apos;edges buffer does not match the expected size (either number of edges is incorrect, or structure is)&apos;)
 	}
+	
+	/**
+	 * @private
+	 */
+	this.sample_struct_size = 4 * 2;
+	/**
+	 * @private
+	 */
+	this.sample_arr_length = samples_buffer.length / this.sample_struct_size;
+	/**
+	 * @private
+	 */
+	this.sample_buffer = samples_buffer;
     
     /**
      * @private
@@ -183,13 +197,28 @@ export default class SplitSnapshotProvider {
       offset + this.edge_struct_size
     );
   }
-  
-  getTraceBufferFrame(index) {
-	  
+
+
+  /**
+   * Get total number of Samples
+   * @return {number}
+   */
+  getSampleArraySize() {
+    return this.sample_arr_length;
   }
   
-  getTraceLocation(index) {
-	  
+
+  /**
+   * Gets a sample at the specified index.
+   * @param {number} index Index of the sample we wish to get.
+   * @return {string} 
+   */
+  getSampleBuffer(index) {
+	  const index_offset = index * this.sample_struct_size;
+	  return this.sample_buffer.slice(
+		  index_offset,
+		  index_offset + this.sample_struct_size
+	  );
   }
 
 
@@ -266,13 +295,15 @@ export default class SplitSnapshotProvider {
 		const meta_file = path.join(outdir, &apos;snapshot.json&apos;);
 		const nodes_file = path.join(outdir, &apos;nodes&apos;);
 		const edges_file = path.join(outdir, &apos;edges&apos;);
+		const samples_file = path.join(outdir, &apos;samples&apos;);
 		const strings_file = path.join(outdir, &apos;strings&apos;);
 		const string_indices_file = path.join(outdir, &apos;string_indices&apos;);
 		
-		let todo = 5;
+		let todo = 6;
 		let snapshot_info;
 		let nodes_buffer;
 		let edges_buffer;
+		let samples_buffer;
 		let strings_buffer;
 		let string_indices_buffer;
 		function done(e) {
@@ -289,6 +320,7 @@ export default class SplitSnapshotProvider {
 					snapshot_info,
 					nodes_buffer,
 					edges_buffer,
+					samples_buffer,
 					string_indices_buffer,
 					strings_buffer
 				));
@@ -321,6 +353,14 @@ export default class SplitSnapshotProvider {
 				return;
 			}
 			edges_buffer = b;
+			done();
+		});
+		fs.readFile(samples_file, (e,b) =&gt; {
+			if (e) {
+				done(e);
+				return;
+			}
+			samples_buffer = b;
 			done();
 		});
 		fs.readFile(strings_file, (e,b) =&gt; {
@@ -360,6 +400,8 @@ export default class SplitSnapshotProvider {
 		let nodes_buffer = null;
 		let edges_buffer_index = 0;
 		let edges_buffer = null;
+		let samples_buffer_length = 0;
+		let samples_buffer = new Buffer(0);
 		let strings_buffer_length = 0;
 		let strings_buffer = null;
 		let strings_indices_buffer_length = 0;
@@ -411,12 +453,24 @@ export default class SplitSnapshotProvider {
 				edges_buffer.writeUInt32BE(node_offset * node_struct_size, edges_buffer_index);
 				edges_buffer_index += 4;
 			},
+			onsample(buffer) {
+				if (buffer == null) {
+					samples_buffer = samples_buffer.slice(0, samples_buffer_length);
+					return;
+				}
+				if (samples_buffer.length - samples_buffer_length &lt; 8) {
+					samples_buffer = Buffer.concat([samples_buffer, new Buffer(4096)]);
+				}
+				buffer.copy(samples_buffer, samples_buffer_length);
+				samples_buffer_length += buffer.length;
+			},
 			onstring(str) {
 				if (str == null) {
 					strings_indices_buffer = strings_indices_buffer.slice(0, strings_indices_buffer_length);
 					strings_buffer = strings_buffer.slice(0, strings_buffer_length);
 					return;
 				}
+				// enforce utf8 encoding
 				let str_buf = new Buffer(str, &apos;utf8&apos;);
 				let str_buf_length = str_buf.length;
 				
@@ -437,7 +491,15 @@ export default class SplitSnapshotProvider {
 		}))
 		.on(&apos;error&apos;, e=&gt;callback(e))
 		.on(&apos;end&apos;, ()=&gt;{
-			callback(null, new SplitSnapshotProvider(snapshot_info, nodes_buffer, edges_buffer, strings_indices_buffer, strings_buffer));
+			callback(null, new SplitSnapshotProvider(
+				snapshot_info,
+				nodes_buffer,
+				edges_buffer,
+				samples_buffer,
+				strings_indices_buffer,
+				strings_buffer
+				)
+			);
 		});
 	}
 }</code></pre>

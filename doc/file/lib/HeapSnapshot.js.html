@@ -159,6 +159,41 @@ export default class HeapSnapshot {
       while (nodes_to_visit.length);
     })();
   }
+  
+  /**
+   * Walks over all the Samples in the HeapSnapshot in order.
+   * 
+   * @return {Iterator&lt;Sample&gt;} Iterator to walk over all of the Samples. 
+   */
+  samples() {
+    const snapshot = this;
+    return function* samples() {
+      const samples_arr_length = snapshot.provider.getSampleArraySize();
+      for (let i = 0; i &lt; samples_arr_length; i++) {
+        yield snapshot.getSample(i);
+      }
+    }();
+  }
+  
+  /**
+   * Gets a Sample by index.
+   * 
+   * @example
+   * const first = snapshot.getSample(0);
+   * const second = snapshot.getSample(1);
+   * console.log(&apos;delay&apos;, second.time - first.time);
+   * 
+   * @param {number} sample_index
+   * @return {Sample}
+   */
+  getSample(sample_index) {
+    if (sample_index &gt; this.provider.getSampleArraySize()) {
+      return null;
+    }
+    const sample_buffer = this.provider.getSampleBuffer(sample_index);
+    const sample = new Sample(sample_buffer);
+    return sample;
+  }
 
   /**
    * @typedef {Object} NodeResult
@@ -251,6 +286,31 @@ export default class HeapSnapshot {
         return self.getNode(node_index);
       }
     };
+  }
+}
+/**
+ * A Sample class for a HeapSnapshot.
+ * @property {number} timestamp
+ * @property {number} lastAssignedId The largest `node.fields.id` visible when this sample was taken. Since `id`s only increment, all `id`s less than this were allocated prior to this sample.
+ */
+class Sample {
+  constructor(buffer) {
+    this._buffer = buffer;
+  }
+  inspect() {
+      let ret = &apos;&apos;;
+      let i = 0;
+      for (const field of [&apos;timestamp&apos;,&apos;lastAssignedId&apos;]) {
+        ret += &apos; &apos;+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString(&apos;hex&apos;)].join(&apos;:&apos;);
+        i++;
+      }
+      return `HeapSnapshot::Sample${ret}`;
+  }
+  get timestamp() {
+    return this._buffer.readUInt32BE(0);
+  }
+  get lastAssignedId() {
+    return this._buffer.readUInt32BE(4);
   }
 }
 /**

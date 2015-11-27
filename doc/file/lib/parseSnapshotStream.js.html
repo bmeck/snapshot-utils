@@ -50,6 +50,7 @@
  * @property {function(snapshot_info: {meta:Object})} onsnapshot_info
  * @property {function(node_buffer: Buffer)} onnode
  * @property {function(edge_buffer: Buffer)} onedge
+ * @property {function(sample_buffer: Buffer)} onsample
  * @property {function(str: string)} onstring
  */
 /**
@@ -63,6 +64,7 @@ export default function parseSnapshotStream({
 	onnode = Function.prototype,
 	onedge = Function.prototype,
 	onstring = Function.prototype,
+  onsample = Function.prototype
 }) {
   const parser = clarinet.createStream();
 
@@ -104,6 +106,7 @@ export default function parseSnapshotStream({
 	let innodes = false;
 	let inedges = false;
 	let instrings = false;
+	let insamples = false;
 	const atsnapshot = () =&gt; {
 		return parser_keys.length === 1 &amp;&amp; parser_keys[0] === &apos;snapshot&apos;;
 	};
@@ -115,6 +118,9 @@ export default function parseSnapshotStream({
 	};
 	const atedges = () =&gt; {
 		return parser_keys.length === 1 &amp;&amp; parser_keys[0] === &apos;edges&apos;;
+	};
+	const atsamples = () =&gt; {
+		return parser_keys.length === 1 &amp;&amp; parser_keys[0] === &apos;samples&apos;;
 	};
 	const atstrings = () =&gt; {
 		return parser_keys.length === 1 &amp;&amp; parser_keys[0] === &apos;strings&apos;;
@@ -136,17 +142,22 @@ export default function parseSnapshotStream({
   });
   parser.on(&quot;openarray&quot;, () =&gt; {
     if (insnapshot()) nest([]);
-    if (atnodes()) {
+    else if (atnodes()) {
       innodes = true;
       buffer = new Buffer(node_fields_size);
       field_index = 0;
     }
-    if (atedges()) {
+    else if (atedges()) {
       inedges = true;
       buffer = new Buffer(edge_fields_size);
       field_index = 0;
     }
-    if (atstrings()) {
+    else if (atsamples()) {
+      insamples = true;
+      buffer = new Buffer(4 * 2);
+      field_index = 0;
+    }
+    else if (atstrings()) {
       instrings = true;
     }
     key(0);
@@ -154,15 +165,19 @@ export default function parseSnapshotStream({
   parser.on(&quot;closearray&quot;, () =&gt; {
     unkey();
     if (insnapshot()) pop();
-    if (atnodes()) {
+    else if (atnodes()) {
       innodes = false;
       onnode(null);
     }
-    if (atedges()) {
+    else if (atedges()) {
       inedges = false;
       onedge(null);
     }
-    if (atstrings()) {
+    else if (atsamples()) {
+      insamples = false;
+      onsample(null);
+    }
+    else if (atstrings()) {
       instrings = false;
       onstring(null);
     }
@@ -180,7 +195,7 @@ export default function parseSnapshotStream({
         buffer = new Buffer(node_fields_size);
       }
     }
-    if (inedges) {
+    else if (inedges) {
       buffer.writeUInt32BE(value, field_index);
       field_index = (field_index + 4) % edge_fields_size;
       if (field_index === 0) {
@@ -188,7 +203,15 @@ export default function parseSnapshotStream({
         buffer = new Buffer(edge_fields_size);
       }
     }
-    if (instrings) {
+    else if (insamples) {
+      buffer.writeUInt32BE(value, field_index);
+      field_index = (field_index + 4) % (4 * 2);
+      if (field_index === 0) {
+        onsample(buffer);
+        buffer = new Buffer(4 * 2);
+      }
+    }
+    else if (instrings) {
       onstring(value);
     }
     else if (insnapshot()) push(value);

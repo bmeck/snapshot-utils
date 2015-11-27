@@ -366,6 +366,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "lib/heapsnapshot.js~heapsnapshot#getsample",
+    "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getSample",
+    "lib/HeapSnapshot.js~HeapSnapshot#getSample",
+    "method"
+  ],
+  [
+    "lib/heapsnapshot.js~heapsnapshot#samples",
+    "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-samples",
+    "lib/HeapSnapshot.js~HeapSnapshot#samples",
+    "method"
+  ],
+  [
     "lib/heapsnapshot.js~heapsnapshot#walk",
     "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-walk",
     "lib/HeapSnapshot.js~HeapSnapshot#walk",
@@ -432,21 +444,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "lib/splitsnapshotprovider.js~splitsnapshotprovider#getsamplearraysize",
+    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getSampleArraySize",
+    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getSampleArraySize",
+    "method"
+  ],
+  [
+    "lib/splitsnapshotprovider.js~splitsnapshotprovider#getsamplebuffer",
+    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getSampleBuffer",
+    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getSampleBuffer",
+    "method"
+  ],
+  [
     "lib/splitsnapshotprovider.js~splitsnapshotprovider#getstring",
     "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getString",
     "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getString",
-    "method"
-  ],
-  [
-    "lib/splitsnapshotprovider.js~splitsnapshotprovider#gettracebufferframe",
-    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getTraceBufferFrame",
-    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getTraceBufferFrame",
-    "method"
-  ],
-  [
-    "lib/splitsnapshotprovider.js~splitsnapshotprovider#gettracelocation",
-    "class/lib/SplitSnapshotProvider.js~SplitSnapshotProvider.html#instance-method-getTraceLocation",
-    "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getTraceLocation",
     "method"
   ],
   [
@@ -483,6 +495,12 @@ window.esdocSearchIndex = [
     "lib/bin/dump.js",
     "file/lib/bin/dump.js.html",
     "lib/bin/dump.js",
+    "file"
+  ],
+  [
+    "lib/bin/samples.js",
+    "file/lib/bin/samples.js.html",
+    "lib/bin/samples.js",
     "file"
   ],
   [
