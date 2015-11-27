@@ -402,6 +402,12 @@ window.esdocSearchIndex = [
     "typedef"
   ],
   [
+    "lib/heapsnapshot.js~sample",
+    "typedef/index.html#static-typedef-Sample",
+    "lib/HeapSnapshot.js~Sample",
+    "typedef"
+  ],
+  [
     "lib/splitsnapshotprovider.js",
     "file/lib/SplitSnapshotProvider.js.html",
     "lib/SplitSnapshotProvider.js",
