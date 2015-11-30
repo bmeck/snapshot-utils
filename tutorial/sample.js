@@ -13,6 +13,6 @@ setInterval(function() {
 }, 10)
 
 setTimeout(function() {
-  heapdump.writeSnapshot('2.heapsnapshot');
-  process.exit();
+  //heapdump.writeSnapshot('2.heapsnapshot');
+  //process.exit();
 }, 1000);

@@ -1,6 +1,12 @@
-all: doc
-	@mkdir -p out
+.PHONY: doc compile coverage watch test
+
+all: doc compile
+
+doc:
 	@esdoc -c esdoc.json 
+
+compile:
+	@mkdir -p out
 	@babel lib\
 		--optional runtime\
 		--out-dir out\
@@ -8,7 +14,7 @@ all: doc
 	@echo built
 
 watch:
-	watch-run -i -p "lib/**.js" -- make all
+	watch-run -i -p "lib/**.js" -- make compile
 
 clean:
-	rm -rf out/
+	rm -rf out/ doc/

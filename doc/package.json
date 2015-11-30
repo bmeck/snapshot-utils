@@ -5,7 +5,10 @@
   "main": "out/index.js",
   "scripts": {
     "build": "make",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "doc": "make doc",
+    "compile": "make compile",
+    "watch": "make watch",
+    "test": "make test"
   },
   "repository": {
     "type": "git",

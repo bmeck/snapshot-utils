@@ -366,6 +366,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "lib/heapsnapshot.js~heapsnapshot#getnodebyid",
+    "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getNodeById",
+    "lib/HeapSnapshot.js~HeapSnapshot#getNodeById",
+    "method"
+  ],
+  [
     "lib/heapsnapshot.js~heapsnapshot#getsample",
     "class/lib/HeapSnapshot.js~HeapSnapshot.html#instance-method-getSample",
     "lib/HeapSnapshot.js~HeapSnapshot#getSample",
@@ -501,6 +507,12 @@ window.esdocSearchIndex = [
     "lib/bin/dump.js",
     "file/lib/bin/dump.js.html",
     "lib/bin/dump.js",
+    "file"
+  ],
+  [
+    "lib/bin/id.js",
+    "file/lib/bin/id.js.html",
+    "lib/bin/id.js",
     "file"
   ],
   [
