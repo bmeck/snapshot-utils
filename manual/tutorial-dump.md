@@ -2,6 +2,7 @@
 
 ```javascript
 import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
+
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node dump.js <"my.heapsnapshot"`
 const stream = process.stdin;
@@ -22,14 +23,11 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
 	const snapshot = new HeapSnapshot(provider);
 	
 	// setup the walk
-	const iter = snapshot.walk(
-		// node opened function
-		node => console.log(node),
-		// edge walked function
-		edge => {},
-		// node closed function
-		node => {}
-	);
+	const iter = snapshot.walk({
+		onNodeOpen(node) { console.log(node) },
+		onEdge(edge) {},
+		onNodeClose(node) {}
+	});
 	// perform the walk
 	for (const _ of iter) {}
 });

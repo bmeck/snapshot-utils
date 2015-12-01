@@ -4,6 +4,7 @@
   "manual": {
     "overview": ["./readme.md"],
     "Terms": ["./manual/terms.md"],
-    "tutorial": ["./manual/tutorial-dump.md", "./manual/tutorial-script-vars.md"]
+    "tutorial": [
+      "./manual/tutorial-header.md", "./manual/tutorial-dump.md", "./manual/tutorial-script-vars.md"]
   }
 }

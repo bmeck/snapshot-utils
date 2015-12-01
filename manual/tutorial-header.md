@@ -1,0 +1,1 @@
+All these examples assume a full ES2015 environment, you can use [babel-node](https://babeljs.io/docs/usage/cli/#babel-node) in order to run these without compiling them.

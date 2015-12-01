@@ -92,8 +92,10 @@
     <span>&#xBB;</span>
     <span data-ice="title">Tutorial</span>
   </div>
-  <div data-ice="content"><h2 id="get-all-nodes">Get All Nodes</h2>
+  <div data-ice="content"><p>All these examples assume a full ES2015 environment, you can use <a href="https://babeljs.io/docs/usage/cli/#babel-node">babel-node</a> in order to run these without compiling them.</p>
+<h2 id="get-all-nodes">Get All Nodes</h2>
 <pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
+
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node dump.js &lt;&quot;my.heapsnapshot&quot;`
 const stream = process.stdin;
@@ -114,20 +116,17 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
     const snapshot = new HeapSnapshot(provider);
 
     // setup the walk
-    const iter = snapshot.walk(
-        // node opened function
-        node =&gt; console.log(node),
-        // edge walked function
-        edge =&gt; {},
-        // node closed function
-        node =&gt; {}
-    );
+    const iter = snapshot.walk({
+        onNodeOpen(node) { console.log(node) },
+        onEdge(edge) {},
+        onNodeClose(node) {}
+    });
     // perform the walk
     for (const _ of iter) {}
 });</code>
 </code></pre>
 <h2 id="get-all-variables">Get All Variables</h2>
-<pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;;
+<pre><code class="lang-javascript"><code class="source-code prettyprint">import {HeapSnapshot,SplitSnapshotProvider} from &quot;snapshot-utils&quot;
 
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node script-vars.js &lt;&quot;my.heapsnapshot&quot;`

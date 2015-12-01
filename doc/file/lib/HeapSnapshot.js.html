@@ -274,7 +274,6 @@ export default class HeapSnapshot {
       -node_fields_len :
       node_fields_len;
     while (node_index &gt;= 0 &amp;&amp; node_index &lt; node_arr_length) {
-      console.log(node_index)
       const node = this.getNode(node_index);
       const id = node.fields.id;
       if (id === node_id) {

@@ -1,6 +1,6 @@
 {
   "name": "snapshot-utils",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Tools to more easily create programs against v8 heap snapshots.",
   "main": "out/index.js",
   "scripts": {
@@ -21,7 +21,8 @@
   },
   "homepage": "http://bmeck.github.io/snapshot-utils/doc/identifiers.html",
   "dependencies": {
-    "babel-runtime": "^6.1.4",
+    "babel": "^5.8.34",
+    "babel-runtime": "^5.8.34",
     "clarinet": "^0.11.0"
   },
   "devDependencies": {

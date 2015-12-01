@@ -1,7 +1,7 @@
 ## Get All Variables
 
 ```javascript
-import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils";
+import {HeapSnapshot,SplitSnapshotProvider} from "snapshot-utils"
 
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node script-vars.js <"my.heapsnapshot"`
