@@ -492,12 +492,6 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "lib/bin/closed-size.js",
-    "file/lib/bin/closed-size.js.html",
-    "lib/bin/closed-size.js",
-    "file"
-  ],
-  [
     "lib/bin/dominators.js",
     "file/lib/bin/dominators.js.html",
     "lib/bin/dominators.js",

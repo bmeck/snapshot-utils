@@ -45,7 +45,8 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">lib/bin/save-to-dir.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import SplitSnapshotProvider from &quot;../SplitSnapshotProvider&quot;;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">#!/usr/bin/env node
+import SplitSnapshotProvider from &quot;../SplitSnapshotProvider&quot;;
 import path from &quot;path&quot;;
 import fs from &quot;fs&quot;;
 
@@ -55,9 +56,11 @@ if (!path.isAbsolute(outdir)) {
 	process.exit(3);
 }
 
+// We are going to use stdin to read our snapshot
+// pipe a snapshot in via: `node save-to-dir.js $dir &lt;&quot;my.heapsnapshot&quot;`
 SplitSnapshotProvider.fromStream(process.stdin, function (err, provider) {
   provider.writeToDirectory(outdir, _=&gt;_);
-})</code></pre>
+});</code></pre>
 
 </div>
 

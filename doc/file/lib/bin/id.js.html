@@ -45,10 +45,11 @@
 </nav>
 
 <div class="content" data-ice="content"><h1 data-ice="title">lib/bin/id.js</h1>
-<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {HeapSnapshot,SplitSnapshotProvider} from &quot;../&quot;;
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">#!/usr/bin/env node
+import {HeapSnapshot,SplitSnapshotProvider} from &quot;../&quot;;
 
 // We are going to use stdin to read our snapshot
-// pipe a snapshot in via: `node dump.js &lt;&quot;my.heapsnapshot&quot;`
+// pipe a snapshot in via: `node id.js &lt;&quot;my.heapsnapshot&quot;`
 const stream = process.stdin;
 
 // This is used to parse the snapshot data.

@@ -10,16 +10,16 @@
             "type": "Identifier",
             "name": "HeapSnapshot",
             "range": [
-              8,
-              20
+              28,
+              40
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 8
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 20
               }
             }
@@ -28,31 +28,31 @@
             "type": "Identifier",
             "name": "HeapSnapshot",
             "range": [
-              8,
-              20
+              28,
+              40
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 8
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 20
               }
             }
           },
           "range": [
-            8,
-            20
+            28,
+            40
           ],
           "loc": {
             "start": {
-              "line": 1,
+              "line": 2,
               "column": 8
             },
             "end": {
-              "line": 1,
+              "line": 2,
               "column": 20
             }
           }
@@ -63,16 +63,16 @@
             "type": "Identifier",
             "name": "SplitSnapshotProvider",
             "range": [
-              21,
-              42
+              41,
+              62
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 21
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 42
               }
             }
@@ -81,31 +81,31 @@
             "type": "Identifier",
             "name": "SplitSnapshotProvider",
             "range": [
-              21,
-              42
+              41,
+              62
             ],
             "loc": {
               "start": {
-                "line": 1,
+                "line": 2,
                 "column": 21
               },
               "end": {
-                "line": 1,
+                "line": 2,
                 "column": 42
               }
             }
           },
           "range": [
-            21,
-            42
+            41,
+            62
           ],
           "loc": {
             "start": {
-              "line": 1,
+              "line": 2,
               "column": 21
             },
             "end": {
-              "line": 1,
+              "line": 2,
               "column": 42
             }
           }
@@ -116,68 +116,88 @@
         "value": "../",
         "raw": "\"../\"",
         "range": [
-          49,
-          54
+          69,
+          74
         ],
         "loc": {
           "start": {
-            "line": 1,
+            "line": 2,
             "column": 49
           },
           "end": {
-            "line": 1,
+            "line": 2,
             "column": 54
           }
         }
       },
       "range": [
-        0,
-        55
+        20,
+        75
       ],
       "loc": {
         "start": {
-          "line": 1,
+          "line": 2,
           "column": 0
         },
         "end": {
-          "line": 1,
+          "line": 2,
           "column": 55
         }
       },
+      "leadingComments": [
+        {
+          "type": "Line",
+          "value": "/usr/bin/env node",
+          "range": [
+            0,
+            19
+          ],
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 19
+            }
+          }
+        }
+      ],
       "trailingComments": [
         {
           "type": "Line",
           "value": " We are going to use stdin to read our snapshot",
           "range": [
-            57,
-            106
+            77,
+            126
           ],
           "loc": {
             "start": {
-              "line": 3,
+              "line": 4,
               "column": 0
             },
             "end": {
-              "line": 3,
+              "line": 4,
               "column": 49
             }
           }
         },
         {
           "type": "Line",
-          "value": " pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`",
+          "value": " pipe a snapshot in via: `node id.js <\"my.heapsnapshot\"`",
           "range": [
-            107,
-            167
+            127,
+            185
           ],
           "loc": {
             "start": {
-              "line": 4,
+              "line": 5,
               "column": 0
             },
             "end": {
-              "line": 4,
-              "column": 60
+              "line": 5,
+              "column": 58
             }
           }
         }
@@ -192,16 +212,16 @@
             "type": "Identifier",
             "name": "stream",
             "range": [
-              174,
-              180
+              192,
+              198
             ],
             "loc": {
               "start": {
-                "line": 5,
+                "line": 6,
                 "column": 6
               },
               "end": {
-                "line": 5,
+                "line": 6,
                 "column": 12
               }
             }
@@ -213,16 +233,16 @@
               "type": "Identifier",
               "name": "process",
               "range": [
-                183,
-                190
+                201,
+                208
               ],
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 6,
                   "column": 15
                 },
                 "end": {
-                  "line": 5,
+                  "line": 6,
                   "column": 22
                 }
               }
@@ -231,46 +251,46 @@
               "type": "Identifier",
               "name": "stdin",
               "range": [
-                191,
-                196
+                209,
+                214
               ],
               "loc": {
                 "start": {
-                  "line": 5,
+                  "line": 6,
                   "column": 23
                 },
                 "end": {
-                  "line": 5,
+                  "line": 6,
                   "column": 28
                 }
               }
             },
             "range": [
-              183,
-              196
+              201,
+              214
             ],
             "loc": {
               "start": {
-                "line": 5,
+                "line": 6,
                 "column": 15
               },
               "end": {
-                "line": 5,
+                "line": 6,
                 "column": 28
               }
             }
           },
           "range": [
-            174,
-            196
+            192,
+            214
           ],
           "loc": {
             "start": {
-              "line": 5,
+              "line": 6,
               "column": 6
             },
             "end": {
-              "line": 5,
+              "line": 6,
               "column": 28
             }
           }
@@ -278,16 +298,16 @@
       ],
       "kind": "const",
       "range": [
-        168,
-        197
+        186,
+        215
       ],
       "loc": {
         "start": {
-          "line": 5,
+          "line": 6,
           "column": 0
         },
         "end": {
-          "line": 5,
+          "line": 6,
           "column": 29
         }
       },
@@ -296,35 +316,35 @@
           "type": "Line",
           "value": " We are going to use stdin to read our snapshot",
           "range": [
-            57,
-            106
+            77,
+            126
           ],
           "loc": {
             "start": {
-              "line": 3,
+              "line": 4,
               "column": 0
             },
             "end": {
-              "line": 3,
+              "line": 4,
               "column": 49
             }
           }
         },
         {
           "type": "Line",
-          "value": " pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`",
+          "value": " pipe a snapshot in via: `node id.js <\"my.heapsnapshot\"`",
           "range": [
-            107,
-            167
+            127,
+            185
           ],
           "loc": {
             "start": {
-              "line": 4,
+              "line": 5,
               "column": 0
             },
             "end": {
-              "line": 4,
-              "column": 60
+              "line": 5,
+              "column": 58
             }
           }
         }
@@ -334,16 +354,16 @@
           "type": "Line",
           "value": " This is used to parse the snapshot data.",
           "range": [
-            199,
-            242
+            217,
+            260
           ],
           "loc": {
             "start": {
-              "line": 7,
+              "line": 8,
               "column": 0
             },
             "end": {
-              "line": 7,
+              "line": 8,
               "column": 43
             }
           }
@@ -352,16 +372,16 @@
           "type": "Line",
           "value": " A provider is generally not used for analyzing the snapshot.",
           "range": [
-            243,
-            306
+            261,
+            324
           ],
           "loc": {
             "start": {
-              "line": 8,
+              "line": 9,
               "column": 0
             },
             "end": {
-              "line": 8,
+              "line": 9,
               "column": 63
             }
           }
@@ -370,16 +390,16 @@
           "type": "Line",
           "value": " It is an abstraction to allow saving/loading the snapshot to different",
           "range": [
-            307,
-            380
+            325,
+            398
           ],
           "loc": {
             "start": {
-              "line": 9,
+              "line": 10,
               "column": 0
             },
             "end": {
-              "line": 9,
+              "line": 10,
               "column": 73
             }
           }
@@ -388,16 +408,16 @@
           "type": "Line",
           "value": " location.",
           "range": [
-            381,
-            393
+            399,
+            411
           ],
           "loc": {
             "start": {
-              "line": 10,
+              "line": 11,
               "column": 0
             },
             "end": {
-              "line": 10,
+              "line": 11,
               "column": 12
             }
           }
@@ -415,16 +435,16 @@
             "type": "Identifier",
             "name": "SplitSnapshotProvider",
             "range": [
-              394,
-              415
+              412,
+              433
             ],
             "loc": {
               "start": {
-                "line": 11,
+                "line": 12,
                 "column": 0
               },
               "end": {
-                "line": 11,
+                "line": 12,
                 "column": 21
               }
             }
@@ -433,31 +453,31 @@
             "type": "Identifier",
             "name": "fromStream",
             "range": [
-              416,
-              426
+              434,
+              444
             ],
             "loc": {
               "start": {
-                "line": 11,
+                "line": 12,
                 "column": 22
               },
               "end": {
-                "line": 11,
+                "line": 12,
                 "column": 32
               }
             }
           },
           "range": [
-            394,
-            426
+            412,
+            444
           ],
           "loc": {
             "start": {
-              "line": 11,
+              "line": 12,
               "column": 0
             },
             "end": {
-              "line": 11,
+              "line": 12,
               "column": 32
             }
           }
@@ -467,16 +487,16 @@
             "type": "Identifier",
             "name": "stream",
             "range": [
-              427,
-              433
+              445,
+              451
             ],
             "loc": {
               "start": {
-                "line": 11,
+                "line": 12,
                 "column": 33
               },
               "end": {
-                "line": 11,
+                "line": 12,
                 "column": 39
               }
             }
@@ -489,16 +509,16 @@
                 "type": "Identifier",
                 "name": "err",
                 "range": [
-                  436,
-                  439
+                  454,
+                  457
                 ],
                 "loc": {
                   "start": {
-                    "line": 11,
+                    "line": 12,
                     "column": 42
                   },
                   "end": {
-                    "line": 11,
+                    "line": 12,
                     "column": 45
                   }
                 }
@@ -507,16 +527,16 @@
                 "type": "Identifier",
                 "name": "provider",
                 "range": [
-                  441,
-                  449
+                  459,
+                  467
                 ],
                 "loc": {
                   "start": {
-                    "line": 11,
+                    "line": 12,
                     "column": 47
                   },
                   "end": {
-                    "line": 11,
+                    "line": 12,
                     "column": 55
                   }
                 }
@@ -531,16 +551,16 @@
                     "type": "Identifier",
                     "name": "err",
                     "range": [
-                      461,
-                      464
+                      479,
+                      482
                     ],
                     "loc": {
                       "start": {
-                        "line": 12,
+                        "line": 13,
                         "column": 5
                       },
                       "end": {
-                        "line": 12,
+                        "line": 13,
                         "column": 8
                       }
                     }
@@ -559,16 +579,16 @@
                               "type": "Identifier",
                               "name": "console",
                               "range": [
-                                470,
-                                477
+                                488,
+                                495
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 2
                                 },
                                 "end": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 9
                                 }
                               }
@@ -577,31 +597,31 @@
                               "type": "Identifier",
                               "name": "error",
                               "range": [
-                                478,
-                                483
+                                496,
+                                501
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 10
                                 },
                                 "end": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 15
                                 }
                               }
                             },
                             "range": [
-                              470,
-                              483
+                              488,
+                              501
                             ],
                             "loc": {
                               "start": {
-                                "line": 13,
+                                "line": 14,
                                 "column": 2
                               },
                               "end": {
-                                "line": 13,
+                                "line": 14,
                                 "column": 15
                               }
                             }
@@ -611,47 +631,47 @@
                               "type": "Identifier",
                               "name": "err",
                               "range": [
-                                484,
-                                487
+                                502,
+                                505
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 16
                                 },
                                 "end": {
-                                  "line": 13,
+                                  "line": 14,
                                   "column": 19
                                 }
                               }
                             }
                           ],
                           "range": [
-                            470,
-                            488
+                            488,
+                            506
                           ],
                           "loc": {
                             "start": {
-                              "line": 13,
+                              "line": 14,
                               "column": 2
                             },
                             "end": {
-                              "line": 13,
+                              "line": 14,
                               "column": 20
                             }
                           }
                         },
                         "range": [
-                          470,
-                          489
+                          488,
+                          507
                         ],
                         "loc": {
                           "start": {
-                            "line": 13,
+                            "line": 14,
                             "column": 2
                           },
                           "end": {
-                            "line": 13,
+                            "line": 14,
                             "column": 21
                           }
                         }
@@ -667,16 +687,16 @@
                               "type": "Identifier",
                               "name": "process",
                               "range": [
-                                492,
-                                499
+                                510,
+                                517
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 2
                                 },
                                 "end": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 9
                                 }
                               }
@@ -685,31 +705,31 @@
                               "type": "Identifier",
                               "name": "exit",
                               "range": [
-                                500,
-                                504
+                                518,
+                                522
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 10
                                 },
                                 "end": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 14
                                 }
                               }
                             },
                             "range": [
-                              492,
-                              504
+                              510,
+                              522
                             ],
                             "loc": {
                               "start": {
-                                "line": 14,
+                                "line": 15,
                                 "column": 2
                               },
                               "end": {
-                                "line": 14,
+                                "line": 15,
                                 "column": 14
                               }
                             }
@@ -720,79 +740,79 @@
                               "value": 1,
                               "raw": "1",
                               "range": [
-                                505,
-                                506
+                                523,
+                                524
                               ],
                               "loc": {
                                 "start": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 15
                                 },
                                 "end": {
-                                  "line": 14,
+                                  "line": 15,
                                   "column": 16
                                 }
                               }
                             }
                           ],
                           "range": [
-                            492,
-                            507
+                            510,
+                            525
                           ],
                           "loc": {
                             "start": {
-                              "line": 14,
+                              "line": 15,
                               "column": 2
                             },
                             "end": {
-                              "line": 14,
+                              "line": 15,
                               "column": 17
                             }
                           }
                         },
                         "range": [
-                          492,
-                          508
+                          510,
+                          526
                         ],
                         "loc": {
                           "start": {
-                            "line": 14,
+                            "line": 15,
                             "column": 2
                           },
                           "end": {
-                            "line": 14,
+                            "line": 15,
                             "column": 18
                           }
                         }
                       }
                     ],
                     "range": [
-                      466,
-                      511
+                      484,
+                      529
                     ],
                     "loc": {
                       "start": {
-                        "line": 12,
+                        "line": 13,
                         "column": 10
                       },
                       "end": {
-                        "line": 15,
+                        "line": 16,
                         "column": 2
                       }
                     }
                   },
                   "alternate": null,
                   "range": [
-                    457,
-                    511
+                    475,
+                    529
                   ],
                   "loc": {
                     "start": {
-                      "line": 12,
+                      "line": 13,
                       "column": 1
                     },
                     "end": {
-                      "line": 15,
+                      "line": 16,
                       "column": 2
                     }
                   },
@@ -801,16 +821,16 @@
                       "type": "Line",
                       "value": " This gives us an API that can be used to analyze the snapshot.",
                       "range": [
-                        513,
-                        578
+                        531,
+                        596
                       ],
                       "loc": {
                         "start": {
-                          "line": 16,
+                          "line": 17,
                           "column": 1
                         },
                         "end": {
-                          "line": 16,
+                          "line": 17,
                           "column": 66
                         }
                       }
@@ -819,16 +839,16 @@
                       "type": "Line",
                       "value": " Since snapshot data contains the structure of Nodes and Edges",
                       "range": [
-                        580,
-                        644
+                        598,
+                        662
                       ],
                       "loc": {
                         "start": {
-                          "line": 17,
+                          "line": 18,
                           "column": 1
                         },
                         "end": {
-                          "line": 17,
+                          "line": 18,
                           "column": 65
                         }
                       }
@@ -837,16 +857,16 @@
                       "type": "Line",
                       "value": " the Node and Edge classes we obtain from this may be different",
                       "range": [
-                        646,
-                        711
+                        664,
+                        729
                       ],
                       "loc": {
                         "start": {
-                          "line": 18,
+                          "line": 19,
                           "column": 1
                         },
                         "end": {
-                          "line": 18,
+                          "line": 19,
                           "column": 66
                         }
                       }
@@ -855,16 +875,16 @@
                       "type": "Line",
                       "value": " from different snapshots.",
                       "range": [
-                        713,
-                        741
+                        731,
+                        759
                       ],
                       "loc": {
                         "start": {
-                          "line": 19,
+                          "line": 20,
                           "column": 1
                         },
                         "end": {
-                          "line": 19,
+                          "line": 20,
                           "column": 29
                         }
                       }
@@ -880,16 +900,16 @@
                         "type": "Identifier",
                         "name": "snapshot",
                         "range": [
-                          749,
-                          757
+                          767,
+                          775
                         ],
                         "loc": {
                           "start": {
-                            "line": 20,
+                            "line": 21,
                             "column": 7
                           },
                           "end": {
-                            "line": 20,
+                            "line": 21,
                             "column": 15
                           }
                         }
@@ -900,16 +920,16 @@
                           "type": "Identifier",
                           "name": "HeapSnapshot",
                           "range": [
-                            764,
-                            776
+                            782,
+                            794
                           ],
                           "loc": {
                             "start": {
-                              "line": 20,
+                              "line": 21,
                               "column": 22
                             },
                             "end": {
-                              "line": 20,
+                              "line": 21,
                               "column": 34
                             }
                           }
@@ -919,47 +939,47 @@
                             "type": "Identifier",
                             "name": "provider",
                             "range": [
-                              777,
-                              785
+                              795,
+                              803
                             ],
                             "loc": {
                               "start": {
-                                "line": 20,
+                                "line": 21,
                                 "column": 35
                               },
                               "end": {
-                                "line": 20,
+                                "line": 21,
                                 "column": 43
                               }
                             }
                           }
                         ],
                         "range": [
-                          760,
-                          786
+                          778,
+                          804
                         ],
                         "loc": {
                           "start": {
-                            "line": 20,
+                            "line": 21,
                             "column": 18
                           },
                           "end": {
-                            "line": 20,
+                            "line": 21,
                             "column": 44
                           }
                         }
                       },
                       "range": [
-                        749,
-                        786
+                        767,
+                        804
                       ],
                       "loc": {
                         "start": {
-                          "line": 20,
+                          "line": 21,
                           "column": 7
                         },
                         "end": {
-                          "line": 20,
+                          "line": 21,
                           "column": 44
                         }
                       }
@@ -967,16 +987,16 @@
                   ],
                   "kind": "const",
                   "range": [
-                    743,
-                    787
+                    761,
+                    805
                   ],
                   "loc": {
                     "start": {
-                      "line": 20,
+                      "line": 21,
                       "column": 1
                     },
                     "end": {
-                      "line": 20,
+                      "line": 21,
                       "column": 45
                     }
                   },
@@ -985,16 +1005,16 @@
                       "type": "Line",
                       "value": " This gives us an API that can be used to analyze the snapshot.",
                       "range": [
-                        513,
-                        578
+                        531,
+                        596
                       ],
                       "loc": {
                         "start": {
-                          "line": 16,
+                          "line": 17,
                           "column": 1
                         },
                         "end": {
-                          "line": 16,
+                          "line": 17,
                           "column": 66
                         }
                       }
@@ -1003,16 +1023,16 @@
                       "type": "Line",
                       "value": " Since snapshot data contains the structure of Nodes and Edges",
                       "range": [
-                        580,
-                        644
+                        598,
+                        662
                       ],
                       "loc": {
                         "start": {
-                          "line": 17,
+                          "line": 18,
                           "column": 1
                         },
                         "end": {
-                          "line": 17,
+                          "line": 18,
                           "column": 65
                         }
                       }
@@ -1021,16 +1041,16 @@
                       "type": "Line",
                       "value": " the Node and Edge classes we obtain from this may be different",
                       "range": [
-                        646,
-                        711
+                        664,
+                        729
                       ],
                       "loc": {
                         "start": {
-                          "line": 18,
+                          "line": 19,
                           "column": 1
                         },
                         "end": {
-                          "line": 18,
+                          "line": 19,
                           "column": 66
                         }
                       }
@@ -1039,16 +1059,16 @@
                       "type": "Line",
                       "value": " from different snapshots.",
                       "range": [
-                        713,
-                        741
+                        731,
+                        759
                       ],
                       "loc": {
                         "start": {
-                          "line": 19,
+                          "line": 20,
                           "column": 1
                         },
                         "end": {
-                          "line": 19,
+                          "line": 20,
                           "column": 29
                         }
                       }
@@ -1066,16 +1086,16 @@
                         "type": "Identifier",
                         "name": "console",
                         "range": [
-                          792,
-                          799
+                          810,
+                          817
                         ],
                         "loc": {
                           "start": {
-                            "line": 22,
+                            "line": 23,
                             "column": 2
                           },
                           "end": {
-                            "line": 22,
+                            "line": 23,
                             "column": 9
                           }
                         }
@@ -1084,31 +1104,31 @@
                         "type": "Identifier",
                         "name": "log",
                         "range": [
-                          800,
-                          803
+                          818,
+                          821
                         ],
                         "loc": {
                           "start": {
-                            "line": 22,
+                            "line": 23,
                             "column": 10
                           },
                           "end": {
-                            "line": 22,
+                            "line": 23,
                             "column": 13
                           }
                         }
                       },
                       "range": [
-                        792,
-                        803
+                        810,
+                        821
                       ],
                       "loc": {
                         "start": {
-                          "line": 22,
+                          "line": 23,
                           "column": 2
                         },
                         "end": {
-                          "line": 22,
+                          "line": 23,
                           "column": 13
                         }
                       }
@@ -1123,16 +1143,16 @@
                             "type": "Identifier",
                             "name": "snapshot",
                             "range": [
-                              804,
-                              812
+                              822,
+                              830
                             ],
                             "loc": {
                               "start": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 14
                               },
                               "end": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 22
                               }
                             }
@@ -1141,31 +1161,31 @@
                             "type": "Identifier",
                             "name": "getNodeById",
                             "range": [
-                              813,
-                              824
+                              831,
+                              842
                             ],
                             "loc": {
                               "start": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 23
                               },
                               "end": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 34
                               }
                             }
                           },
                           "range": [
-                            804,
-                            824
+                            822,
+                            842
                           ],
                           "loc": {
                             "start": {
-                              "line": 22,
+                              "line": 23,
                               "column": 14
                             },
                             "end": {
-                              "line": 22,
+                              "line": 23,
                               "column": 34
                             }
                           }
@@ -1176,79 +1196,79 @@
                             "value": 3,
                             "raw": "3",
                             "range": [
-                              825,
-                              826
+                              843,
+                              844
                             ],
                             "loc": {
                               "start": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 35
                               },
                               "end": {
-                                "line": 22,
+                                "line": 23,
                                 "column": 36
                               }
                             }
                           }
                         ],
                         "range": [
-                          804,
-                          827
+                          822,
+                          845
                         ],
                         "loc": {
                           "start": {
-                            "line": 22,
+                            "line": 23,
                             "column": 14
                           },
                           "end": {
-                            "line": 22,
+                            "line": 23,
                             "column": 37
                           }
                         }
                       }
                     ],
                     "range": [
-                      792,
-                      828
+                      810,
+                      846
                     ],
                     "loc": {
                       "start": {
-                        "line": 22,
+                        "line": 23,
                         "column": 2
                       },
                       "end": {
-                        "line": 22,
+                        "line": 23,
                         "column": 38
                       }
                     }
                   },
                   "range": [
-                    792,
-                    829
+                    810,
+                    847
                   ],
                   "loc": {
                     "start": {
-                      "line": 22,
+                      "line": 23,
                       "column": 2
                     },
                     "end": {
-                      "line": 22,
+                      "line": 23,
                       "column": 39
                     }
                   }
                 }
               ],
               "range": [
-                454,
-                831
+                472,
+                849
               ],
               "loc": {
                 "start": {
-                  "line": 11,
+                  "line": 12,
                   "column": 60
                 },
                 "end": {
-                  "line": 23,
+                  "line": 24,
                   "column": 1
                 }
               }
@@ -1256,47 +1276,47 @@
             "generator": false,
             "expression": false,
             "range": [
-              435,
-              831
+              453,
+              849
             ],
             "loc": {
               "start": {
-                "line": 11,
+                "line": 12,
                 "column": 41
               },
               "end": {
-                "line": 23,
+                "line": 24,
                 "column": 1
               }
             }
           }
         ],
         "range": [
-          394,
-          832
+          412,
+          850
         ],
         "loc": {
           "start": {
-            "line": 11,
+            "line": 12,
             "column": 0
           },
           "end": {
-            "line": 23,
+            "line": 24,
             "column": 2
           }
         }
       },
       "range": [
-        394,
-        833
+        412,
+        851
       ],
       "loc": {
         "start": {
-          "line": 11,
+          "line": 12,
           "column": 0
         },
         "end": {
-          "line": 23,
+          "line": 24,
           "column": 3
         }
       },
@@ -1305,16 +1325,16 @@
           "type": "Line",
           "value": " This is used to parse the snapshot data.",
           "range": [
-            199,
-            242
+            217,
+            260
           ],
           "loc": {
             "start": {
-              "line": 7,
+              "line": 8,
               "column": 0
             },
             "end": {
-              "line": 7,
+              "line": 8,
               "column": 43
             }
           }
@@ -1323,16 +1343,16 @@
           "type": "Line",
           "value": " A provider is generally not used for analyzing the snapshot.",
           "range": [
-            243,
-            306
+            261,
+            324
           ],
           "loc": {
             "start": {
-              "line": 8,
+              "line": 9,
               "column": 0
             },
             "end": {
-              "line": 8,
+              "line": 9,
               "column": 63
             }
           }
@@ -1341,16 +1361,16 @@
           "type": "Line",
           "value": " It is an abstraction to allow saving/loading the snapshot to different",
           "range": [
-            307,
-            380
+            325,
+            398
           ],
           "loc": {
             "start": {
-              "line": 9,
+              "line": 10,
               "column": 0
             },
             "end": {
-              "line": 9,
+              "line": 10,
               "column": 73
             }
           }
@@ -1359,16 +1379,16 @@
           "type": "Line",
           "value": " location.",
           "range": [
-            381,
-            393
+            399,
+            411
           ],
           "loc": {
             "start": {
-              "line": 10,
+              "line": 11,
               "column": 0
             },
             "end": {
-              "line": 10,
+              "line": 11,
               "column": 12
             }
           }
@@ -1378,53 +1398,71 @@
   ],
   "sourceType": "module",
   "range": [
-    0,
-    833
+    20,
+    851
   ],
   "loc": {
     "start": {
-      "line": 1,
+      "line": 2,
       "column": 0
     },
     "end": {
-      "line": 23,
+      "line": 24,
       "column": 3
     }
   },
   "comments": [
     {
       "type": "Line",
-      "value": " We are going to use stdin to read our snapshot",
+      "value": "/usr/bin/env node",
       "range": [
-        57,
-        106
+        0,
+        19
       ],
       "loc": {
         "start": {
-          "line": 3,
+          "line": 1,
           "column": 0
         },
         "end": {
-          "line": 3,
+          "line": 1,
+          "column": 19
+        }
+      }
+    },
+    {
+      "type": "Line",
+      "value": " We are going to use stdin to read our snapshot",
+      "range": [
+        77,
+        126
+      ],
+      "loc": {
+        "start": {
+          "line": 4,
+          "column": 0
+        },
+        "end": {
+          "line": 4,
           "column": 49
         }
       }
     },
     {
       "type": "Line",
-      "value": " pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`",
+      "value": " pipe a snapshot in via: `node id.js <\"my.heapsnapshot\"`",
       "range": [
-        107,
-        167
+        127,
+        185
       ],
       "loc": {
         "start": {
-          "line": 4,
+          "line": 5,
           "column": 0
         },
         "end": {
-          "line": 4,
-          "column": 60
+          "line": 5,
+          "column": 58
         }
       }
     },
@@ -1432,16 +1470,16 @@
       "type": "Line",
       "value": " This is used to parse the snapshot data.",
       "range": [
-        199,
-        242
+        217,
+        260
       ],
       "loc": {
         "start": {
-          "line": 7,
+          "line": 8,
           "column": 0
         },
         "end": {
-          "line": 7,
+          "line": 8,
           "column": 43
         }
       }
@@ -1450,16 +1488,16 @@
       "type": "Line",
       "value": " A provider is generally not used for analyzing the snapshot.",
       "range": [
-        243,
-        306
+        261,
+        324
       ],
       "loc": {
         "start": {
-          "line": 8,
+          "line": 9,
           "column": 0
         },
         "end": {
-          "line": 8,
+          "line": 9,
           "column": 63
         }
       }
@@ -1468,16 +1506,16 @@
       "type": "Line",
       "value": " It is an abstraction to allow saving/loading the snapshot to different",
       "range": [
-        307,
-        380
+        325,
+        398
       ],
       "loc": {
         "start": {
-          "line": 9,
+          "line": 10,
           "column": 0
         },
         "end": {
-          "line": 9,
+          "line": 10,
           "column": 73
         }
       }
@@ -1486,16 +1524,16 @@
       "type": "Line",
       "value": " location.",
       "range": [
-        381,
-        393
+        399,
+        411
       ],
       "loc": {
         "start": {
-          "line": 10,
+          "line": 11,
           "column": 0
         },
         "end": {
-          "line": 10,
+          "line": 11,
           "column": 12
         }
       }
@@ -1504,16 +1542,16 @@
       "type": "Line",
       "value": " This gives us an API that can be used to analyze the snapshot.",
       "range": [
-        513,
-        578
+        531,
+        596
       ],
       "loc": {
         "start": {
-          "line": 16,
+          "line": 17,
           "column": 1
         },
         "end": {
-          "line": 16,
+          "line": 17,
           "column": 66
         }
       }
@@ -1522,16 +1560,16 @@
       "type": "Line",
       "value": " Since snapshot data contains the structure of Nodes and Edges",
       "range": [
-        580,
-        644
+        598,
+        662
       ],
       "loc": {
         "start": {
-          "line": 17,
+          "line": 18,
           "column": 1
         },
         "end": {
-          "line": 17,
+          "line": 18,
           "column": 65
         }
       }
@@ -1540,16 +1578,16 @@
       "type": "Line",
       "value": " the Node and Edge classes we obtain from this may be different",
       "range": [
-        646,
-        711
+        664,
+        729
       ],
       "loc": {
         "start": {
-          "line": 18,
+          "line": 19,
           "column": 1
         },
         "end": {
-          "line": 18,
+          "line": 19,
           "column": 66
         }
       }
@@ -1558,16 +1596,16 @@
       "type": "Line",
       "value": " from different snapshots.",
       "range": [
-        713,
-        741
+        731,
+        759
       ],
       "loc": {
         "start": {
-          "line": 19,
+          "line": 20,
           "column": 1
         },
         "end": {
-          "line": 19,
+          "line": 20,
           "column": 29
         }
       }
