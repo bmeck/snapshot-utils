@@ -68,16 +68,74 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	
 	const path = [];
 	
+	let tree = null;
+	const lookup = new Map();
+	const $id = node =&gt; node.fields.id;
+	function integrate(id) {
+		if (tree == null) {
+			tree = new DominatorTreeNode(null, id);
+			lookup.set(id, tree);
+			return;
+		}
+		// add to tree
+		// walk up the path
+		let parent_id = path.length - 1;
+		let node = new DominatorTreeNode(path[parent_id], id);
+		lookup.set(id, node);
+	}
+	function reduce(id, max_path = path.length) {
+		let subpath = path.slice(0, max_path);
+		let dominator = lookup.get(id).parent;
+		let adjusting = [id];
+		while (lookup.has(dominator)) {
+			let index = subpath.indexOf(dominator);
+			if (index &gt;= 0) {
+				for (const node_id of adjusting) {
+					lookup.get(node_id).parent = dominator;
+				}
+				break;
+			}
+			adjusting.push(dominator);
+			dominator = lookup.get(dominator).parent;
+		}
+	}
+	
 	// setup the walk
 	const iter = snapshot.walk({
-		onNodeOpen(node) { console.log(node) },
-		onEdge(edge) {},
-		onNodeSkipped(node) { },
-		onNodeClose(node) {}
+		onNodeOpen(node) {
+			const id = $id(node);
+			integrate(id);
+			path.push(id);
+		 },
+		//onEdge(edge) {},
+		onNodeSkipped(node) {
+			const id = $id(node);
+			reduce(id);
+		},
+		onNodeClose(node) {
+			path.pop(node);
+		}
 	});
 	// perform the walk
 	for (const _ of iter) {}
-});</code></pre>
+	
+	for (const node of lookup.values()) {
+		let ret = `${node.id}`;
+		let parent_id = node.parent;
+		while (parent_id != null &amp;&amp; lookup.has(parent_id)) {
+			ret += `-&gt;${parent_id}`;
+			parent_id = lookup.get(parent_id).parent;
+		}
+		console.log(ret);
+	}
+});
+
+class DominatorTreeNode {
+	constructor(parent, id) {
+		this.parent = parent;
+		this.id = id;
+	}
+}</code></pre>
 
 </div>
 
