@@ -1793,7 +1793,7 @@
     "access": null,
     "description": null,
     "lineNumber": 1,
-    "content": "import {HeapSnapshot,SplitSnapshotProvider} from \"../\";\n\n// We are going to use stdin to read our snapshot\n// pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`\nconst stream = process.stdin;\n\n// This is used to parse the snapshot data.\n// A provider is generally not used for analyzing the snapshot.\n// It is an abstraction to allow saving/loading the snapshot to different\n// location.\nSplitSnapshotProvider.fromStream(stream, (err, provider) => {\n\tif (err) {\n\t\tconsole.error(err);\n\t\tprocess.exit(1);\n\t}\n\t// This gives us an API that can be used to analyze the snapshot.\n\t// Since snapshot data contains the structure of Nodes and Edges\n\t// the Node and Edge classes we obtain from this may be different\n\t// from different snapshots.\n\tconst snapshot = new HeapSnapshot(provider);\n\t\n\tconst path = [];\n\t\n\tlet tree = null;\n\tconst lookup = new Map();\n\tconst $id = node => node.fields.id;\n\tfunction integrate(id) {\n\t\tif (tree == null) {\n\t\t\ttree = new DominatorTreeNode(null, id);\n\t\t\tlookup.set(id, tree);\n\t\t\treturn;\n\t\t}\n\t\t// add to tree\n\t\t// walk up the path\n\t\tlet parent_id = path.length - 1;\n\t\tlet node = new DominatorTreeNode(path[parent_id], id);\n\t\tlookup.set(id, node);\n\t}\n\tfunction reduce(id, max_path = path.length) {\n\t\tlet subpath = path.slice(0, max_path);\n\t\tlet dominator = lookup.get(id).parent;\n\t\tlet adjusting = [id];\n\t\twhile (lookup.has(dominator)) {\n\t\t\tlet index = subpath.indexOf(dominator);\n\t\t\tif (index >= 0) {\n\t\t\t\tfor (const node_id of adjusting) {\n\t\t\t\t\tlookup.get(node_id).parent = dominator;\n\t\t\t\t}\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tadjusting.push(dominator);\n\t\t\tdominator = lookup.get(dominator).parent;\n\t\t}\n\t}\n\t\n\t// setup the walk\n\tconst iter = snapshot.walk({\n\t\tonNodeOpen(node) {\n\t\t\tconst id = $id(node);\n\t\t\tintegrate(id);\n\t\t\tpath.push(id);\n\t\t },\n\t\t//onEdge(edge) {},\n\t\tonNodeSkipped(node) {\n\t\t\tconst id = $id(node);\n\t\t\treduce(id);\n\t\t},\n\t\tonNodeClose(node) {\n\t\t\tpath.pop(node);\n\t\t}\n\t});\n\t// perform the walk\n\tfor (const _ of iter) {}\n\t\n\tfor (const node of lookup.values()) {\n\t\tlet ret = `${node.id}`;\n\t\tlet parent_id = node.parent;\n\t\twhile (parent_id != null && lookup.has(parent_id)) {\n\t\t\tret += `->${parent_id}`;\n\t\t\tparent_id = lookup.get(parent_id).parent;\n\t\t}\n\t\tconsole.log(ret);\n\t}\n});\n\nclass DominatorTreeNode {\n\tconstructor(parent, id) {\n\t\tthis.parent = parent;\n\t\tthis.id = id;\n\t}\n}"
+    "content": "import {HeapSnapshot,SplitSnapshotProvider} from \"../\";\n\n// We are going to use stdin to read our snapshot\n// pipe a snapshot in via: `node dump.js <\"my.heapsnapshot\"`\nconst stream = process.stdin;\n\n// This is used to parse the snapshot data.\n// A provider is generally not used for analyzing the snapshot.\n// It is an abstraction to allow saving/loading the snapshot to different\n// location.\nSplitSnapshotProvider.fromStream(stream, (err, provider) => {\n\tif (err) {\n\t\tconsole.error(err);\n\t\tprocess.exit(1);\n\t}\n\t// This gives us an API that can be used to analyze the snapshot.\n\t// Since snapshot data contains the structure of Nodes and Edges\n\t// the Node and Edge classes we obtain from this may be different\n\t// from different snapshots.\n\tconst snapshot = new HeapSnapshot(provider);\n\t\n\tconst path = [];\n\t\n\tlet tree = null;\n\tconst lookup = new Map();\n\tconst $id = node => node.fields.id;\n\tfunction integrate(id) {\n\t\tif (tree == null) {\n\t\t\ttree = new DominatorTreeNode(null, id);\n\t\t\tlookup.set(id, tree);\n\t\t\treturn;\n\t\t}\n\t\tlet parent_id = path.length - 1;\n\t\tlet node = new DominatorTreeNode(path[parent_id], id);\n\t\tlookup.set(id, node);\n\t}\n\t// we only ever need to reduce to immediate dominator,\n\t// but! me must adjust any current immediate dominator as well\n\tfunction reduce(id, max_path = path.length) {\n\t\tlet subpath = path.slice(0, max_path);\n\t\tlet dominator = lookup.get(id).parent;\n\t\tlet adjusting = [id];\n\t\twhile (lookup.has(dominator)) {\n\t\t\tlet index = subpath.indexOf(dominator);\n\t\t\tif (index >= 0) {\n\t\t\t\tfor (const node_id of adjusting) {\n\t\t\t\t\tlookup.get(node_id).parent = dominator;\n\t\t\t\t}\n\t\t\t\tbreak;\n\t\t\t}\n\t\t\tadjusting.push(dominator);\n\t\t\tdominator = lookup.get(dominator).parent;\n\t\t}\n\t}\n\t\n\t// setup the walk\n\tconst iter = snapshot.walk({\n\t\t// first time we encounter a node we need to add\n\t\t// the full path to the dominator tree\n\t\tonNodeOpen(node) {\n\t\t\tconst id = $id(node);\n\t\t\tintegrate(id);\n\t\t\tpath.push(id);\n\t\t},\n\t\t// when we encounter a node we have already seen\n\t\t// we only need to reduce the dominator tree\n\t\tonNodeSkipped(node) {\n\t\t\tconst id = $id(node);\n\t\t\treduce(id);\n\t\t},\n\t\tonNodeClose(node) {\n\t\t\tpath.pop(node);\n\t\t}\n\t});\n\t// perform the walk\n\tfor (const _ of iter) {}\n\t\n\t// print our lovely data\n\tfor (const node of lookup.values()) {\n\t\tlet ret = `${node.id}`;\n\t\tlet parent_id = node.parent;\n\t\twhile (parent_id != null && lookup.has(parent_id)) {\n\t\t\tret += `->${parent_id}`;\n\t\t\tparent_id = lookup.get(parent_id).parent;\n\t\t}\n\t\tconsole.log(ret);\n\t}\n});\n\nclass DominatorTreeNode {\n\tconstructor(parent, id) {\n\t\tthis.parent = parent;\n\t\tthis.id = id;\n\t}\n}"
   },
   {
     "__docId__": 71,
@@ -1829,7 +1829,7 @@
     "importPath": "snapshot-utils/lib/bin/dominators.js",
     "importStyle": null,
     "description": null,
-    "lineNumber": 86,
+    "lineNumber": 90,
     "undocument": true,
     "interface": false
   },
@@ -1843,7 +1843,7 @@
     "longname": "lib/bin/dominators.js~DominatorTreeNode#constructor",
     "access": null,
     "description": null,
-    "lineNumber": 87,
+    "lineNumber": 91,
     "undocument": true,
     "params": [
       {
@@ -1871,7 +1871,7 @@
     "longname": "lib/bin/dominators.js~DominatorTreeNode#parent",
     "access": null,
     "description": null,
-    "lineNumber": 88,
+    "lineNumber": 92,
     "undocument": true,
     "type": {
       "types": [
@@ -1889,7 +1889,7 @@
     "longname": "lib/bin/dominators.js~DominatorTreeNode#id",
     "access": null,
     "description": null,
-    "lineNumber": 89,
+    "lineNumber": 93,
     "undocument": true,
     "type": {
       "types": [

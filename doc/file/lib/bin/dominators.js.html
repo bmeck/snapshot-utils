@@ -77,12 +77,12 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 			lookup.set(id, tree);
 			return;
 		}
-		// add to tree
-		// walk up the path
 		let parent_id = path.length - 1;
 		let node = new DominatorTreeNode(path[parent_id], id);
 		lookup.set(id, node);
 	}
+	// we only ever need to reduce to immediate dominator,
+	// but! me must adjust any current immediate dominator as well
 	function reduce(id, max_path = path.length) {
 		let subpath = path.slice(0, max_path);
 		let dominator = lookup.get(id).parent;
@@ -102,12 +102,15 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	
 	// setup the walk
 	const iter = snapshot.walk({
+		// first time we encounter a node we need to add
+		// the full path to the dominator tree
 		onNodeOpen(node) {
 			const id = $id(node);
 			integrate(id);
 			path.push(id);
-		 },
-		//onEdge(edge) {},
+		},
+		// when we encounter a node we have already seen
+		// we only need to reduce the dominator tree
 		onNodeSkipped(node) {
 			const id = $id(node);
 			reduce(id);
@@ -119,6 +122,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) =&gt; {
 	// perform the walk
 	for (const _ of iter) {}
 	
+	// print our lovely data
 	for (const node of lookup.values()) {
 		let ret = `${node.id}`;
 		let parent_id = node.parent;
