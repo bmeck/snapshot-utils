@@ -10,7 +10,7 @@
     "access": null,
     "description": null,
     "lineNumber": 6,
-    "content": "\n/**\n * Representation for iterating over a snapshot's Nodes and Edges.\n * The structure of a snapshot's Node and Edge is defined within the contents of the snapshot.\n */\nexport default class HeapSnapshot {\n  /**\n   * @param {SplitSnapshotProvider} provider Snapshot data provider\n   */\n  constructor(provider) {\n    /**\n     * @private\n     */\n    this.meta = provider.getMeta();\n    /**\n     * @private\n     */\n    this.Node = createNodeClass(this, provider);\n    /**\n     * @private\n     */\n    this.Edge = createEdgeClass(this, provider);\n    /**\n     * @private\n     */\n    this.provider = provider;\n  }\n  \n  /**\n   * @typedef {Object} WalkCallbacks\n   * @property {function(node: NodeResult)} onNodeOpen callback called when a Node\n   *   is first encountered\n   * @property {function(edge: EdgeResult)} onEdge callback called when traversing\n   *   an Edge\n   * @property {function(node: NodeResult)} onNodeSkipped callback called when a Node\n   *   is skipped because it has already been encountered\n   * @property {function(node: NodeResult)} onNodeClose callback called when all\n   *   children of a Node are guaranteed to have been encountered\n   */\n  \n  /**\n   * Helper function that performs a depth first pre order traversal of\n   * the nodes of a HeapSnapshot. This will only visit each Node once, but\n   * will visit all Edges of a HeapSnapshot. Since this can be a costly\n   * operation it uses an iterator to allow chunked processing.\n   * \n   * @example\n   * let walker = walk(console.log);\n   * // the iterator does not return a value it is purely a controller\n   * for (const _ of walker) {}\n   * \n   * @param {WalkCallbacks} callbacks\n   * @return {Iterator} iterator to continue walking by calling .next \n   */\n  walk({\n    onNodeOpen = Function.prototype,\n    onEdge = Function.prototype,\n    onNodeSkipped = Function.prototype,\n    onNodeClose = Function.prototype\n  }) {\n    const snapshot = this;\n    return (function* walk() {\n      // Heaps are graphs, they can contain cycles! So we use a Set to\n      // keep track of Nodes we have already seen.\n      const visited = new Set();\n      \n      // We will be keeping a list of all the Edges we need to cross\n      // still in an array.\n      const nodes_to_visit = [snapshot.getNode(0)];\n      const edge_indices = [0];\n      \n      onNodeOpen(nodes_to_visit[0]);\n      \n      do {\n        // While walking we will grab the first Edge off our list\n        const edge_index = edge_indices[edge_indices.length - 1];\n        const owner = nodes_to_visit[nodes_to_visit.length - 1];\n        if (edge_index === owner.fields.edge_count) {\n          onNodeClose(owner);\n          yield;\n          nodes_to_visit.pop();\n          edge_indices.pop();\n          continue;\n        }\n        else {\n          edge_indices[edge_indices.length - 1] += 1;\n        }\n        const edge_to_walk = owner.getEdge(edge_index);\n        \n        onEdge(edge_to_walk);\n        yield;\n        \n        // We grab the Node that this edge points to\n        const node = edge_to_walk.getNode();\n        \n        // We want to be sure we don't start a cycle so we skip\n        // Nodes we have already visited (but not Edges to those Nodes\n        // in this example)\n        if (visited.has(node.node_index)) {\n          onNodeSkipped(node);\n          continue;\n        }\n        visited.add(node.node_index);\n        \n        // Add all of the edges of a node to the list of Edges we\n        // need to visit\n        nodes_to_visit.push(node);\n        edge_indices.push(0);\n        \n        onNodeOpen(node);\n        yield;\n      }\n      while (nodes_to_visit.length);\n    })();\n  }\n  \n  /**\n   * Walks over all the Samples in the HeapSnapshot in order.\n   * \n   * @return {Iterator<Sample>} Iterator to walk over all of the Samples. \n   */\n  samples() {\n    const snapshot = this;\n    return function* samples() {\n      const samples_arr_length = snapshot.provider.getSampleArraySize();\n      for (let i = 0; i < samples_arr_length; i++) {\n        yield snapshot.getSample(i);\n      }\n    }();\n  }\n  \n  /**\n   * Gets a Sample by index.\n   * \n   * @example\n   * const first = snapshot.getSample(0);\n   * const second = snapshot.getSample(1);\n   * console.log('delay', second.time - first.time);\n   * \n   * @param {number} sample_index\n   * @return {Sample}\n   */\n  getSample(sample_index) {\n    if (sample_index > this.provider.getSampleArraySize()) {\n      return null;\n    }\n    const sample_buffer = this.provider.getSampleBuffer(sample_index);\n    const sample = new Sample(sample_buffer);\n    return sample;\n  }\n\n  /**\n   * @typedef {Object} NodeResult\n   * @property {Node} fields\n   * @property {number} node_index Index that can be used with getNode to get this Node.\n   * @property {number} edge_index Index that can be used to get the first Edge of this Node.\n   * @property {function(index: Number):EdgeResult} getEdge Get the specified Edge of this node.\n   * @property {function():EdgeIterator} walkEdges Helper for iterating the edges of a Node.\n   */\n  /**\n   * Gets a Node by index, not by ID. The root Node is at index 0.\n   *\n   * @example\n   * const root = snapshot.getNode(0);\n   *\n   * @param {number} node_index\n   * @return {NodeResult}\n   */\n  getNode(node_index) {\n    if (node_index > this.provider.getNodeArraySize()) {\n      return null;\n    }\n    const node_buffer = this.provider.getNodeBuffer(node_index);\n    const node = new this.Node(node_buffer);\n    const edge_index = node_buffer.readUInt32BE(node_buffer.length - 4);\n    const self = this;\n    return {\n      fields: node,\n      node_index,\n      edge_index,\n      getEdge(i) {\n        const edge_count = node.edge_count;\n        if (i > edge_count) {\n          throw new RangeError('invalid edge number');\n        }\n        const edge_size = self.meta.edge_fields.length;\n        const index = (edge_index + i) * edge_size;\n        return self.getEdge(index);\n      },\n      getTrace() {\n        return {\n          id: -1,\n          line: -1,\n          column: -1\n        };\n      },\n      *walkEdges() {\n        const edge_count = node.edge_count;\n        const edge_size = self.meta.edge_fields.length;\n        for (let i = 0; i < edge_count; i++) {\n          const index = (edge_index + i) * edge_size;\n          const e = self.getEdge(index);\n          if (e != null) {\n            yield e;\n          }\n        }\n      }\n    };\n  }\n  \n  /**\n   * Gets a Node by ID. This can be *SIGNIFICANTLY SLOWER* than looking up the Node by index since IDs are sparse.\n   *\n   * @example\n   * const myNode = snapshot.getNodeById(42);\n   *\n   * @param {number} node_id\n   * @return {NodeResult}\n   */\n  getNodeById(node_id) {\n    const node_arr_length = this.provider.getNodeArraySize();\n    const node_fields_len = this.meta.node_fields.length;\n    const last = this.getNode(node_arr_length - node_fields_len);\n    // make a best guess given known distribution\n    let node_index = Math.ceil((node_id / last.fields.id) * node_arr_length) * node_fields_len;\n    const incr = this.getNode(node_index).fields.id < node_id ?\n      -node_fields_len :\n      node_fields_len;\n    while (node_index >= 0 && node_index < node_arr_length) {\n      const node = this.getNode(node_index);\n      const id = node.fields.id;\n      if (id === node_id) {\n        return node;\n      }\n      node_index += incr;\n    }\n  }\n\n  /**\n   * @typedef {Object} EdgeResult\n   * @property {Edge} fields\n   * @property {number} edge_index Index that can be used with getEdge to get this Edge.\n   * @property {number} node_index Index that can be used with getNode to get the owner of this Edge.\n   * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.\n   */\n  /**\n   * Gets an Edge by index. This should only be used in conjuction with a Node object.\n   * @private\n   * @param {number} edge_index Index of the Edge we wish to get a hold of.\n   * @return {EdgeResult}\n   */\n  getEdge(edge_index) {\n    if (edge_index > this.provider.getEdgeArraySize()) {\n      return null;\n    }\n    const edge_buffer = this.provider.getEdgeBuffer(edge_index);\n    const fields = new this.Edge(edge_buffer);\n    const node_index = edge_buffer.readUInt32BE(edge_buffer.length - 4);\n    const self = this;\n    return {\n      fields,\n      edge_index,\n      node_index,\n      getNode() {\n        return self.getNode(fields.to_node);\n      },\n      getOwner() {\n        return self.getNode(node_index);\n      }\n    };\n  }\n}\n/**\n * @typedef {Object} Sample\n * A Sample class for a HeapSnapshot.\n * @property {number} timestamp Timestamp of this sample in nanoseconds. The first sample will generally have a timestamp of 0 and you must compute the time differences accordingly.\n * @property {number} lastAssignedId The largest `node.fields.id` visible when this sample was taken. Since `id`s only increment, all `id`s less than this were allocated prior to this sample.\n */\nexport class Sample {\n  /**\n   * @private\n   */\n  constructor(buffer) {\n    this._buffer = buffer;\n  }\n  /**\n   * @private\n   */\n  inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of ['timestamp','lastAssignedId']) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Sample${ret}`;\n  }\n  /**\n   * @private\n   */\n  get timestamp() {\n    return this._buffer.readUInt32BE(0);\n  }\n  /**\n   * @private\n   */\n  get lastAssignedId() {\n    return this._buffer.readUInt32BE(4);\n  }\n}\n/**\n * Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Node class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createNodeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Node {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Node${ret}`;\n    }\n  }\n  let i = 0;\n  for (const field of meta.node_fields) {\n    let field_index = i * 4;\n    let field_type = meta.node_types[i];\n    if (Array.isArray(field_type)) {\n      if (field === 'type') {\n        // v8 bug: https://codereview.chromium.org/1450463002/#\n        field_type[0x0C] = 'symbol';\n        field_type[0x0D] = 'simd';\n      }\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field_type === 'string') {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return provider.getString(this._buffer.readUInt32BE(field_index));\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    i++;\n  };\n  return Node;\n}\n/**\n * Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Edge class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createEdgeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Edge {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.edge_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      ret += ' node.id:' + snapshot.getNode(this.to_node).fields.id;\n      return `HeapSnapshot::Edge ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.edge_fields) {\n    (function(){ \n    const field_index = i * 4;\n    const field_type = meta.edge_types[i];\n    i++;\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field === 'name_or_index') {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          let value = this._buffer.readUInt32BE(field_index);\n          if (this.type !== 'element') {\n            value = provider.getString(value).toString();\n          }\n          return value;\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    })();\n  };\n  return Edge;\n}\nfunction createTraceFrameClass(provider) {\n  const meta = provider.getMeta();\n  class TraceFrame {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    parent() {\n      \n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.trace_node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::TraceFrame ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.trace_node_fields) {\n    (function(){ \n      const field_index = i * 4;\n      Object.defineProperty(TraceFrame.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    })();\n  };\n  return TraceFrame;\n}\nfunction createTraceLocationClass(provider) {\n  const meta = provider.getMeta();\n  class TraceFrame {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    parent() {\n      \n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.trace_node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::TraceFrame ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.trace_node_fields) {\n    (function(){ \n      const field_index = i * 4;\n      Object.defineProperty(TraceFrame.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    })();\n  };\n  return TraceFrame;\n}\n"
+    "content": "\n/**\n * Representation for iterating over a snapshot's Nodes and Edges.\n * The structure of a snapshot's Node and Edge is defined within the contents of the snapshot.\n */\nexport default class HeapSnapshot {\n  /**\n   * @param {SplitSnapshotProvider} provider Snapshot data provider\n   */\n  constructor(provider) {\n    /**\n     * @private\n     */\n    this.meta = provider.getMeta();\n    /**\n     * @private\n     */\n    this.Node = createNodeClass(this, provider);\n    /**\n     * @private\n     */\n    this.Edge = createEdgeClass(this, provider);\n    /**\n     * @private\n     */\n    this.provider = provider;\n  }\n  \n  /**\n   * @typedef {Object} WalkCallbacks\n   * @property {function(node: NodeResult)} onNodeOpen callback called when a Node\n   *   is first encountered\n   * @property {function(edge: EdgeResult)} onEdge callback called when traversing\n   *   an Edge\n   * @property {function(node: NodeResult)} onNodeSkipped callback called when a Node\n   *   is skipped because it has already been encountered\n   * @property {function(node: NodeResult)} onNodeClose callback called when all\n   *   children of a Node are guaranteed to have been encountered\n   */\n  \n  /**\n   * Helper function that performs a depth first pre order traversal of\n   * the nodes of a HeapSnapshot. This will only visit each Node once, but\n   * will visit all Edges of a HeapSnapshot. Since this can be a costly\n   * operation it uses an iterator to allow chunked processing.\n   * \n   * @example\n   * let walker = walk(console.log);\n   * // the iterator does not return a value it is purely a controller\n   * for (const _ of walker) {}\n   * \n   * @param {WalkCallbacks} callbacks\n   * @return {Iterator} iterator to continue walking by calling .next \n   */\n  walk({\n    onNodeOpen = Function.prototype,\n    onEdge = Function.prototype,\n    onNodeSkipped = Function.prototype,\n    onNodeClose = Function.prototype\n  }) {\n    const snapshot = this;\n    return (function* walk() {\n      // Heaps are graphs, they can contain cycles! So we use a Set to\n      // keep track of Nodes we have already seen.\n      const visited = new Set();\n      \n      // We will be keeping a list of all the Edges we need to cross\n      // still in an array.\n      const nodes_to_visit = [snapshot.getNode(0)];\n      const edge_indices = [0];\n      \n      onNodeOpen(nodes_to_visit[0]);\n      \n      do {\n        // While walking we will grab the first Edge off our list\n        const edge_index = edge_indices[edge_indices.length - 1];\n        const owner = nodes_to_visit[nodes_to_visit.length - 1];\n        if (edge_index === owner.fields.edge_count) {\n          onNodeClose(owner);\n          yield;\n          nodes_to_visit.pop();\n          edge_indices.pop();\n          continue;\n        }\n        else {\n          edge_indices[edge_indices.length - 1] += 1;\n        }\n        const edge_to_walk = owner.getEdge(edge_index);\n        \n        onEdge(edge_to_walk);\n        yield;\n        \n        // We grab the Node that this edge points to\n        const node = edge_to_walk.getNode();\n        \n        // We want to be sure we don't start a cycle so we skip\n        // Nodes we have already visited (but not Edges to those Nodes\n        // in this example)\n        if (visited.has(node.node_index)) {\n          onNodeSkipped(node);\n          continue;\n        }\n        visited.add(node.node_index);\n        \n        // Add all of the edges of a node to the list of Edges we\n        // need to visit\n        nodes_to_visit.push(node);\n        edge_indices.push(0);\n        \n        onNodeOpen(node);\n        yield;\n      }\n      while (nodes_to_visit.length);\n    })();\n  }\n  \n  /**\n   * Walks over all the Samples in the HeapSnapshot in order.\n   * \n   * @return {Iterator<Sample>} Iterator to walk over all of the Samples. \n   */\n  samples() {\n    const snapshot = this;\n    return function* samples() {\n      const samples_arr_length = snapshot.provider.getSampleArraySize();\n      for (let i = 0; i < samples_arr_length; i++) {\n        yield snapshot.getSample(i);\n      }\n    }();\n  }\n  \n  /**\n   * Gets a Sample by index.\n   * \n   * @example\n   * const first = snapshot.getSample(0);\n   * const second = snapshot.getSample(1);\n   * console.log('delay', second.time - first.time);\n   * \n   * @param {number} sample_index\n   * @return {Sample}\n   */\n  getSample(sample_index) {\n    if (sample_index > this.provider.getSampleArraySize()) {\n      return null;\n    }\n    const sample_buffer = this.provider.getSampleBuffer(sample_index);\n    const sample = new Sample(sample_buffer);\n    return sample;\n  }\n\n  /**\n   * @typedef {Object} NodeResult\n   * @property {Node} fields\n   * @property {number} node_index Index that can be used with getNode to get this Node.\n   * @property {number} edge_index Index that can be used to get the first Edge of this Node.\n   * @property {function(index: Number):EdgeResult} getEdge Get the specified Edge of this node.\n   * @property {function():EdgeIterator} walkEdges Helper for iterating the edges of a Node.\n   */\n  /**\n   * Gets a Node by index, not by ID. The root Node is at index 0.\n   *\n   * @example\n   * const root = snapshot.getNode(0);\n   *\n   * @param {number} node_index\n   * @return {NodeResult}\n   */\n  getNode(node_index) {\n    if (node_index > this.meta.node_fields.length * this.provider.getNodeArraySize()) {\n      return null;\n    }\n    const node_buffer = this.provider.getNodeBuffer(node_index);\n    const node = new this.Node(node_buffer);\n    const edge_index = node_buffer.readUInt32BE(node_buffer.length - 4);\n    const self = this;\n    return {\n      fields: node,\n      node_index,\n      edge_index,\n      getEdge(i) {\n        const edge_count = node.edge_count;\n        if (i > edge_count) {\n          throw new RangeError('invalid edge number');\n        }\n        const edge_size = self.meta.edge_fields.length;\n        const index = (edge_index + i) * edge_size;\n        return self.getEdge(index);\n      },\n      getTrace() {\n        return {\n          id: -1,\n          line: -1,\n          column: -1\n        };\n      },\n      *walkEdges() {\n        const edge_count = node.edge_count;\n        const edge_size = self.meta.edge_fields.length;\n        for (let i = 0; i < edge_count; i++) {\n          const index = (edge_index + i) * edge_size;\n          const e = self.getEdge(index);\n          if (e != null) {\n            yield e;\n          }\n        }\n      }\n    };\n  }\n  \n  /**\n   * Gets a Node by ID. This can be *SIGNIFICANTLY SLOWER* than looking up the Node by index since IDs are sparse.\n   *\n   * @example\n   * const myNode = snapshot.getNodeById(42);\n   *\n   * @param {number} node_id\n   * @return {NodeResult}\n   */\n  getNodeById(node_id) {\n    const node_arr_length = this.provider.getNodeArraySize();\n    const node_fields_len = this.meta.node_fields.length;\n    const last = this.getNode(node_arr_length - node_fields_len);\n    // make a best guess given known distribution\n    let node_index = Math.ceil((node_id / last.fields.id) * node_arr_length) * node_fields_len;\n    const incr = this.getNode(node_index).fields.id < node_id ?\n      -node_fields_len :\n      node_fields_len;\n    while (node_index >= 0 && node_index < node_arr_length) {\n      const node = this.getNode(node_index);\n      const id = node.fields.id;\n      if (id === node_id) {\n        return node;\n      }\n      node_index += incr;\n    }\n  }\n\n  /**\n   * @typedef {Object} EdgeResult\n   * @property {Edge} fields\n   * @property {number} edge_index Index that can be used with getEdge to get this Edge.\n   * @property {number} node_index Index that can be used with getNode to get the owner of this Edge.\n   * @property {function():NodeResult} getNode Helper for getting the Node this Edge points to.\n   */\n  /**\n   * Gets an Edge by index. This should only be used in conjuction with a Node object.\n   * @private\n   * @param {number} edge_index Index of the Edge we wish to get a hold of.\n   * @return {EdgeResult}\n   */\n  getEdge(edge_index) {\n    if (edge_index > this.meta.edge_fields.length * this.provider.getEdgeArraySize()) {\n      return null;\n    }\n    const edge_buffer = this.provider.getEdgeBuffer(edge_index);\n    const fields = new this.Edge(edge_buffer);\n    const node_index = edge_buffer.readUInt32BE(edge_buffer.length - 4);\n    const self = this;\n    return {\n      fields,\n      edge_index,\n      node_index,\n      getNode() {\n        return self.getNode(fields.to_node);\n      },\n      getOwner() {\n        return self.getNode(node_index);\n      }\n    };\n  }\n}\n/**\n * @typedef {Object} Sample\n * A Sample class for a HeapSnapshot.\n * @property {number} timestamp Timestamp of this sample in nanoseconds. The first sample will generally have a timestamp of 0 and you must compute the time differences accordingly.\n * @property {number} lastAssignedId The largest `node.fields.id` visible when this sample was taken. Since `id`s only increment, all `id`s less than this were allocated prior to this sample.\n */\nexport class Sample {\n  /**\n   * @private\n   */\n  constructor(buffer) {\n    this._buffer = buffer;\n  }\n  /**\n   * @private\n   */\n  inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of ['timestamp','lastAssignedId']) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Sample${ret}`;\n  }\n  /**\n   * @private\n   */\n  get timestamp() {\n    return this._buffer.readUInt32BE(0);\n  }\n  /**\n   * @private\n   */\n  get lastAssignedId() {\n    return this._buffer.readUInt32BE(4);\n  }\n}\n/**\n * Generates an Node class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Node class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createNodeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Node {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::Node${ret}`;\n    }\n  }\n  let i = 0;\n  for (const field of meta.node_fields) {\n    let field_index = i * 4;\n    let field_type = meta.node_types[i];\n    if (Array.isArray(field_type)) {\n      if (field === 'type') {\n        // v8 bug: https://codereview.chromium.org/1450463002/#\n        field_type[0x0C] = 'symbol';\n        field_type[0x0D] = 'simd';\n      }\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field_type === 'string') {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return provider.getString(this._buffer.readUInt32BE(field_index));\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Node.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    i++;\n  };\n  return Node;\n}\n/**\n * Generates an Edge class tailored for HeapSnapshot. These can vary between snapshots.\n * @param {HeapSnapshot} snapshot HeapSnapshot that created this Edge class\n * @param {SplitSnapshotProvider} provider Our snapshot data\n */\nfunction createEdgeClass(snapshot, provider) {\n  const meta = provider.getMeta();\n  class Edge {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.edge_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      ret += ' node.id:' + snapshot.getNode(this.to_node).fields.id;\n      return `HeapSnapshot::Edge ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.edge_fields) {\n    (function(){ \n    const field_index = i * 4;\n    const field_type = meta.edge_types[i];\n    i++;\n    if (Array.isArray(field_type)) {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return field_type[this._buffer.readUInt32BE(field_index)];\n        }\n      });\n    }\n    else if (field === 'name_or_index') {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          let value = this._buffer.readUInt32BE(field_index);\n          if (this.type !== 'element') {\n            value = provider.getString(value).toString();\n          }\n          return value;\n        }\n      });\n    }\n    else {\n      Object.defineProperty(Edge.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    }\n    })();\n  };\n  return Edge;\n}\nfunction createTraceFrameClass(provider) {\n  const meta = provider.getMeta();\n  class TraceFrame {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    parent() {\n      \n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.trace_node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::TraceFrame ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.trace_node_fields) {\n    (function(){ \n      const field_index = i * 4;\n      Object.defineProperty(TraceFrame.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    })();\n  };\n  return TraceFrame;\n}\nfunction createTraceLocationClass(provider) {\n  const meta = provider.getMeta();\n  class TraceFrame {\n    constructor(buffer) {\n      this._buffer = buffer;\n    }\n    parent() {\n      \n    }\n    inspect() {\n      let ret = '';\n      let i = 0;\n      for (const field of meta.trace_node_fields) {\n        ret += ' '+[field, this[field], this._buffer.slice(i * 4, i * 4 + 4).toString('hex')].join(':');\n        i++;\n      }\n      return `HeapSnapshot::TraceFrame ${ret}`;\n    }\n  }\n  let i = 0;\n  for (let field of meta.trace_node_fields) {\n    (function(){ \n      const field_index = i * 4;\n      Object.defineProperty(TraceFrame.prototype, field, {\n        enumerable: true,\n        get() {\n          return this._buffer.readUInt32BE(field_index);\n        }\n      });\n    })();\n  };\n  return TraceFrame;\n}\n"
   },
   {
     "__docId__": 1,
@@ -1813,7 +1813,75 @@
     "generator": false
   },
   {
+    "__docId__": 70,
+    "kind": "file",
+    "static": true,
+    "variation": null,
+    "name": "lib/util.js",
+    "memberof": null,
+    "longname": "lib/util.js",
+    "access": null,
+    "description": null,
+    "lineNumber": 1,
+    "content": "\"use strict\";\nfunction createRetainers(snapshot) {\n\tconst node_count = snapshot.getNodeCount();\n\tif (node_count === 0) {\n\t\treturn {\n\t\t\tindex: new Uint32Array(0),\n\t\t\tretainers: new Uint32Array(0)\n\t\t};\n\t}\n\tconst first_retainer_index = new Uint32Array(node_count);\n\t// this may be larger than needed if nodes have multiple edges to eachother\n\t// IE: [a -> b, a -> b] should compress to [a -> b], however, we just put\n\t// a duplicate in\n\tconst edge_count = snapshot.getEdgeCount();\n\tif (edge_count === 0) {\n\t\treturn {\n\t\t\tindex: new Uint32Array(0),\n\t\t\tretainers: new Uint32Array(0)\n\t\t};\n\t}\n\tconst retainers = new Uint32Array(edge_count);\n\t\n\t// count number of edges to nodes\n\tfor (let i = 0; i < edge_count; i++) {\n\t\tconst dst = snapshot.getEdge(i).fields.to_node;\n\t\tfirst_retainer_index[dst]++;\n\t}\n\t\n\tlet prev = first_retainer_index[0];\n\tfor (let i = 1; i < node_count; i++) {\n\t\tprev = (first_retainer_index[i] += prev);\n\t}\n\t\n\t// get the parents\n\tfor (let i = 0; i < node_count; i++) {\n\t\tconst dst = snapshot.getNode(i).fields.to_node;\n\t\tfirst_retainer_index[dst]++;\n\t}\n\t\n\treturn {\n\t\tindex: first_retainer_index,\n\t\tretainers\n\t}\n}\nfunction   compressStrings(strs) {\n\t  const occurances = new Map();\n\t  for (let left = 0; left < strs.length; left++) {\n\t\t  for (let right = strs.length; right > left; right--) {\n\t\t\t  let substr = strs.slice(left, right);\n\t\t\t  if (!occurances.has(substr)) {\n\t\t\t\t  occurances.set(substr, 0);\n\t\t\t  }\n\t\t\t  occurances.set(substr, occurances.get(substr) + 1);\n\t\t  } \n\t  }\n\t  console.log(occurances)\n  }\n  console.log(compressStrings('thisthing'))"
+  },
+  {
     "__docId__": 71,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "createRetainers",
+    "memberof": "lib/util.js",
+    "longname": "lib/util.js~createRetainers",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/util.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 2,
+    "undocument": true,
+    "params": [
+      {
+        "name": "snapshot",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "return": {
+      "types": [
+        "*"
+      ]
+    },
+    "generator": false
+  },
+  {
+    "__docId__": 72,
+    "kind": "function",
+    "static": true,
+    "variation": null,
+    "name": "compressStrings",
+    "memberof": "lib/util.js",
+    "longname": "lib/util.js~compressStrings",
+    "access": null,
+    "export": false,
+    "importPath": "snapshot-utils/lib/util.js",
+    "importStyle": null,
+    "description": null,
+    "lineNumber": 45,
+    "undocument": true,
+    "params": [
+      {
+        "name": "strs",
+        "types": [
+          "*"
+        ]
+      }
+    ],
+    "generator": false
+  },
+  {
+    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1826,7 +1894,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 72,
+    "__docId__": 75,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1839,7 +1907,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 73,
+    "__docId__": 76,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1852,7 +1920,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 74,
+    "__docId__": 77,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1865,7 +1933,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 78,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1878,7 +1946,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 79,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1891,7 +1959,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 77,
+    "__docId__": 80,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1904,7 +1972,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 81,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1917,7 +1985,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 82,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1930,7 +1998,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 83,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1943,7 +2011,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 84,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1956,7 +2024,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 85,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1969,7 +2037,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 86,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1982,7 +2050,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 87,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1995,7 +2063,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 88,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2008,7 +2076,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 89,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2021,7 +2089,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 87,
+    "__docId__": 90,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2034,7 +2102,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 88,
+    "__docId__": 91,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2047,7 +2115,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 89,
+    "__docId__": 92,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2060,7 +2128,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 90,
+    "__docId__": 93,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2073,7 +2141,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 91,
+    "__docId__": 94,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2086,7 +2154,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 92,
+    "__docId__": 95,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2099,7 +2167,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 96,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2112,7 +2180,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 94,
+    "__docId__": 97,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2125,7 +2193,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 98,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2138,7 +2206,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 96,
+    "__docId__": 99,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2151,7 +2219,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 100,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2164,7 +2232,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 98,
+    "__docId__": 101,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2177,7 +2245,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 102,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2190,7 +2258,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 103,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2203,7 +2271,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 101,
+    "__docId__": 104,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2216,7 +2284,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 105,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2229,7 +2297,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 103,
+    "__docId__": 106,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2242,7 +2310,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 104,
+    "__docId__": 107,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2255,7 +2323,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 105,
+    "__docId__": 108,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2268,7 +2336,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 106,
+    "__docId__": 109,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2281,7 +2349,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 107,
+    "__docId__": 110,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2294,7 +2362,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 108,
+    "__docId__": 111,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2307,7 +2375,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 109,
+    "__docId__": 112,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2320,7 +2388,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 110,
+    "__docId__": 113,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2333,7 +2401,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 111,
+    "__docId__": 114,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2346,7 +2414,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 112,
+    "__docId__": 115,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2359,7 +2427,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 113,
+    "__docId__": 116,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2372,7 +2440,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 114,
+    "__docId__": 117,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2385,7 +2453,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 115,
+    "__docId__": 118,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2398,7 +2466,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 116,
+    "__docId__": 119,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2411,7 +2479,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 117,
+    "__docId__": 120,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2424,7 +2492,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 119,
+    "__docId__": 122,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2437,7 +2505,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 120,
+    "__docId__": 123,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2450,7 +2518,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 121,
+    "__docId__": 124,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2463,7 +2531,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 122,
+    "__docId__": 125,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2476,7 +2544,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 123,
+    "__docId__": 126,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2489,7 +2557,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 124,
+    "__docId__": 127,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2502,7 +2570,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 125,
+    "__docId__": 128,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2515,7 +2583,7 @@
     "builtinExternal": true
   },
   {
-    "__docId__": 126,
+    "__docId__": 129,
     "kind": "external",
     "static": true,
     "variation": null,

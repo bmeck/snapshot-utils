@@ -214,7 +214,7 @@ export default class HeapSnapshot {
    * @return {NodeResult}
    */
   getNode(node_index) {
-    if (node_index &gt; this.provider.getNodeArraySize()) {
+    if (node_index &gt; this.meta.node_fields.length * this.provider.getNodeArraySize()) {
       return null;
     }
     const node_buffer = this.provider.getNodeBuffer(node_index);
@@ -297,7 +297,7 @@ export default class HeapSnapshot {
    * @return {EdgeResult}
    */
   getEdge(edge_index) {
-    if (edge_index &gt; this.provider.getEdgeArraySize()) {
+    if (edge_index &gt; this.meta.edge_fields.length * this.provider.getEdgeArraySize()) {
       return null;
     }
     const edge_buffer = this.provider.getEdgeBuffer(edge_index);

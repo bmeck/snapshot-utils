@@ -544,5 +544,11 @@ window.esdocSearchIndex = [
     "typedef/index.html#static-typedef-parseSnapshotStreamCallbacks",
     "lib/parseSnapshotStream.js~parseSnapshotStreamCallbacks",
     "typedef"
+  ],
+  [
+    "lib/util.js",
+    "file/lib/util.js.html",
+    "lib/util.js",
+    "file"
   ]
 ]
