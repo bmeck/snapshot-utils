@@ -37,7 +37,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot#constructor",
     "access": null,
-    "description": null,
+    "description": "",
     "lineNumber": 10,
     "params": [
       {
@@ -62,7 +62,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot#meta",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 14,
     "type": {
       "types": [
@@ -79,7 +79,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot#Node",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 18,
     "type": {
       "types": [
@@ -96,7 +96,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot#Edge",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 22,
     "type": {
       "types": [
@@ -113,7 +113,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot#provider",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 26,
     "type": {
       "types": [
@@ -130,7 +130,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot.WalkCallbacks",
     "access": null,
-    "description": null,
+    "description": "",
     "properties": [
       {
         "nullable": null,
@@ -284,7 +284,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot.NodeResult",
     "access": null,
-    "description": null,
+    "description": "",
     "properties": [
       {
         "nullable": null,
@@ -426,7 +426,7 @@
     "memberof": "lib/HeapSnapshot.js~HeapSnapshot",
     "longname": "lib/HeapSnapshot.js~HeapSnapshot.EdgeResult",
     "access": null,
-    "description": null,
+    "description": "",
     "properties": [
       {
         "nullable": null,
@@ -519,7 +519,7 @@
     "memberof": "lib/HeapSnapshot.js",
     "longname": "lib/HeapSnapshot.js~Sample",
     "access": null,
-    "description": null,
+    "description": "",
     "lineNumber": 279,
     "properties": [
       {
@@ -735,7 +735,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#constructor",
     "access": null,
-    "description": null,
+    "description": "",
     "lineNumber": 17,
     "params": [
       {
@@ -800,7 +800,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#snapshot",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 29,
     "type": {
       "types": [
@@ -817,7 +817,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_fields_length",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 34,
     "type": {
       "types": [
@@ -834,7 +834,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_arr_length",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 38,
     "type": {
       "types": [
@@ -851,7 +851,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_struct_size",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 43,
     "type": {
       "types": [
@@ -868,7 +868,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#node_buffer",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 47,
     "type": {
       "types": [
@@ -885,7 +885,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_fields_length",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 55,
     "type": {
       "types": [
@@ -902,7 +902,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_arr_length",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 59,
     "type": {
       "types": [
@@ -919,7 +919,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_struct_size",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 64,
     "type": {
       "types": [
@@ -936,7 +936,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#edge_buffer",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 68,
     "type": {
       "types": [
@@ -953,7 +953,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#sample_struct_size",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 76,
     "type": {
       "types": [
@@ -970,7 +970,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#sample_arr_length",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 80,
     "type": {
       "types": [
@@ -987,7 +987,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#sample_buffer",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 84,
     "type": {
       "types": [
@@ -1004,7 +1004,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#string_indices_buffer",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 89,
     "type": {
       "types": [
@@ -1021,7 +1021,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#strings_buffer",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 93,
     "type": {
       "types": [
@@ -1038,7 +1038,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#string_index_struct_size",
     "access": "private",
-    "description": null,
+    "description": "",
     "lineNumber": 98,
     "type": {
       "types": [
@@ -1253,7 +1253,7 @@
     "memberof": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider",
     "longname": "lib/SplitSnapshotProvider.js~SplitSnapshotProvider#getMeta",
     "access": null,
-    "description": null,
+    "description": "",
     "lineNumber": 201,
     "params": [],
     "return": {
@@ -1715,7 +1715,7 @@
     "memberof": "lib/parseSnapshotStream.js",
     "longname": "lib/parseSnapshotStream.js~parseSnapshotStreamCallbacks",
     "access": null,
-    "description": null,
+    "description": "",
     "properties": [
       {
         "nullable": null,
@@ -1813,75 +1813,7 @@
     "generator": false
   },
   {
-    "__docId__": 70,
-    "kind": "file",
-    "static": true,
-    "variation": null,
-    "name": "lib/util.js",
-    "memberof": null,
-    "longname": "lib/util.js",
-    "access": null,
-    "description": null,
-    "lineNumber": 1,
-    "content": "\"use strict\";\nfunction createRetainers(snapshot) {\n\tconst node_count = snapshot.getNodeCount();\n\tif (node_count === 0) {\n\t\treturn {\n\t\t\tindex: new Uint32Array(0),\n\t\t\tretainers: new Uint32Array(0)\n\t\t};\n\t}\n\tconst first_retainer_index = new Uint32Array(node_count);\n\t// this may be larger than needed if nodes have multiple edges to eachother\n\t// IE: [a -> b, a -> b] should compress to [a -> b], however, we just put\n\t// a duplicate in\n\tconst edge_count = snapshot.getEdgeCount();\n\tif (edge_count === 0) {\n\t\treturn {\n\t\t\tindex: new Uint32Array(0),\n\t\t\tretainers: new Uint32Array(0)\n\t\t};\n\t}\n\tconst retainers = new Uint32Array(edge_count);\n\t\n\t// count number of edges to nodes\n\tfor (let i = 0; i < edge_count; i++) {\n\t\tconst dst = snapshot.getEdge(i).fields.to_node;\n\t\tfirst_retainer_index[dst]++;\n\t}\n\t\n\tlet prev = first_retainer_index[0];\n\tfor (let i = 1; i < node_count; i++) {\n\t\tprev = (first_retainer_index[i] += prev);\n\t}\n\t\n\t// get the parents\n\tfor (let i = 0; i < node_count; i++) {\n\t\tconst dst = snapshot.getNode(i).fields.to_node;\n\t\tfirst_retainer_index[dst]++;\n\t}\n\t\n\treturn {\n\t\tindex: first_retainer_index,\n\t\tretainers\n\t}\n}\nfunction   compressStrings(strs) {\n\t  const occurances = new Map();\n\t  for (let left = 0; left < strs.length; left++) {\n\t\t  for (let right = strs.length; right > left; right--) {\n\t\t\t  let substr = strs.slice(left, right);\n\t\t\t  if (!occurances.has(substr)) {\n\t\t\t\t  occurances.set(substr, 0);\n\t\t\t  }\n\t\t\t  occurances.set(substr, occurances.get(substr) + 1);\n\t\t  } \n\t  }\n\t  console.log(occurances)\n  }\n  console.log(compressStrings('thisthing'))"
-  },
-  {
     "__docId__": 71,
-    "kind": "function",
-    "static": true,
-    "variation": null,
-    "name": "createRetainers",
-    "memberof": "lib/util.js",
-    "longname": "lib/util.js~createRetainers",
-    "access": null,
-    "export": false,
-    "importPath": "snapshot-utils/lib/util.js",
-    "importStyle": null,
-    "description": null,
-    "lineNumber": 2,
-    "undocument": true,
-    "params": [
-      {
-        "name": "snapshot",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "return": {
-      "types": [
-        "*"
-      ]
-    },
-    "generator": false
-  },
-  {
-    "__docId__": 72,
-    "kind": "function",
-    "static": true,
-    "variation": null,
-    "name": "compressStrings",
-    "memberof": "lib/util.js",
-    "longname": "lib/util.js~compressStrings",
-    "access": null,
-    "export": false,
-    "importPath": "snapshot-utils/lib/util.js",
-    "importStyle": null,
-    "description": null,
-    "lineNumber": 45,
-    "undocument": true,
-    "params": [
-      {
-        "name": "strs",
-        "types": [
-          "*"
-        ]
-      }
-    ],
-    "generator": false
-  },
-  {
-    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1890,11 +1822,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 75,
+    "__docId__": 72,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1903,11 +1835,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 76,
+    "__docId__": 73,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1916,11 +1848,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 77,
+    "__docId__": 74,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1929,11 +1861,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 78,
+    "__docId__": 75,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1942,11 +1874,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 79,
+    "__docId__": 76,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1955,11 +1887,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 80,
+    "__docId__": 77,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1968,11 +1900,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 81,
+    "__docId__": 78,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1981,11 +1913,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 82,
+    "__docId__": 79,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -1994,11 +1926,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 83,
+    "__docId__": 80,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2007,11 +1939,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 84,
+    "__docId__": 81,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2020,11 +1952,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 85,
+    "__docId__": 82,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2033,11 +1965,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 86,
+    "__docId__": 83,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2046,11 +1978,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 87,
+    "__docId__": 84,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2059,11 +1991,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 88,
+    "__docId__": 85,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2072,11 +2004,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 89,
+    "__docId__": 86,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2085,11 +2017,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 90,
+    "__docId__": 87,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2098,11 +2030,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 91,
+    "__docId__": 88,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2111,11 +2043,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 92,
+    "__docId__": 89,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2124,11 +2056,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 93,
+    "__docId__": 90,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2137,11 +2069,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 94,
+    "__docId__": 91,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2150,11 +2082,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 95,
+    "__docId__": 92,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2163,11 +2095,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 96,
+    "__docId__": 93,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2176,11 +2108,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 97,
+    "__docId__": 94,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2189,11 +2121,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 98,
+    "__docId__": 95,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2202,11 +2134,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 99,
+    "__docId__": 96,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2215,11 +2147,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 100,
+    "__docId__": 97,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2228,11 +2160,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 101,
+    "__docId__": 98,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2241,11 +2173,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 102,
+    "__docId__": 99,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2254,11 +2186,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 103,
+    "__docId__": 100,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2267,11 +2199,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 104,
+    "__docId__": 101,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2280,11 +2212,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 105,
+    "__docId__": 102,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2293,11 +2225,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 106,
+    "__docId__": 103,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2306,11 +2238,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 107,
+    "__docId__": 104,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2319,11 +2251,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 108,
+    "__docId__": 105,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2332,11 +2264,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 109,
+    "__docId__": 106,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2345,11 +2277,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 110,
+    "__docId__": 107,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2358,11 +2290,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 111,
+    "__docId__": 108,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2371,11 +2303,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 112,
+    "__docId__": 109,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2384,11 +2316,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 113,
+    "__docId__": 110,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2397,11 +2329,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 114,
+    "__docId__": 111,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2410,11 +2342,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 115,
+    "__docId__": 112,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2423,11 +2355,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 116,
+    "__docId__": 113,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2436,11 +2368,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 117,
+    "__docId__": 114,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2449,11 +2381,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 118,
+    "__docId__": 115,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2462,11 +2394,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 119,
+    "__docId__": 116,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2475,11 +2407,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 120,
+    "__docId__": 117,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2488,11 +2420,11 @@
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 122,
+    "__docId__": 119,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2501,11 +2433,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 123,
+    "__docId__": 120,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2514,11 +2446,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 124,
+    "__docId__": 121,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2527,11 +2459,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~Element",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 125,
+    "__docId__": 122,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2540,11 +2472,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~Event",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 126,
+    "__docId__": 123,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2553,11 +2485,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~Node",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 127,
+    "__docId__": 124,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2566,11 +2498,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 128,
+    "__docId__": 125,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2579,11 +2511,11 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   },
   {
-    "__docId__": 129,
+    "__docId__": 126,
     "kind": "external",
     "static": true,
     "variation": null,
@@ -2592,7 +2524,7 @@
     "memberof": "BuiltinExternal/WebAPIExternal.js",
     "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
     "access": null,
-    "description": null,
+    "description": "",
     "builtinExternal": true
   }
 ]

@@ -1,6 +1,6 @@
 {
   "name": "snapshot-utils",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Tools to more easily create programs against v8 heap snapshots.",
   "main": "out/index.js",
   "scripts": {
