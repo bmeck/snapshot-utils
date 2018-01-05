@@ -8,17 +8,11 @@ const findGlobal = closureNode => {
   try {
     return [
       ...[
-        ...[...closureNode.walkEdges()]
-          .find(e => e.fields.name_or_index === 'context')
-          .getNode()
-          .walkEdges(),
-      ]
-        .find(e => e.fields.name_or_index === 'native_context')
-        .getNode()
-        .walkEdges(),
-    ]
-      .find(e => e.fields.name_or_index === 'extension')
-      .getNode();
+        ...[...closureNode.edges].find(
+          e => e.fields.name_or_index === 'context'
+        ).node.edges,
+      ].find(e => e.fields.name_or_index === 'native_context').node.edges,
+    ].find(e => e.fields.name_or_index === 'extension').node;
   } catch (e) {
     return null;
   }
@@ -48,12 +42,12 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
       const vars = [];
       let script = null;
       let global = findGlobal(node);
-      for (const edge of node.walkEdges()) {
+      for (const edge of node.edges) {
         // closures that have variables create context Nodes
         // these will list all the variables that a closure
         // uses. unused variables are not listed.
         if (edge.fields.name_or_index === 'context') {
-          for (const context_edge of edge.getNode().walkEdges()) {
+          for (const context_edge of edge.node.edges) {
             // console.error(context_edge.fields.name_or_index);
             // context Nodes have Edges with a type of "context"
             // to represent where variables are
@@ -61,7 +55,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
               // grab the name of the variable and
               // the id of the Node that is in the variable
               const name = context_edge.fields.name_or_index;
-              const val_id = context_edge.getNode().fields.id;
+              const val_id = context_edge.node.fields.id;
               vars.push(`${name} = @${val_id}`);
             }
           }
@@ -71,13 +65,14 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
         // function and includes things like what script the closure
         // was from
         if (edge.fields.name_or_index === 'shared') {
-          for (const shared_edge of edge.getNode().walkEdges()) {
+          for (const shared_edge of edge.node.edges) {
             if (shared_edge.fields.name_or_index === 'script') {
-              script = shared_edge.getNode().fields.name;
+              script = shared_edge.node.fields.name;
             }
           }
         }
       }
+      debugger;
       // print our closure data!
       for (const line of vars) {
         if (script != null) {
@@ -93,12 +88,14 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
     }
   }
 
+  console.dir(globals);
   // next we walk all of the global objects we saw
   for (const global_index of globals) {
     let node = snapshot.getNode(global_index);
-    for (const edge of node.walkEdges()) {
+    console.log('DUMP GLOBAL', global_index);
+    for (const edge of node.edges) {
       if (edge.fields.type === 'property') {
-        const property_node = edge.getNode();
+        const property_node = edge.node;
         console.log(
           `${edge.fields.name_or_index} = @${
             property_node.fields.id

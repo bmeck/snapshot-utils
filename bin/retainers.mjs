@@ -2,9 +2,8 @@
 import { HeapSnapshot, SplitSnapshotProvider } from '../';
 
 // We are going to use stdin to read our snapshot
-// pipe a snapshot in via: `node --experimental-modules id.mjs <"my.heapsnapshot"`
+// pipe a snapshot in via: `node --experimental-modules dump.mjs <"my.heapsnapshot"`
 const stream = process.stdin;
-
 // This is used to parse the snapshot data.
 // A provider is generally not used for analyzing the snapshot.
 // It is an abstraction to allow saving/loading the snapshot to different
@@ -19,23 +18,30 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
   // the Node and Edge classes we obtain from this may be different
   // from different snapshots.
   const snapshot = new HeapSnapshot(provider);
+  const node_indices = new Set(
+    process.argv.slice(2).map(id => snapshot.getNodeById(+id).node_index)
+  );
 
-  for (const id of process.argv.slice(2)) {
-    const node = snapshot.getNodeById(+id);
-    if (!node) {
-      console.error(id, 'not found');
-      continue;
-    }
-    console.log(
-      JSON.stringify(
-        {
-          node,
-          edges: [...node.edges],
-        },
-        null,
-        2
-      )
-    );
-    debugger;
+  // setup the walk
+  const iter = snapshot.walk({
+    onNodeOpen(node) {},
+    onEdge(edge, owner) {
+      if (node_indices.has(edge.fields.to_node)) {
+        console.log(
+          JSON.stringify(
+            {
+              edge,
+              owner: owner.fields.id,
+            },
+            null,
+            2
+          )
+        );
+      }
+    },
+    onNodeClose(node) {},
+  });
+  // perform the walk
+  for (const _ of iter) {
   }
 });
