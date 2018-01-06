@@ -9,7 +9,7 @@ const stream = process.stdin;
 // A provider is generally not used for analyzing the snapshot.
 // It is an abstraction to allow saving/loading the snapshot to different
 // location.
-SplitSnapshotProvider.fromStream(stream, (err, provider) => {
+SplitSnapshotProvider.fromDirectory(process.argv[2], (err, provider) => {
   if (err) {
     console.error(err);
     process.exit(1);
@@ -20,7 +20,7 @@ SplitSnapshotProvider.fromStream(stream, (err, provider) => {
   // from different snapshots.
   const snapshot = new HeapSnapshot(provider);
 
-  for (const id of process.argv.slice(2)) {
+  for (const id of process.argv.slice(3)) {
     const node = snapshot.getNodeById(+id);
     if (!node) {
       console.error(id, 'not found');

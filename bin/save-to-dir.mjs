@@ -1,5 +1,5 @@
 #!/usr/bin/env node --experimental-modules
-import SplitSnapshotProvider from '../SplitSnapshotProvider';
+import { SplitSnapshotProvider } from '../';
 import path from 'path';
 import fs from 'fs';
 
@@ -12,5 +12,11 @@ if (!path.isAbsolute(outdir)) {
 // We are going to use stdin to read our snapshot
 // pipe a snapshot in via: `node save-to-dir.js $dir <"my.heapsnapshot"`
 SplitSnapshotProvider.fromStream(process.stdin, function(err, provider) {
-  provider.writeToDirectory(outdir, _ => _);
+  console.error(provider);
+  provider.writeToDirectory(outdir, e => {
+    if (e) {
+      console.error(e);
+      process.exit(1);
+    }
+  });
 });
