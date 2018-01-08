@@ -18,15 +18,12 @@ SplitSnapshotProvider.fromDirectory(process.argv[2], (err, provider) => {
   // the Node and Edge classes we obtain from this may be different
   // from different snapshots.
   const snapshot = new HeapSnapshot(provider);
-  const node_indices = new Set(
-    process.argv.slice(3).map(id => snapshot.getNodeById(+id).node_index)
-  );
+  const names = new Set(process.argv.slice(3));
 
   // setup the walk
   const iter = snapshot.walk({
-    onNodeOpen(node) {},
     onEdge(edge, owner) {
-      if (node_indices.has(edge.fields.to_node)) {
+      if (names.has(edge.fields.name_or_index)) {
         console.log(
           JSON.stringify(
             {
@@ -34,12 +31,11 @@ SplitSnapshotProvider.fromDirectory(process.argv[2], (err, provider) => {
               owner: owner.fields.id,
             },
             null,
-            2
+            0
           )
         );
       }
     },
-    onNodeClose(node) {},
   });
   // perform the walk
   for (const _ of iter) {
