@@ -1,30 +1,29 @@
 #!/usr/bin/env node --experimental-modules
 
-// compare before.heapsnapshot after.heapsnapshot {dead,old,new}
-import { HeapSnapshot, SplitSnapshotProvider } from '../';
+import { HeapSnapshot } from '../';
 import { Timeline } from '../lib/Timeline';
 import fs from 'fs';
 
 (async () => {
-  const providers = await Promise.all(
+  const snapshots = await Promise.all(
     process.argv.slice(2).map(file => {
       return {
         then(f, r) {
-          SplitSnapshotProvider.fromDirectory(file, (err, provider) => {
-            if (err) {
-              r(err);
-            } else {
-              f(provider);
-            }
-          });
+          HeapSnapshot.fromJSONStream(
+            fs.createReadStream(file),
+            snapshot => f(snapshot),
+            r
+          );
         },
       };
     })
   );
-  const snapshots = providers.map(provider => new HeapSnapshot(provider));
+  debugger;
   const walk = new Timeline(snapshots).masks({
     onMask(m) {
-      console.log(JSON.stringify(m));
+      console.log(JSON.stringify(m.map(n => {
+        return n && n.fields().id
+      })));
     },
   });
   for (const _ of walk) {

@@ -1,76 +1,92 @@
 #!/usr/bin/env node --experimental-modules
-import { HeapSnapshot, SplitSnapshotProvider } from '../';
-
-// FINDS ALL THE PATHS UP TO CLOSURES
-
-// We are going to use stdin to read our snapshot
-// pipe a snapshot in via: `node --experimental-modules dump.mjs <"my.heapsnapshot"`
-const stream = process.stdin;
-// This is used to parse the snapshot data.
-// A provider is generally not used for analyzing the snapshot.
-// It is an abstraction to allow saving/loading the snapshot to different
-// location.
-SplitSnapshotProvider.fromDirectory(process.argv[2], (err, provider) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
+import { HeapSnapshot } from '../';
+import fs from 'fs';
+const findGlobal = closureNode => {
+  try {
+    return [
+      ...[
+        ...[...closureNode.edges()].find(
+          e => e.fields().name_or_index === 'context'
+        ).node().edges(),
+      ].find(e => e.fields().name_or_index === 'native_context').node().edges(),
+    ].find(e => e.fields().name_or_index === 'extension').node().fields().id;
+  } catch (e) {
+    // console.log(e)
+    return null;
   }
-  // This gives us an API that can be used to analyze the snapshot.
-  // Since snapshot data contains the structure of Nodes and Edges
-  // the Node and Edge classes we obtain from this may be different
-  // from different snapshots.
-  const snapshot = new HeapSnapshot(provider);
-  const nodes = new Set(
-    process.argv.slice(3).map(id => snapshot.getNodeById(+id))
-  );
-
-  // setup the walk
-  for (const query of nodes) {
-    const queued = [query];
-    const queryId = query.fields.id;
-    const seen = new Set();
-    console.log(
-      JSON.stringify(
-        {
-          query: queryId,
-          node: query,
-        },
-        null,
-        2
-      )
-    );
-    while (queued.length) {
-      const node = queued.shift();
-      const id = node.fields.id;
-      seen.add(id);
-      for (const edge of node.edges) {
-        const { fields: { type } } = edge;
-        if (type === 'context' || type === 'property' || type == 'element') {
-          const child = edge.node;
-          const childId = child.fields.id;
-          if (seen.has(childId)) continue;
-          seen.add(childId);
-          console.log(
-            JSON.stringify(
-              {
-                query: queryId,
-                node: child,
-              },
-              null,
-              0
-            )
-          );
-          if (child.fields.type !== 'closure') {
-            queued.push(child);
-          }
-        } else if (
-          node.fields.type === 'closure' &&
-          type === 'internal' &&
-          edge.fields.name_or_index === 'context'
-        ) {
-          queued.push(edge.node);
+};
+const findScript = closureNode => {
+  for (const edge of closureNode.edges()) {
+    // closures have what is called shared script information
+    // this information is shared between *all* instances of a
+    // function and includes things like what script the closure
+    // was from
+    if (edge.fields().name_or_index === 'shared') {
+      for (const shared_edge of edge.node().edges()) {
+        if (shared_edge.fields().name_or_index === 'script') {
+          return shared_edge.node().fields().name;
         }
       }
     }
   }
+  return null;
+}
+
+// We are going to use argv to get our snapshot and ids
+// usage: `node --experimental-modules id.mjs my.heapsnapshot $ID1 $ID2 ...
+const [streamSpecifier, ...ids] = process.argv.slice(2);
+const stream =
+  streamSpecifier === '-'
+    ? process.stdin
+    : fs.createReadStream(streamSpecifier);
+
+function reduce(acc, edge, node) {
+  if (acc === null) acc = 0;
+  return acc + node.fields().self_size;
+}
+
+HeapSnapshot.fromJSONStream(stream, snapshot => {
+  const nodes = process.argv.slice(3).map(id => snapshot.getNodeById(+id));
+
+  // setup the walk
+  for (const query of nodes) {
+    let acc = null;
+    const queued = [query];
+    const queryId = query.fields().id;
+    const seen = new Uint8Array(snapshot.node_count);
+    const script = findScript(query);
+    const global = findGlobal(query);
+    const out = (edge, node) => {
+      acc = reduce(acc, edge, node);
+    }
+    out(null, query);
+    // if (global) queued.push(global);
+    while (queued.length) {
+      const node = queued.shift();
+      const id = node.fields().id;
+      if (seen[node.index] !== 0) continue;
+      seen[node.index] = 1;
+      for (const edge of node.edges()) {
+        const type = edge.fields().type;
+        if (type === 'context' || type === 'property' || type == 'element') {
+          const child = edge.node();
+          if (seen[child.index] !== 0) continue;
+          seen[child.index] = 1;
+          out(edge, child);
+          if (child.fields().type !== 'closure') {
+            queued.push(child);
+          } else {
+          }
+        } else if (
+          node.fields().type === 'closure' &&
+          type === 'internal' &&
+          edge.fields().name_or_index === 'context'
+        ) {
+          queued.push(edge.node());
+        }
+      }
+    }
+    console.error('@%d => name:%s url:%s, global:%d, acc:%j', queryId, query.fields().name, script, global, acc);
+  }
 });
+
