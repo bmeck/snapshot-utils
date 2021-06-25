@@ -1,23 +1,30 @@
 import {
   takeSnapshot,
   newNodes,
-  inspectById
+  inspectById,
+  reifyById,
 } from './snapshot-api.js';
 try {
-  class EASY_TO_TRACK {}
-
   let diffParams = [-1, -1];
   let inspectParams = {
     snapshotId: -1,
     nodeId: -1
   };
-  let dirOptions = {depth: null};
-  
+
   ////////////////////////////////
   // SNAPSHOTTING HERE          //
   ////////////////////////////////
+  class EASY_TO_TRACK {
+    static x = 'class';
+    constructor(_x) {
+      this.x = _x;
+    }
+  }
   let before = takeSnapshot();
-  let x = new EASY_TO_TRACK();
+  let hoho = class EASY_TO_TRACK {
+    static x = 'same name class';
+  }
+  let x = new EASY_TO_TRACK(['instance']);
   let after = takeSnapshot();
 
   
@@ -29,7 +36,23 @@ try {
 
   for (nodeId of allocated) {
     inspectParams.nodeId = nodeId;
-    console.dir(inspectById(inspectParams).node, dirOptions)
+    const {
+      node: nodeFields,
+      edges
+    } = inspectById(inspectParams);
+    if (nodeFields.type !== 'object') {
+      if (nodeFields.type !== 'closure') {
+        continue;
+      }
+      if (nodeFields.name.startsWith('<')) {
+        continue;
+      }
+    }
+    try {
+      // may already be GC'd by now
+      const value = reifyById({nodeId: nodeFields.id});
+      console.dir(value);
+    } catch {}
   }
 
   console.log('saw %d new nodes', allocated.length);

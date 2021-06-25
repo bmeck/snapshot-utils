@@ -16,7 +16,7 @@ const {
   port2: workerPort
 } = new MessageChannel();
 
-inspectorOpen(0, '127.0.0.1', false);
+inspectorOpen(9229, '127.0.0.1', false);
 const worker = new Worker(
   new URL('snapshot-worker.js', import.meta.url),
   {
@@ -31,6 +31,8 @@ const worker = new Worker(
 inspectorWaitForDebugger();
 worker.unref();
 const arg = {method: null, params: null};
+let reifyValueCell = null;
+const dirOptions = {depth: null};
 const api = (method, params) => {
   worker.ref();
   let exception;
@@ -41,12 +43,13 @@ const api = (method, params) => {
     arg.params = params;
     mainPort.postMessage(arg);
     while (true) {
+      reifyValueCell = null;
       lock[0] = 1;
       Atomics.notify(lock, 0, 1);
       Atomics.wait(lock, 0, 1);
       ret = receiveMessageOnPort(mainPort).message;
       if (ret.log) {
-        console.log(ret.log);
+        console.dir(ret.log, dirOptions);
         ret = null;
       } else if (ret.exception) {
         exception = ret.exception;
@@ -55,7 +58,7 @@ const api = (method, params) => {
       } else {
         result = ret.result;
         ret = null;
-        return result;
+        return reifyValueCell !== null ? reifyValueCell : result;
       }
     }
   } finally {
@@ -66,3 +69,6 @@ const api = (method, params) => {
 export const takeSnapshot = api.bind(null, 'snapshot');
 export const newNodes = api.bind(null, 'newNodes');
 export const inspectById = api.bind(null, 'inspectById');
+export const inspectByIndex = api.bind(null, 'inspectByIndex');
+export const readStringById = api.bind(null, 'readStringById');
+export const reifyById = api.bind(null, 'reifyById');
