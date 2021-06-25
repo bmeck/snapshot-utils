@@ -9,11 +9,16 @@ try {
     nodeId: -1
   }}
   let dirOptions = {depth: null};
+  
+  ////////////////////////////////
+  // SNAPSHOTTING HERE          //
+  ////////////////////////////////
   let before = api(snapshotParams);
-
-  diffParams.params[0] = before;
   let x = new EASY_TO_TRACK();
   let after = api(snapshotParams);
+
+  
+  diffParams.params[0] = before;
   diffParams.params[1] = after;
   inspectParams.params.snapshotId = after;
   const newNodes = api(diffParams);
