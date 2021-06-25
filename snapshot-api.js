@@ -30,12 +30,15 @@ const worker = new Worker(
 );
 inspectorWaitForDebugger();
 worker.unref();
-export default (arg) => {
+const arg = {method: null, params: null};
+const api = (method, params) => {
   worker.ref();
   let exception;
   let result;
   let ret;
   try {
+    arg.method = method;
+    arg.params = params;
     mainPort.postMessage(arg);
     while (true) {
       lock[0] = 1;
@@ -59,3 +62,7 @@ export default (arg) => {
     worker.unref();
   }
 };
+
+export const takeSnapshot = api.bind(null, 'snapshot');
+export const newNodes = api.bind(null, 'newNodes');
+export const inspectById = api.bind(null, 'inspectById');

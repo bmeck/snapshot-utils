@@ -1,35 +1,38 @@
-import api from './snapshot-api.js';
+import {
+  takeSnapshot,
+  newNodes,
+  inspectById
+} from './snapshot-api.js';
 try {
   class EASY_TO_TRACK {}
 
-  let snapshotParams = {method: 'snapshot'};
-  let diffParams = {method: 'newNodes', params: [-1, -1]};
-  let inspectParams = {method: 'inspectById', params: {
+  let diffParams = [-1, -1];
+  let inspectParams = {
     snapshotId: -1,
     nodeId: -1
-  }}
+  };
   let dirOptions = {depth: null};
   
   ////////////////////////////////
   // SNAPSHOTTING HERE          //
   ////////////////////////////////
-  let before = api(snapshotParams);
+  let before = takeSnapshot();
   let x = new EASY_TO_TRACK();
-  let after = api(snapshotParams);
+  let after = takeSnapshot();
 
   
-  diffParams.params[0] = before;
-  diffParams.params[1] = after;
-  inspectParams.params.snapshotId = after;
-  const newNodes = api(diffParams);
+  diffParams[0] = before;
+  diffParams[1] = after;
+  inspectParams.snapshotId = after;
+  const allocated = newNodes(diffParams);
   let nodeId;
 
-  for (nodeId of newNodes) {
-    inspectParams.params.nodeId = nodeId;
-    console.dir(api(inspectParams).node, dirOptions)
+  for (nodeId of allocated) {
+    inspectParams.nodeId = nodeId;
+    console.dir(inspectById(inspectParams).node, dirOptions)
   }
 
-  console.log('saw %d new nodes', newNodes.length);
+  console.log('saw %d new nodes', allocated.length);
 } catch (e) {
   console.error(e);
 }
