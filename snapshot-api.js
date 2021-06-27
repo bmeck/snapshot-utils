@@ -72,3 +72,5 @@ export const inspectById = api.bind(null, 'inspectById');
 export const inspectByIndex = api.bind(null, 'inspectByIndex');
 export const readStringById = api.bind(null, 'readStringById');
 export const reifyById = api.bind(null, 'reifyById');
+export const retainers = api.bind(null, 'retainers');
+export const containingClosures = api.bind(null, 'containingClosures');
