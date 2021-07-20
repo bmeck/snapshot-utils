@@ -15,6 +15,10 @@ const client = await CDP({
   host: inspectorUrl.hostname,
   port: inspectorUrl.port
 });
+const scriptsParsed = new Map();
+client.on('Debugger.scriptParsed', (s) => {
+  scriptsParsed.set(s.scriptId, s);
+});
 await client.Runtime.runIfWaitingForDebugger();
 const lock = workerData.lock;
 const workerPort = workerData.workerPort;
@@ -44,7 +48,7 @@ async function waitForAction() {
  * Can synchronously interrupt an action to perform a console.log
  * @param  {...any} parts to log
  */
- function log(...parts) {
+function log(...parts) {
   workerPort.postMessage({log: parts});
   lock[0] = 0;
   Atomics.notify(lock, 0, 1);
@@ -60,30 +64,47 @@ let pendingSnapshot = null;
 const snapshots = new Map();
 async function act({method, params}) {
   // log('act', {method, params}, lock);
-  if (method === 'snapshot') {
+  if (method === 'close') {
+    workerPort.postMessage({close: true});
+    client.close();
+    return undefined;
+  } else if (method === 'snapshot') {
     // we have to wait for other snapshot to finish due to DevTools protocol
     // being unable to distinguish snapshots while dumping it out
     if (pendingSnapshot) await pendingSnapshot;
     const id = pendingSnapshotId = snapshotN++;
     pendingSnapshot = (async () => {
+      await post('Debugger.enable');
       await post('HeapProfiler.enable');
+      await post('HeapProfiler.startTrackingHeapObjects', {
+        trackAllocations: true
+      });
+      const {save = false} = params ?? {};
       const stream = new PassThrough();
-      const file = createWriteStream('tmp.heapsnapshot');
+      const file = typeof save === 'string' && createWriteStream(save);
+      file && file.on('error', () => process.kill(process.pid, 1));
+      let chunks = 0;
       function accumulate(m) {
+        chunks++;
         stream.write(m.chunk);
-        file.write(m.chunk);
       }
       client.addListener('HeapProfiler.addHeapSnapshotChunk', accumulate);
-      post('HeapProfiler.collectGarbage');
-      await post('HeapProfiler.takeHeapSnapshot');
+      client.addListener('HeapProfiler.resetProfiles', log)
+      await post('HeapProfiler.takeHeapSnapshot', {
+        reportProgress: false
+      });
+      client.removeListener('HeapProfiler.addHeapSnapshotChunk', accumulate);
       stream.end();
-      file.end();
+      file && file.end();
       const provider = await SplitSnapshotProvider.fromStream(stream);
       const snapshot = new HeapSnapshot(provider);
-      client.removeListener('HeapProfiler.addHeapSnapshotChunk', accumulate);
       snapshots.set(id, snapshot);
       pendingSnapshotId = -1;
       pendingSnapshot = null;
+      file && await new Promise(f => {
+        if (file.destroyed) f();
+        file.once('close', f);
+      })
     })();
     await pendingSnapshot;
     return id;
@@ -117,6 +138,67 @@ async function act({method, params}) {
     const snapshot = snapshots.get(snapshotId);
     const node = snapshot.getNode(nodeIndex);
     return inspectResult(node);
+  } else if (method === 'getScriptById') {
+    const {scriptId} = params;
+    return scriptsParsed.get(scriptId);
+  } else if (method === 'getPropertiesById') {
+    const {nodeId} = params;
+    let result = await post('HeapProfiler.getObjectByHeapObjectId', {
+      objectId: `${nodeId}`,
+      objectGroup: 'getObjectFromHeapId'
+    });
+    const objectId = result.result.objectId;
+    const ret = await post('Runtime.getProperties', {
+      objectId: objectId,
+      ownProperties: true,
+      accessorPropertiesOnly: false,
+      generatePreview: false
+    });
+    await post('Runtime.releaseObjectGroup', {
+      objectGroup: 'getObjectFromHeapId'
+    });
+    return ret;
+  } else if (method === 'getFunctionLocation') {
+    const {nodeId} = params;
+    let result = await post('HeapProfiler.getObjectByHeapObjectId', {
+      objectId: `${nodeId}`,
+      objectGroup: 'getObjectFromHeapId'
+    });
+    const objectId = result.result.objectId;
+    let props = await post('Runtime.getProperties', {
+      objectId: objectId,
+      ownProperties: true,
+      accessorPropertiesOnly: false,
+      generatePreview: false,
+      objectGroup: 'getObjectFromHeapId'
+    });
+    let bound = props.internalProperties.find(
+      e => e.name === '[[TargetFunction]]'
+    )?.value;
+    while (bound) {
+      props = await post('Runtime.getProperties', {
+        objectId: bound.objectId,
+        ownProperties: true,
+        accessorPropertiesOnly: false,
+        generatePreview: false,
+        objectGroup: 'getObjectFromHeapId'
+      });
+      bound = props.internalProperties.find(
+        e => e.name === '[[TargetFunction]]'
+      )?.value;
+    }
+    let loc = props.internalProperties.find(
+      e => e.name === '[[FunctionLocation]]'
+    )?.value;
+    await post('Runtime.releaseObjectGroup', {
+      objectGroup: 'getObjectFromHeapId'
+    });
+    if (!loc) return null;
+    return {
+      url: scriptsParsed.get(loc.value.scriptId).url,
+      line: loc.value.lineNumber + 1,
+      column: loc.value.columnNumber + 1,
+    };
   } else if (method === 'readStringById') {
     const {snapshotId, nodeId} = params;
     await waitForSnapshotIds([snapshotId]);
@@ -166,7 +248,6 @@ async function act({method, params}) {
     const snapshot = snapshots.get(snapshotId);
     const retaining = retainers(snapshot);
     const result = new Map();
-    log(nodeIds);
     for (const id of nodeIds) {
       const node = snapshot.getNodeById(id);
       result.set(id, retaining.getRetainers(node.node_index));
@@ -195,3 +276,5 @@ function inspectResult(node) {
 }
 
 waitForAction();
+process.on('uncaughtException', ()=>process.kill(process.pid, 8));
+process.on('error', ()=>process.kill(process.pid, 7));

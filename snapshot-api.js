@@ -4,6 +4,7 @@ import {
   MessageChannel
 } from 'worker_threads';
 import {
+  close as inspectorClose,
   open as inspectorOpen,
   url as inspectorUrl,
   waitForDebugger as inspectorWaitForDebugger
@@ -17,7 +18,7 @@ const {
 } = new MessageChannel();
 
 inspectorOpen(9229, '127.0.0.1', false);
-const worker = new Worker(
+let worker = new Worker(
   new URL('snapshot-worker.js', import.meta.url),
   {
     workerData: {
@@ -32,7 +33,7 @@ inspectorWaitForDebugger();
 worker.unref();
 const arg = {method: null, params: null};
 let reifyValueCell = null;
-const dirOptions = {depth: null};
+const dirOptions = {depth: null,maxStringLength:null,maxArrayLength: null};
 const api = (method, params) => {
   worker.ref();
   let exception;
@@ -48,7 +49,12 @@ const api = (method, params) => {
       Atomics.notify(lock, 0, 1);
       Atomics.wait(lock, 0, 1);
       ret = receiveMessageOnPort(mainPort).message;
-      if (ret.log) {
+      if (ret.close) {
+        worker.unref();
+        worker = null;
+        inspectorClose();
+        return true;
+      } else if (ret.log) {
         console.dir(ret.log, dirOptions);
         ret = null;
       } else if (ret.exception) {
@@ -62,7 +68,7 @@ const api = (method, params) => {
       }
     }
   } finally {
-    worker.unref();
+    if (worker) worker.unref();
   }
 };
 
@@ -74,3 +80,10 @@ export const readStringById = api.bind(null, 'readStringById');
 export const reifyById = api.bind(null, 'reifyById');
 export const retainers = api.bind(null, 'retainers');
 export const containingClosures = api.bind(null, 'containingClosures');
+export const getPropertiesById = api.bind(null, 'getPropertiesById');
+export const getScriptById = api.bind(null, 'getScriptById');
+export const getFunctionLocation = api.bind(null, 'getFunctionLocation');
+export const close = api.bind(null, 'close');
+process.on('exit', () => {
+  if (worker) close()
+});
