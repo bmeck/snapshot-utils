@@ -17,7 +17,7 @@ const {
   port2: workerPort
 } = new MessageChannel();
 
-inspectorOpen(9229, '127.0.0.1', false);
+inspectorOpen(0, '127.0.0.1', false);
 let worker = new Worker(
   new URL('snapshot-worker.js', import.meta.url),
   {
@@ -84,6 +84,55 @@ export const getPropertiesById = api.bind(null, 'getPropertiesById');
 export const getScriptById = api.bind(null, 'getScriptById');
 export const getFunctionLocation = api.bind(null, 'getFunctionLocation');
 export const close = api.bind(null, 'close');
+export const deleteSnapshot = api.bind(null, 'deleteSnapshot');
+export const getAllocationLocationById = api.bind(null, 'getAllocationLocationById');
 process.on('exit', () => {
   if (worker) close()
 });
+const diffParams = [-1, -1];
+const inspectParams = {
+  snapshotId: -1,
+  nodeId: -1,
+};
+const functionLocationParams = {
+  nodeId: -1,
+};
+export function diff({snapshotId: before, save}) {
+  const after = takeSnapshot(save ? {save} : undefined);
+  diffParams[0] = before;
+  diffParams[1] = after;
+  inspectParams.snapshotId = after;
+  const allocated = newNodes(diffParams);
+  let nodeId;
+
+  let seen = new Map();
+  for (nodeId of allocated) {
+    inspectParams.nodeId = nodeId;
+    const { node: nodeFields } = inspectById(inspectParams);
+    const allocSite = getAllocationLocationById({
+      snapshotId: after,
+      nodeId
+    });
+    // special things / VM internals
+    if (nodeFields.type === 'closure' && nodeFields.name.startsWith('<')) {
+      continue;
+    }
+    functionLocationParams.nodeId = nodeId;
+    // internal functions don't have locations
+    if (allocSite) {
+      const url = getScriptById({scriptId: allocSite.script_id})?.url;
+      let key = `${url}:${allocSite.line+1}:${allocSite.column + 1}`;
+      let existing = seen.get(key);
+      existing = existing || 0;
+      seen.set(key, existing + 1);
+    }
+  }
+  return {
+    get allocated() {
+      return Array.from(seen.keys()).sort().map(
+        (key) => [key, seen.get(key)]
+      )
+    },
+    snapshot: after
+  }
+}
